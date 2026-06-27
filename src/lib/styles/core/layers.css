@@ -13,9 +13,9 @@
  * Per-component cascade layers stay NESTED inside `base`, so component
  * styles always sit below theme + mapping.
  */
-@layer palette, mapping, base;
+@layer mapping, palette;
 
-@layer base {
+@layer components {
 	/*
    * Per-component layers. Earlier in each list = HIGHER priority.
    *   l1 = state overrides (disabled, pressed, dragged)

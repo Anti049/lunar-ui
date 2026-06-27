@@ -1,0 +1,65 @@
+/*
+ * Inspired by tailwind-scrollbar (MIT).
+ * Reduced to a single themed scrollbar that always uses the current theme's
+ * primary color. No color variants, no arbitrary values.
+ *
+ * Usage:
+ *   <div class="scrollbar overflow-auto">…</div>
+ *   <div class="scrollbar scrollbar-thin overflow-auto">…</div>
+ *   <div class="scrollbar-none overflow-auto">…</div>
+ */
+
+@utility scrollbar {
+	@layer scrollbar.l3 {
+		/* Firefox + standardized */
+		scrollbar-width: auto;
+		scrollbar-color: var(--color-primary) transparent;
+
+		/* WebKit fallback for finer control + hover styling */
+		&::-webkit-scrollbar {
+			width: 12px;
+			height: 12px;
+		}
+		&::-webkit-scrollbar-track {
+			background: transparent;
+		}
+		&::-webkit-scrollbar-thumb {
+			background: var(--color-primary);
+			border-radius: 9999px;
+			/* Inset border creates breathing room between thumb and track edge */
+			border: 3px solid transparent;
+			background-clip: padding-box;
+		}
+		&::-webkit-scrollbar-thumb:hover {
+			background: var(--color-primary-container);
+			background-clip: padding-box;
+		}
+		&::-webkit-scrollbar-corner {
+			background: transparent;
+		}
+	}
+}
+
+@utility scrollbar-thin {
+	@layer scrollbar.l2 {
+		scrollbar-width: thin;
+
+		&::-webkit-scrollbar {
+			width: 8px;
+			height: 8px;
+		}
+		&::-webkit-scrollbar-thumb {
+			border-width: 2px;
+		}
+	}
+}
+
+@utility scrollbar-none {
+	@layer scrollbar.l2 {
+		scrollbar-width: none;
+
+		&::-webkit-scrollbar {
+			display: none;
+		}
+	}
+}

@@ -1,0 +1,65 @@
+/*
+ * Material Design 3 Elevation System
+ * Six elevation levels (0-5) plus scrim.
+ * Levels 0-3: resting states. Levels 4-5: user-interacted states.
+ */
+
+/* Level 0: No elevation (0dp) */
+@utility elevation-0 {
+	box-shadow: none;
+}
+
+/* Level 1: 1dp elevation
+ * Used by: Banner, Bottom sheet (modal), Elevated buttons, Elevated cards,
+ * Elevated chips, Modal navigation drawer, Modal side sheet
+ */
+@utility elevation-1 {
+	box-shadow:
+		0px 1px 2px 0px color-mix(in srgb, var(--color-shadow) 30%, transparent),
+		0px 1px 3px 1px color-mix(in srgb, var(--color-shadow) 15%, transparent);
+}
+
+/* Level 2: 3dp elevation
+ * Used by: Scrolled app bar, Menu, Navigation bar, Rich tooltip, Toolbar
+ */
+@utility elevation-2 {
+	box-shadow:
+		0px 1px 2px 0px color-mix(in srgb, var(--color-shadow) 30%, transparent),
+		0px 2px 6px 2px color-mix(in srgb, var(--color-shadow) 15%, transparent);
+}
+
+/* Level 3: 6dp elevation
+ * Used by: Date pickers, Modal dialogs, Extended FAB, FAB, Menu close button,
+ * Search, Time pickers
+ */
+@utility elevation-3 {
+	box-shadow:
+		0px 1px 3px 0px color-mix(in srgb, var(--color-shadow) 30%, transparent),
+		0px 4px 8px 3px color-mix(in srgb, var(--color-shadow) 15%, transparent);
+}
+
+/* Level 4: 8dp elevation
+ * Reserved for user-interacted states (not assigned as resting level)
+ */
+@utility elevation-4 {
+	box-shadow:
+		0px 2px 3px 0px color-mix(in srgb, var(--color-shadow) 30%, transparent),
+		0px 6px 10px 4px color-mix(in srgb, var(--color-shadow) 15%, transparent);
+}
+
+/* Level 5: 12dp elevation
+ * Reserved for user-interacted states (not assigned as resting level)
+ */
+@utility elevation-5 {
+	box-shadow:
+		0px 4px 4px 0px color-mix(in srgb, var(--color-shadow) 30%, transparent),
+		0px 8px 12px 6px color-mix(in srgb, var(--color-shadow) 15%, transparent);
+}
+
+/* Scrim overlay
+ * Used for modal surfaces to create focus on elevated content
+ * Apply at 32% opacity as per Material 3 specs
+ */
+@utility scrim {
+	background-color: color-mix(in srgb, var(--color-scrim) 32%, transparent);
+}

@@ -1,0 +1,6 @@
+/*
+ * Component classes. Use @utility (not @layer components) so each one gets
+ * IntelliSense, Prettier sorting, and variant support.
+ */
+@import './button.css';
+@import './scrollbar.css';

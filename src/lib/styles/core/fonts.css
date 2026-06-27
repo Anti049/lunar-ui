@@ -1,0 +1,8 @@
+/*
+ * @font-face declarations.
+ * /wght.css loads only the weight axis (smaller download).
+ * Drop the suffix to load all axes (italic, optical size, etc.).
+ */
+@import '@fontsource-variable/plus-jakarta-sans/wght.css';
+@import '@fontsource-variable/inter/wght.css';
+@import '@fontsource-variable/fira-code/wght.css';

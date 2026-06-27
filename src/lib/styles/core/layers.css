@@ -1,0 +1,27 @@
+/*
+ * TOP-LEVEL cascade layer order.
+ * Earlier in the list = HIGHER priority.
+ *
+ *   theme   — explicit theme overrides (Catppuccin flavors, user themes)
+ *   mapping — mode mapper (light/dark → semantic tokens via ramp steps)
+ *   base    — everything else (palette, foundations, components)
+ *
+ * This means a theme file declaring `--theme-color-primary: oklch(…)` always
+ * wins over the mode mapper's `--theme-color-primary: var(--theme-color-primary-80)`
+ * for that scope, regardless of selector specificity or source order.
+ *
+ * Per-component cascade layers stay NESTED inside `base`, so component
+ * styles always sit below theme + mapping.
+ */
+@layer theme, mapping, base;
+
+@layer base {
+	/*
+   * Per-component layers. Earlier in each list = HIGHER priority.
+   *   l1 = state overrides (disabled, pressed, dragged)
+   *   l2 = size/variant/color adjustments
+   *   l3 = foundational base
+   */
+	@layer button.l1, button.l2, button.l3;
+	@layer scrollbar.l1, scrollbar.l2, scrollbar.l3;
+}

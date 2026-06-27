@@ -1,0 +1,78 @@
+/*
+ * Material 3 type scale → Tailwind utilities.
+ * Each role becomes text-{role} (e.g. text-display-large, text-label-small).
+ */
+@theme inline {
+	/* Display - Large */
+	--text-display-large: 57pt;
+	--text-display-large--line-height: 64pt;
+	--text-display-large--font-weight: 400;
+	/* Display - Medium */
+	--text-display-medium: 45pt;
+	--text-display-medium--line-height: 52pt;
+	--text-display-medium--font-weight: 400;
+	/* Display - Small */
+	--text-display-small: 36pt;
+	--text-display-small--line-height: 44pt;
+	--text-display-small--font-weight: 400;
+	/* Headline - Large */
+	--text-headline-large: 32pt;
+	--text-headline-large--line-height: 40pt;
+	--text-headline-large--font-weight: 400;
+	/* Headline - Medium */
+	--text-headline-medium: 28pt;
+	--text-headline-medium--line-height: 36pt;
+	--text-headline-medium--font-weight: 400;
+	/* Headline - Small */
+	--text-headline-small: 24pt;
+	--text-headline-small--line-height: 32pt;
+	--text-headline-small--font-weight: 400;
+	/* Title - Large */
+	--text-title-large: 22pt;
+	--text-title-large--line-height: 28pt;
+	--text-title-large--font-weight: 400;
+	/* Title - Medium */
+	--text-title-medium: 16pt;
+	--text-title-medium--line-height: 24pt;
+	--text-title-medium--font-weight: 400;
+	/* Title - Small */
+	--text-title-small: 14pt;
+	--text-title-small--line-height: 20pt;
+	--text-title-small--font-weight: 400;
+	/* Label - Large */
+	--text-label-large: 14pt;
+	--text-label-large--line-height: 20pt;
+	--text-label-large--font-weight: 500;
+	/* Label - Medium */
+	--text-label-medium: 12pt;
+	--text-label-medium--line-height: 16pt;
+	--text-label-medium--font-weight: 500;
+	/* Label - Small */
+	--text-label-small: 11pt;
+	--text-label-small--line-height: 16pt;
+	--text-label-small--font-weight: 500;
+	/* Body - Large */
+	--text-body-large: 16pt;
+	--text-body-large--line-height: 24pt;
+	--text-body-large--font-weight: 400;
+	/* Body - Medium */
+	--text-body-medium: 14pt;
+	--text-body-medium--line-height: 20pt;
+	--text-body-medium--font-weight: 400;
+	/* Body - Small */
+	--text-body-small: 12pt;
+	--text-body-small--line-height: 16pt;
+	--text-body-small--font-weight: 400;
+	/* Caption - Large */
+	--text-caption-large: 11pt;
+	--text-caption-large--line-height: 16pt;
+	--text-caption-large--font-weight: 400;
+	/* Caption - Medium */
+	--text-caption-medium: 10pt;
+	--text-caption-medium--line-height: 14pt;
+	--text-caption-medium--font-weight: 400;
+	/* Caption - Small */
+	--text-caption-small: 9pt;
+	--text-caption-small--line-height: 12pt;
+	--text-caption-small--font-weight: 400;
+}

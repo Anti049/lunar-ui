@@ -1,0 +1,9 @@
+/*
+ * Catppuccin meta-import — bundles ALL FOUR flavors.
+ * Latte (light) and Mocha (dark) participate in the binary mode system.
+ * Frappé and Macchiato are direct-selection only.
+ */
+@import './latte.css';
+@import './frappe.css';
+@import './macchiato.css';
+@import './mocha.css';

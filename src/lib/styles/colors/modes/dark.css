@@ -1,0 +1,199 @@
+/*
+ * Dark mode mappings.
+ *
+ * Active when:
+ *   - the closest ancestor with .light / .dark is .dark
+ *   - no .light or .dark class exists AND the system prefers dark
+ *   - the theme has a "dark-flavor" suffix (e.g. catppuccin-mocha)
+ */
+
+@layer mapping {
+	.dark {
+		/* Primary */
+		--theme-color-primary: var(--theme-color-primary-80);
+		--theme-color-on-primary: var(--theme-color-primary-20);
+		--theme-color-primary-container: var(--theme-color-primary-30);
+		--theme-color-on-primary-container: var(--theme-color-primary-90);
+		/* Secondary */
+		--theme-color-secondary: var(--theme-color-secondary-80);
+		--theme-color-on-secondary: var(--theme-color-secondary-20);
+		--theme-color-secondary-container: var(--theme-color-secondary-30);
+		--theme-color-on-secondary-container: var(--theme-color-secondary-90);
+		/* Tertiary */
+		--theme-color-tertiary: var(--theme-color-tertiary-80);
+		--theme-color-on-tertiary: var(--theme-color-tertiary-20);
+		--theme-color-tertiary-container: var(--theme-color-tertiary-30);
+		--theme-color-on-tertiary-container: var(--theme-color-tertiary-90);
+		/* Error */
+		--theme-color-error: var(--theme-color-error-80);
+		--theme-color-on-error: var(--theme-color-error-20);
+		--theme-color-error-container: var(--theme-color-error-30);
+		--theme-color-on-error-container: var(--theme-color-error-90);
+		/* Surface */
+		--theme-color-surface-dim: var(--theme-color-neutral-6);
+		--theme-color-surface: var(--theme-color-neutral-6);
+		--theme-color-surface-bright: var(--theme-color-neutral-24);
+		--theme-color-inverse-surface: var(--theme-color-neutral-90);
+		--theme-color-surface-container-lowest: var(--theme-color-neutral-4);
+		--theme-color-surface-container-low: var(--theme-color-neutral-10);
+		--theme-color-surface-container: var(--theme-color-neutral-12);
+		--theme-color-surface-container-high: var(--theme-color-neutral-17);
+		--theme-color-surface-container-highest: var(--theme-color-neutral-22);
+		--theme-color-on-inverse-surface: var(--theme-color-neutral-20);
+		--theme-color-inverse-primary: var(--theme-color-primary-40);
+		--theme-color-on-surface: var(--theme-color-neutral-90);
+		--theme-color-on-surface-variant: var(--theme-color-neutral-80);
+		--theme-color-outline: var(--theme-color-neutral-60);
+		--theme-color-outline-variant: var(--theme-color-neutral-variant-30);
+		--theme-color-scrim: var(--theme-color-neutral-0);
+		--theme-color-shadow: var(--theme-color-neutral-0);
+		/* Success */
+		--theme-color-success: var(--theme-color-success-80);
+		--theme-color-on-success: var(--theme-color-success-20);
+		--theme-color-success-container: var(--theme-color-success-30);
+		--theme-color-on-success-container: var(--theme-color-success-90);
+		/* Warning */
+		--theme-color-warning: var(--theme-color-warning-80);
+		--theme-color-on-warning: var(--theme-color-warning-20);
+		--theme-color-warning-container: var(--theme-color-warning-30);
+		--theme-color-on-warning-container: var(--theme-color-warning-90);
+		/* Info */
+		--theme-color-info: var(--theme-color-info-80);
+		--theme-color-on-info: var(--theme-color-info-20);
+		--theme-color-info-container: var(--theme-color-info-30);
+		--theme-color-on-info-container: var(--theme-color-info-90);
+		/* Alert */
+		--theme-color-alert: var(--theme-color-alert-80);
+		--theme-color-on-alert: var(--theme-color-alert-20);
+		--theme-color-alert-container: var(--theme-color-alert-30);
+		--theme-color-on-alert-container: var(--theme-color-alert-90);
+	}
+
+	/* Follow system preference when no explicit class is set */
+	@media (prefers-color-scheme: dark) {
+		:root:not(.light) {
+			/* Primary */
+			--theme-color-primary: var(--theme-color-primary-80);
+			--theme-color-on-primary: var(--theme-color-primary-20);
+			--theme-color-primary-container: var(--theme-color-primary-30);
+			--theme-color-on-primary-container: var(--theme-color-primary-90);
+			/* Secondary */
+			--theme-color-secondary: var(--theme-color-secondary-80);
+			--theme-color-on-secondary: var(--theme-color-secondary-20);
+			--theme-color-secondary-container: var(--theme-color-secondary-30);
+			--theme-color-on-secondary-container: var(--theme-color-secondary-90);
+			/* Tertiary */
+			--theme-color-tertiary: var(--theme-color-tertiary-80);
+			--theme-color-on-tertiary: var(--theme-color-tertiary-20);
+			--theme-color-tertiary-container: var(--theme-color-tertiary-30);
+			--theme-color-on-tertiary-container: var(--theme-color-tertiary-90);
+			/* Error */
+			--theme-color-error: var(--theme-color-error-80);
+			--theme-color-on-error: var(--theme-color-error-20);
+			--theme-color-error-container: var(--theme-color-error-30);
+			--theme-color-on-error-container: var(--theme-color-error-90);
+			/* Surface */
+			--theme-color-surface-dim: var(--theme-color-neutral-6);
+			--theme-color-surface: var(--theme-color-neutral-6);
+			--theme-color-surface-bright: var(--theme-color-neutral-24);
+			--theme-color-inverse-surface: var(--theme-color-neutral-90);
+			--theme-color-surface-container-lowest: var(--theme-color-neutral-4);
+			--theme-color-surface-container-low: var(--theme-color-neutral-10);
+			--theme-color-surface-container: var(--theme-color-neutral-12);
+			--theme-color-surface-container-high: var(--theme-color-neutral-17);
+			--theme-color-surface-container-highest: var(--theme-color-neutral-22);
+			--theme-color-on-inverse-surface: var(--theme-color-neutral-20);
+			--theme-color-inverse-primary: var(--theme-color-primary-40);
+			--theme-color-on-surface: var(--theme-color-neutral-90);
+			--theme-color-on-surface-variant: var(--theme-color-neutral-80);
+			--theme-color-outline: var(--theme-color-neutral-60);
+			--theme-color-outline-variant: var(--theme-color-neutral-variant-30);
+			--theme-color-scrim: var(--theme-color-neutral-0);
+			--theme-color-shadow: var(--theme-color-neutral-0);
+			/* Success */
+			--theme-color-success: var(--theme-color-success-80);
+			--theme-color-on-success: var(--theme-color-success-20);
+			--theme-color-success-container: var(--theme-color-success-30);
+			--theme-color-on-success-container: var(--theme-color-success-90);
+			/* Warning */
+			--theme-color-warning: var(--theme-color-warning-80);
+			--theme-color-on-warning: var(--theme-color-warning-20);
+			--theme-color-warning-container: var(--theme-color-warning-30);
+			--theme-color-on-warning-container: var(--theme-color-warning-90);
+			/* Info */
+			--theme-color-info: var(--theme-color-info-80);
+			--theme-color-on-info: var(--theme-color-info-20);
+			--theme-color-info-container: var(--theme-color-info-30);
+			--theme-color-on-info-container: var(--theme-color-info-90);
+			/* Alert */
+			--theme-color-alert: var(--theme-color-alert-80);
+			--theme-color-on-alert: var(--theme-color-alert-20);
+			--theme-color-alert-container: var(--theme-color-alert-30);
+			--theme-color-on-alert-container: var(--theme-color-alert-90);
+		}
+	}
+
+	/* Catppuccin Frappé/Macchiato/Mocha are dark-flavors */
+	[data-theme='catppuccin-frappe'],
+	[data-theme='catppuccin-macchiato'],
+	[data-theme='catppuccin-mocha'] {
+		/* Primary */
+		--theme-color-primary: var(--theme-color-primary-80);
+		--theme-color-on-primary: var(--theme-color-primary-20);
+		--theme-color-primary-container: var(--theme-color-primary-30);
+		--theme-color-on-primary-container: var(--theme-color-primary-90);
+		/* Secondary */
+		--theme-color-secondary: var(--theme-color-secondary-80);
+		--theme-color-on-secondary: var(--theme-color-secondary-20);
+		--theme-color-secondary-container: var(--theme-color-secondary-30);
+		--theme-color-on-secondary-container: var(--theme-color-secondary-90);
+		/* Tertiary */
+		--theme-color-tertiary: var(--theme-color-tertiary-80);
+		--theme-color-on-tertiary: var(--theme-color-tertiary-20);
+		--theme-color-tertiary-container: var(--theme-color-tertiary-30);
+		--theme-color-on-tertiary-container: var(--theme-color-tertiary-90);
+		/* Error */
+		--theme-color-error: var(--theme-color-error-80);
+		--theme-color-on-error: var(--theme-color-error-20);
+		--theme-color-error-container: var(--theme-color-error-30);
+		--theme-color-on-error-container: var(--theme-color-error-90);
+		/* Surface */
+		--theme-color-surface-dim: var(--theme-color-neutral-6);
+		--theme-color-surface: var(--theme-color-neutral-6);
+		--theme-color-surface-bright: var(--theme-color-neutral-24);
+		--theme-color-inverse-surface: var(--theme-color-neutral-90);
+		--theme-color-surface-container-lowest: var(--theme-color-neutral-4);
+		--theme-color-surface-container-low: var(--theme-color-neutral-10);
+		--theme-color-surface-container: var(--theme-color-neutral-12);
+		--theme-color-surface-container-high: var(--theme-color-neutral-17);
+		--theme-color-surface-container-highest: var(--theme-color-neutral-22);
+		--theme-color-on-inverse-surface: var(--theme-color-neutral-20);
+		--theme-color-inverse-primary: var(--theme-color-primary-40);
+		--theme-color-on-surface: var(--theme-color-neutral-90);
+		--theme-color-on-surface-variant: var(--theme-color-neutral-80);
+		--theme-color-outline: var(--theme-color-neutral-60);
+		--theme-color-outline-variant: var(--theme-color-neutral-variant-30);
+		--theme-color-scrim: var(--theme-color-neutral-0);
+		--theme-color-shadow: var(--theme-color-neutral-0);
+		/* Success */
+		--theme-color-success: var(--theme-color-success-80);
+		--theme-color-on-success: var(--theme-color-success-20);
+		--theme-color-success-container: var(--theme-color-success-30);
+		--theme-color-on-success-container: var(--theme-color-success-90);
+		/* Warning */
+		--theme-color-warning: var(--theme-color-warning-80);
+		--theme-color-on-warning: var(--theme-color-warning-20);
+		--theme-color-warning-container: var(--theme-color-warning-30);
+		--theme-color-on-warning-container: var(--theme-color-warning-90);
+		/* Info */
+		--theme-color-info: var(--theme-color-info-80);
+		--theme-color-on-info: var(--theme-color-info-20);
+		--theme-color-info-container: var(--theme-color-info-30);
+		--theme-color-on-info-container: var(--theme-color-info-90);
+		/* Alert */
+		--theme-color-alert: var(--theme-color-alert-80);
+		--theme-color-on-alert: var(--theme-color-alert-20);
+		--theme-color-alert-container: var(--theme-color-alert-30);
+		--theme-color-on-alert-container: var(--theme-color-alert-90);
+	}
+}

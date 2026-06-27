@@ -1,0 +1,31 @@
+/*
+ * Design-time tokens that aren't colors.
+ * Colors live in the colors/ folder. Components live in components/.
+ * Everything else — fonts, breakpoints, animations, drop shadows — is here.
+ */
+@theme {
+	/* Font families */
+	--font-sans: 'Plus Jakarta Sans Variable', 'Inter Variable', ui-sans-serif, system-ui;
+	--font-serif: 'Inter Variable', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+	--font-mono: 'Fira Code Variable', ui-monospace, monospace;
+
+	/* Material 3 window-size class breakpoints */
+	--breakpoint-compact: 620px;
+	--breakpoint-medium: 960px;
+	--breakpoint-expanded: 1301px;
+	--breakpoint-large: 1600px;
+	--breakpoint-extralarge: 1920px;
+
+	/* Animations */
+	--animate-alert: alert 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+	@keyframes alert {
+		75%,
+		100% {
+			transform: scale(1.5);
+			opacity: 0;
+		}
+	}
+
+	/* Drop shadows */
+	--drop-shadow-icon: 0 0 24px rgba(0, 0, 0, 0.2);
+}

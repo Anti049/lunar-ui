@@ -1,0 +1,12 @@
+/*
+ * Load order matters:
+ *   1. color-scheme.css  — set the CSS property the browser reads
+ *   2. light.css         — default mappings (also handles light-flavor themes)
+ *   3. dark.css          — dark mappings (also handles dark-flavor themes)
+ *
+ * Dark loads last so it wins when both selectors apply (e.g. user has set
+ * both .light and .dark by mistake — dark would win, which is rare).
+ */
+@import './color-scheme.css';
+@import './light.css';
+@import './dark.css';

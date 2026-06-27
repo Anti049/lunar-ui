@@ -1,0 +1,12 @@
+/*
+ * Color pipeline. Import order matters:
+ *   1. palette        — exposes ramp utilities (bg-primary-50)
+ *   2. modes          — mode-specific mappings (light vs dark)
+ *   3. semantics      — exposes semantic utilities (bg-primary)
+ *
+ * Theme color VALUES (the actual hex) come from themes/{theme}.css, loaded
+ * separately. This file is mode-agnostic and theme-agnostic.
+ */
+@import './palette.css';
+@import './modes/index.css';
+@import './semantics.css';

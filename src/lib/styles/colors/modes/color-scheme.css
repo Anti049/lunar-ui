@@ -1,0 +1,29 @@
+/*
+ * Apply the `color-scheme` CSS property based on the mode class.
+ *
+ * This is what tells the BROWSER which mode is active. Form controls,
+ * scrollbars, focus rings, autofill highlights, and any UA-rendered chrome
+ * pick this up automatically. It also makes `light-dark()` and
+ * `prefers-color-scheme` resolve correctly for descendants.
+ *
+ * Mode classes:
+ *   .light  → forces light mode (overrides system preference)
+ *   .dark   → forces dark mode (overrides system preference)
+ *   (none)  → follows `prefers-color-scheme` system preference
+ *
+ * Apply to any element. The closest ancestor with a mode class wins for
+ * descendants — modes can be scoped to subtrees.
+ */
+
+:root {
+	/* Default: respect the user's system preference */
+	color-scheme: light dark;
+}
+
+.light {
+	color-scheme: light;
+}
+
+.dark {
+	color-scheme: dark;
+}

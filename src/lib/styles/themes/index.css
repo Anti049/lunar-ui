@@ -1,0 +1,13 @@
+/*
+ * All themes, bundled.
+ *
+ * Imported automatically by the default entry (`@import '@anti049/lunar-ui'`)
+ * so consumers can use any theme without thinking about per-theme imports.
+ *
+ * Total cost: ~85 KB unminified (~10 KB gzipped). For size-conscious users,
+ * the `@anti049/lunar-ui/no-themes` entry skips this and lets you opt into
+ * just the themes you need via subpath imports.
+ */
+@import './default.css';
+@import './gaziter.css';
+@import './catppuccin/index.css';

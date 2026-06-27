@@ -1,0 +1,12 @@
+/*
+ * Core infrastructure: layer ordering, plugins, fonts, design tokens, scanning.
+ * Loaded first so everything downstream has the context it needs.
+ *
+ * NOTE: reference.css is NOT imported here. It's a separate consumer-facing
+ * entry, exposed via the "./reference" subpath.
+ */
+@import './layers.css';        /* MUST come first */
+@import './plugins.css';
+@import './fonts.css';
+@import './design-tokens.css';
+@import './source.css';

@@ -1,0 +1,71 @@
+/*
+ * Catppuccin Mocha — the darkest flavor, the most commonly used Catppuccin dark.
+ *
+ * Active when:
+ *   data-theme="catppuccin"    + dark mode (via .dark or system)
+ *   data-theme="catppuccin-mocha" (direct flavor selection)
+ */
+
+@layer theme {
+	[data-theme='catppuccin']:where(.dark, [class~='dark']),
+	:where(.dark, [class~='dark']) [data-theme='catppuccin'],
+	[data-theme='catppuccin-mocha'] {
+		/* Primary */
+		--theme-color-primary: oklch(0.7871 0.1188 304.75);
+		--theme-color-on-primary: oklch(0.3231 0.0433 297.97);
+		--theme-color-primary-container: oklch(0.4068 0.0566 299.13);
+		--theme-color-on-primary-container: oklch(0.8974 0.0262 313.59);
+		/* Secondary */
+		--theme-color-secondary: oklch(0.8166 0.0911 277.31);
+		--theme-color-on-secondary: oklch(0.3308 0.0368 279.91);
+		--theme-color-secondary-container: oklch(0.4176 0.0473 279.44);
+		--theme-color-on-secondary-container: oklch(0.9068 0.017 274.96);
+		/* Tertiary */
+		--theme-color-tertiary: oklch(0.87 0.0752 336.24);
+		--theme-color-on-tertiary: oklch(0.3436 0.0297 314.19);
+		--theme-color-tertiary-container: oklch(0.4359 0.0379 317.84);
+		--theme-color-on-tertiary-container: oklch(0.9225 0.0176 358.89);
+		/* Error */
+		--theme-color-error: oklch(0.7556 0.1297 2.73);
+		--theme-color-on-error: oklch(0.3128 0.0382 339.67);
+		--theme-color-error-container: oklch(0.3928 0.0515 344.48);
+		--theme-color-on-error-container: oklch(0.8851 0.035 13.94);
+		/* Success */
+		--theme-color-success: oklch(0.8577 0.1092 142.76);
+		--theme-color-on-success: oklch(0.3394 0.0185 167.61);
+		--theme-color-success-container: oklch(0.4302 0.0287 159.36);
+		--theme-color-on-success-container: oklch(0.9183 0.0406 135.71);
+		/* Warning */
+		--theme-color-warning: oklch(0.8237 0.1014 52.6);
+		--theme-color-on-warning: oklch(0.3303 0.0207 21.93);
+		--theme-color-warning-container: oklch(0.4174 0.0302 30.82);
+		--theme-color-on-warning-container: oklch(0.9074 0.0358 65.79);
+		/* Alert */
+		--theme-color-alert: oklch(0.9193 0.0703 86.53);
+		--theme-color-on-alert: oklch(0.3554 0.0074 47.19);
+		--theme-color-alert-container: oklch(0.4527 0.0134 64.36);
+		--theme-color-on-alert-container: oklch(0.9378 0.0303 92.73);
+		/* Info */
+		--theme-color-info: oklch(0.7664 0.1114 259.9);
+		--theme-color-on-info: oklch(0.3178 0.0413 267.62);
+		--theme-color-info-container: oklch(0.3994 0.0539 266.19);
+		--theme-color-on-info-container: oklch(0.8908 0.0239 250.39);
+		/* Surface */
+		--theme-color-surface-dim: oklch(0.2155 0.0254 284.06);
+		--theme-color-surface: oklch(0.2155 0.0254 284.06);
+		--theme-color-surface-bright: oklch(0.5497 0.0346 277.09);
+		--theme-color-surface-container-lowest: oklch(0.1828 0.0204 284.2);
+		--theme-color-surface-container-low: oklch(0.2429 0.0304 283.91);
+		--theme-color-surface-container: oklch(0.324 0.0319 281.97);
+		--theme-color-surface-container-high: oklch(0.4037 0.032 280.15);
+		--theme-color-surface-container-highest: oklch(0.4765 0.0341 278.64);
+		--theme-color-on-surface: oklch(0.8787 0.0427 272.28);
+		--theme-color-on-surface-variant: oklch(0.751 0.0397 273.93);
+		/* Outline */
+		--theme-color-outline: var(--theme-color-on-surface);
+		--theme-color-outline-variant: var(--theme-color-on-surface-variant);
+		/* Shadow/Scrim */
+		--theme-color-shadow: oklch(0 0 0);
+		--theme-color-scrim: oklch(0 0 0);
+	}
+}

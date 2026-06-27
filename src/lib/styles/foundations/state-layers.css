@@ -1,0 +1,28 @@
+/*
+ * Material 3 state layers: hover/focus/pressed/dragged overlays for interactive
+ * elements. Apply `interactive` to any element that should show these states.
+ */
+@theme inline {
+	--opacity-hover: 0.1;
+	--opacity-focus: 0.2;
+	--opacity-pressed: 0.2;
+	--opacity-dragged: 0.5;
+}
+
+@utility animated {
+	@apply duration-200 ease-in-out;
+}
+
+@utility interactive {
+	/* Base */
+	@apply relative overflow-clip not-disabled:cursor-pointer disabled:cursor-not-allowed;
+	/* Overlay pseudo-element */
+	@apply before:pointer-events-none before:absolute before:inset-0 before:bg-current before:opacity-0 before:transition-opacity;
+	/* State overlays */
+	@apply not-disabled:hover:before:opacity-hover not-disabled:focus-visible:before:opacity-focus not-disabled:active:before:opacity-pressed;
+}
+
+/* Dragged isn't a built-in variant, needs a plain selector */
+.interactive.dragged:not(.disabled)::before {
+	@apply opacity-dragged;
+}

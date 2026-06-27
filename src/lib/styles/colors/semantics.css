@@ -5,66 +5,63 @@
  * step, this file exposes it as --color-primary so Tailwind generates utilities
  * like bg-primary, text-on-primary, etc.
  */
-
-@layer base {
-	@theme inline {
-		/* Primary */
-		--color-primary: var(--theme-color-primary);
-		--color-on-primary: var(--theme-color-on-primary);
-		--color-primary-container: var(--theme-color-primary-container);
-		--color-on-primary-container: var(--theme-color-on-primary-container);
-		--color-inverse-primary: var(--theme-color-on-primary);
-		--color-inverse-on-primary: var(--theme-color-primary);
-		/* Secondary */
-		--color-secondary: var(--theme-color-secondary);
-		--color-on-secondary: var(--theme-color-on-secondary);
-		--color-secondary-container: var(--theme-color-secondary-container);
-		--color-on-secondary-container: var(--theme-color-on-secondary-container);
-		/* Tertiary */
-		--color-tertiary: var(--theme-color-tertiary);
-		--color-on-tertiary: var(--theme-color-on-tertiary);
-		--color-tertiary-container: var(--theme-color-tertiary-container);
-		--color-on-tertiary-container: var(--theme-color-on-tertiary-container);
-		/* Error */
-		--color-error: var(--theme-color-error);
-		--color-on-error: var(--theme-color-on-error);
-		--color-error-container: var(--theme-color-error-container);
-		--color-on-error-container: var(--theme-color-on-error-container);
-		/* Success */
-		--color-success: var(--theme-color-success);
-		--color-on-success: var(--theme-color-on-success);
-		--color-success-container: var(--theme-color-success-container);
-		--color-on-success-container: var(--theme-color-on-success-container);
-		/* Warning */
-		--color-warning: var(--theme-color-warning);
-		--color-on-warning: var(--theme-color-on-warning);
-		--color-warning-container: var(--theme-color-warning-container);
-		--color-on-warning-container: var(--theme-color-on-warning-container);
-		/* Info */
-		--color-info: var(--theme-color-info);
-		--color-on-info: var(--theme-color-on-info);
-		--color-info-container: var(--theme-color-info-container);
-		--color-on-info-container: var(--theme-color-on-info-container);
-		/* Alert */
-		--color-alert: var(--theme-color-alert);
-		--color-on-alert: var(--theme-color-on-alert);
-		--color-alert-container: var(--theme-color-alert-container);
-		--color-on-alert-container: var(--theme-color-on-alert-container);
-		/* Surface */
-		--color-surface-dim: var(--theme-color-surface-dim);
-		--color-surface: var(--theme-color-surface);
-		--color-surface-bright: var(--theme-color-surface-bright);
-		--color-surface-container-lowest: var(--theme-color-surface-container-lowest);
-		--color-surface-container-low: var(--theme-color-surface-container-low);
-		--color-surface-container: var(--theme-color-surface-container);
-		--color-surface-container-high: var(--theme-color-surface-container-high);
-		--color-surface-container-highest: var(--theme-color-surface-container-highest);
-		--color-on-surface: var(--theme-color-on-surface);
-		--color-on-surface-variant: var(--theme-color-on-surface-variant);
-		/* Miscellaneous */
-		--color-outline: var(--theme-color-outline);
-		--color-outline-variant: var(--theme-color-outline-variant);
-		--color-scrim: var(--theme-color-scrim);
-		--color-shadow: var(--theme-color-shadow);
-	}
+@theme inline {
+	/* Primary */
+	--color-primary: var(--theme-color-primary);
+	--color-on-primary: var(--theme-color-on-primary);
+	--color-primary-container: var(--theme-color-primary-container);
+	--color-on-primary-container: var(--theme-color-on-primary-container);
+	--color-inverse-primary: var(--theme-color-on-primary);
+	--color-inverse-on-primary: var(--theme-color-primary);
+	/* Secondary */
+	--color-secondary: var(--theme-color-secondary);
+	--color-on-secondary: var(--theme-color-on-secondary);
+	--color-secondary-container: var(--theme-color-secondary-container);
+	--color-on-secondary-container: var(--theme-color-on-secondary-container);
+	/* Tertiary */
+	--color-tertiary: var(--theme-color-tertiary);
+	--color-on-tertiary: var(--theme-color-on-tertiary);
+	--color-tertiary-container: var(--theme-color-tertiary-container);
+	--color-on-tertiary-container: var(--theme-color-on-tertiary-container);
+	/* Error */
+	--color-error: var(--theme-color-error);
+	--color-on-error: var(--theme-color-on-error);
+	--color-error-container: var(--theme-color-error-container);
+	--color-on-error-container: var(--theme-color-on-error-container);
+	/* Success */
+	--color-success: var(--theme-color-success);
+	--color-on-success: var(--theme-color-on-success);
+	--color-success-container: var(--theme-color-success-container);
+	--color-on-success-container: var(--theme-color-on-success-container);
+	/* Warning */
+	--color-warning: var(--theme-color-warning);
+	--color-on-warning: var(--theme-color-on-warning);
+	--color-warning-container: var(--theme-color-warning-container);
+	--color-on-warning-container: var(--theme-color-on-warning-container);
+	/* Info */
+	--color-info: var(--theme-color-info);
+	--color-on-info: var(--theme-color-on-info);
+	--color-info-container: var(--theme-color-info-container);
+	--color-on-info-container: var(--theme-color-on-info-container);
+	/* Alert */
+	--color-alert: var(--theme-color-alert);
+	--color-on-alert: var(--theme-color-on-alert);
+	--color-alert-container: var(--theme-color-alert-container);
+	--color-on-alert-container: var(--theme-color-on-alert-container);
+	/* Surface */
+	--color-surface-dim: var(--theme-color-surface-dim);
+	--color-surface: var(--theme-color-surface);
+	--color-surface-bright: var(--theme-color-surface-bright);
+	--color-surface-container-lowest: var(--theme-color-surface-container-lowest);
+	--color-surface-container-low: var(--theme-color-surface-container-low);
+	--color-surface-container: var(--theme-color-surface-container);
+	--color-surface-container-high: var(--theme-color-surface-container-high);
+	--color-surface-container-highest: var(--theme-color-surface-container-highest);
+	--color-on-surface: var(--theme-color-on-surface);
+	--color-on-surface-variant: var(--theme-color-on-surface-variant);
+	/* Miscellaneous */
+	--color-outline: var(--theme-color-outline);
+	--color-outline-variant: var(--theme-color-outline-variant);
+	--color-scrim: var(--theme-color-scrim);
+	--color-shadow: var(--theme-color-shadow);
 }

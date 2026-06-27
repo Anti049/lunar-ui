@@ -2,7 +2,7 @@
  * Catppuccin Macchiato — a medium dark flavor.
  * Direct selection only.
  */
-@layer theme {
+@layer palette {
 	[data-theme='catppuccin-macchiato'] {
 		/* Primary */
 		--theme-color-primary: oklch(0.7871 0.1188 304.75);

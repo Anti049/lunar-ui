@@ -1,4 +1,4 @@
-@layer theme {
+@layer palette {
 	[data-theme='gaziter'] {
 		--theme-color-primary-0: #000000;
 		--theme-color-primary-2: #000a05;

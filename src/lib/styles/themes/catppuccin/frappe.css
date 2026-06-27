@@ -5,7 +5,7 @@
  * NOTE: Set color-scheme: dark via a .dark ancestor for correct browser
  * chrome (scrollbars, form controls, etc.).
  */
-@layer theme {
+@layer palette {
 	[data-theme='catppuccin-frappe'] {
 		/* Primary */
 		--theme-color-primary: oklch(0.7871 0.1188 304.75);

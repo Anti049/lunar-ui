@@ -5,7 +5,7 @@
  *   data-theme="catppuccin"    + light mode (via .light or system)
  *   data-theme="catppuccin-latte" (direct flavor selection)
  */
-@layer theme {
+@layer palette {
 	[data-theme='catppuccin']:where(:root, .light, [class~='light']),
 	:where(.light, [class~='light']) [data-theme='catppuccin'],
 	[data-theme='catppuccin-latte'] {

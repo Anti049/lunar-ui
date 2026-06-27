@@ -3,7 +3,7 @@
  * Includes :root so no-data-theme pages get sensible defaults.
  */
 
-@layer theme {
+@layer palette {
 	[data-theme='default'],
 	:root {
 		--theme-color-primary-0: #000000;

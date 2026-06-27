@@ -6,7 +6,7 @@
  *   data-theme="catppuccin-mocha" (direct flavor selection)
  */
 
-@layer theme {
+@layer palette {
 	[data-theme='catppuccin']:where(.dark, [class~='dark']),
 	:where(.dark, [class~='dark']) [data-theme='catppuccin'],
 	[data-theme='catppuccin-mocha'] {

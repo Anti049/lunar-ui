@@ -1,37 +1,42 @@
 /*
  * Light mode mappings.
  *
- * Active when:
- *   - the closest ancestor with .light / .dark is .light
- *   - no .light or .dark class exists AND the system prefers light
- *   - the theme has a "light-flavor" suffix (e.g. catppuccin-latte)
+ * Selectors:
+ *   :root, .light                 → the standard case (mode class on <html>)
+ *   .light [data-theme]           → scoped palette inside a light ancestor
+ *   [data-theme]                  → any scoped palette, falls through to light
+ *                                    unless .dark [data-theme] (in dark.css)
+ *                                    overrides at higher priority
+ *
+ * The .dark [data-theme] rule in dark.css wins over the bare [data-theme]
+ * rule here because both are in @layer mapping and dark.css imports later
+ * (source-order tiebreak).
  */
-
 @layer mapping {
-	/* Always-on default for top-level :root when no .light/.dark is in scope */
 	:root,
-	.light {
-		/* Primary */
+	.light,
+	.light [data-theme],
+	[data-theme] {
 		--theme-color-primary: var(--theme-color-primary-40);
 		--theme-color-on-primary: var(--theme-color-primary-100);
 		--theme-color-primary-container: var(--theme-color-primary-90);
 		--theme-color-on-primary-container: var(--theme-color-primary-30);
-		/* Secondary */
+
 		--theme-color-secondary: var(--theme-color-secondary-40);
 		--theme-color-on-secondary: var(--theme-color-secondary-100);
 		--theme-color-secondary-container: var(--theme-color-secondary-90);
 		--theme-color-on-secondary-container: var(--theme-color-secondary-30);
-		/* Tertiary */
+
 		--theme-color-tertiary: var(--theme-color-tertiary-40);
 		--theme-color-on-tertiary: var(--theme-color-tertiary-100);
 		--theme-color-tertiary-container: var(--theme-color-tertiary-90);
 		--theme-color-on-tertiary-container: var(--theme-color-tertiary-30);
-		/* Error */
+
 		--theme-color-error: var(--theme-color-error-40);
 		--theme-color-on-error: var(--theme-color-error-100);
 		--theme-color-error-container: var(--theme-color-error-90);
 		--theme-color-on-error-container: var(--theme-color-error-30);
-		/* Surface */
+
 		--theme-color-surface-dim: var(--theme-color-neutral-87);
 		--theme-color-surface: var(--theme-color-neutral-98);
 		--theme-color-surface-bright: var(--theme-color-neutral-98);
@@ -49,52 +54,52 @@
 		--theme-color-outline-variant: var(--theme-color-neutral-variant-80);
 		--theme-color-scrim: var(--theme-color-neutral-0);
 		--theme-color-shadow: var(--theme-color-neutral-0);
-		/* Success */
+
 		--theme-color-success: var(--theme-color-success-40);
 		--theme-color-on-success: var(--theme-color-success-100);
 		--theme-color-success-container: var(--theme-color-success-90);
 		--theme-color-on-success-container: var(--theme-color-success-30);
-		/* Warning */
+
 		--theme-color-warning: var(--theme-color-warning-40);
 		--theme-color-on-warning: var(--theme-color-warning-100);
 		--theme-color-warning-container: var(--theme-color-warning-90);
 		--theme-color-on-warning-container: var(--theme-color-warning-30);
-		/* Info */
+
 		--theme-color-info: var(--theme-color-info-40);
 		--theme-color-on-info: var(--theme-color-info-100);
 		--theme-color-info-container: var(--theme-color-info-90);
 		--theme-color-on-info-container: var(--theme-color-info-30);
-		/* Alert */
+
 		--theme-color-alert: var(--theme-color-alert-40);
 		--theme-color-on-alert: var(--theme-color-alert-100);
 		--theme-color-alert-container: var(--theme-color-alert-90);
 		--theme-color-on-alert-container: var(--theme-color-alert-30);
 	}
 
-	/* When no class is set, follow system preference */
+	/* System preference fallback when no explicit class is set */
 	@media (prefers-color-scheme: light) {
-		:root:not(.dark) {
-			/* Primary */
+		:root:not(.dark),
+		:root:not(.dark) [data-theme] {
 			--theme-color-primary: var(--theme-color-primary-40);
 			--theme-color-on-primary: var(--theme-color-primary-100);
 			--theme-color-primary-container: var(--theme-color-primary-90);
 			--theme-color-on-primary-container: var(--theme-color-primary-30);
-			/* Secondary */
+
 			--theme-color-secondary: var(--theme-color-secondary-40);
 			--theme-color-on-secondary: var(--theme-color-secondary-100);
 			--theme-color-secondary-container: var(--theme-color-secondary-90);
 			--theme-color-on-secondary-container: var(--theme-color-secondary-30);
-			/* Tertiary */
+
 			--theme-color-tertiary: var(--theme-color-tertiary-40);
 			--theme-color-on-tertiary: var(--theme-color-tertiary-100);
 			--theme-color-tertiary-container: var(--theme-color-tertiary-90);
 			--theme-color-on-tertiary-container: var(--theme-color-tertiary-30);
-			/* Error */
+
 			--theme-color-error: var(--theme-color-error-40);
 			--theme-color-on-error: var(--theme-color-error-100);
 			--theme-color-error-container: var(--theme-color-error-90);
 			--theme-color-on-error-container: var(--theme-color-error-30);
-			/* Surface */
+
 			--theme-color-surface-dim: var(--theme-color-neutral-87);
 			--theme-color-surface: var(--theme-color-neutral-98);
 			--theme-color-surface-bright: var(--theme-color-neutral-98);
@@ -112,22 +117,22 @@
 			--theme-color-outline-variant: var(--theme-color-neutral-variant-80);
 			--theme-color-scrim: var(--theme-color-neutral-0);
 			--theme-color-shadow: var(--theme-color-neutral-0);
-			/* Success */
+
 			--theme-color-success: var(--theme-color-success-40);
 			--theme-color-on-success: var(--theme-color-success-100);
 			--theme-color-success-container: var(--theme-color-success-90);
 			--theme-color-on-success-container: var(--theme-color-success-30);
-			/* Warning */
+
 			--theme-color-warning: var(--theme-color-warning-40);
 			--theme-color-on-warning: var(--theme-color-warning-100);
 			--theme-color-warning-container: var(--theme-color-warning-90);
 			--theme-color-on-warning-container: var(--theme-color-warning-30);
-			/* Info */
+
 			--theme-color-info: var(--theme-color-info-40);
 			--theme-color-on-info: var(--theme-color-info-100);
 			--theme-color-info-container: var(--theme-color-info-90);
 			--theme-color-on-info-container: var(--theme-color-info-30);
-			/* Alert */
+
 			--theme-color-alert: var(--theme-color-alert-40);
 			--theme-color-on-alert: var(--theme-color-alert-100);
 			--theme-color-alert-container: var(--theme-color-alert-90);

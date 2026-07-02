@@ -8,7 +8,8 @@
  */
 
 @layer mapping {
-	.dark {
+	.dark,
+	.dark [data-theme] {
 		/* Primary */
 		--theme-color-primary: var(--theme-color-primary-80);
 		--theme-color-on-primary: var(--theme-color-primary-20);
@@ -71,7 +72,8 @@
 
 	/* Follow system preference when no explicit class is set */
 	@media (prefers-color-scheme: dark) {
-		:root:not(.light) {
+		:root:not(.light),
+		:root:not(.light) [data-theme] {
 			/* Primary */
 			--theme-color-primary: var(--theme-color-primary-80);
 			--theme-color-on-primary: var(--theme-color-primary-20);

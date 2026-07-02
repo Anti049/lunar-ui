@@ -1,9 +1,10 @@
 /*
  * lunar-ui's theme wrapper. Layers Catppuccin flavor semantics on top of
  * mode-watcher, which handles the low-level mode/theme state, persistence,
- * SSR, FOUC prevention, transition disabling, and matchMedia lifecycle.
+ * SSR-safe rehydration, FOUC prevention, transition disabling, and matchMedia
+ * lifecycle.
  *
- * mode-watcher docs: https://mode-watcher.sveco.dev
+ * mode-watcher: https://mode-watcher.sveco.dev
  */
 import { setMode, setTheme, toggleMode, mode, theme } from 'mode-watcher';
 import { PersistedState } from 'runed';
@@ -19,20 +20,20 @@ export type ThemeName =
 	| 'nihility'
 	| 'star-rail';
 
-/** Binary mode class, driven by mode-watcher. */
+/** Binary mode. Driven by mode-watcher. */
 export type Mode = 'light' | 'dark' | 'system';
 
 /**
  * Catppuccin-specific: which flavor is active.
- * `null` means "use binary mode" — Latte for light, Mocha for dark.
+ * `null` means "use binary mode" (Latte for light, Mocha for dark).
  * Any non-null value BYPASSES binary mode and pins the flavor directly.
  */
 export type CatppuccinFlavor = 'latte' | 'frappe' | 'macchiato' | 'mocha';
 export type FlavorOverride = CatppuccinFlavor | null;
 
 /**
- * Persisted Catppuccin flavor override. Persists across reloads via localStorage.
- * mode-watcher owns the theme + mode keys; we only own the flavor key.
+ * Persisted Catppuccin flavor override. Owns its own localStorage key;
+ * mode-watcher owns theme and mode keys.
  */
 const flavorState = new PersistedState<FlavorOverride>('lunar-ui:flavor', null, {
 	serializer: {
@@ -41,7 +42,7 @@ const flavorState = new PersistedState<FlavorOverride>('lunar-ui:flavor', null, 
 	}
 });
 
-export const lunarTheme = {
+export const appTheme = {
 	/** Current palette. Delegates to mode-watcher. */
 	get theme() {
 		return (theme.current || 'default') as ThemeName;
@@ -60,6 +61,7 @@ export const lunarTheme = {
 	/**
 	 * The value written to <html data-theme="…">.
 	 * Composes theme + flavor: `catppuccin-frappe`, or just `default`.
+	 * A separate $effect (syncDataThemeAttribute) writes this to the DOM.
 	 */
 	get dataTheme() {
 		return flavorState.current !== null ? `${this.theme}-${flavorState.current}` : this.theme;
@@ -67,10 +69,8 @@ export const lunarTheme = {
 
 	setTheme(name: ThemeName) {
 		flavorState.current = null;
+		// mode-watcher's `theme` uses "" for "no data-theme" — normalize 'default' to ''
 		setTheme(name === 'default' ? '' : name);
-		// mode-watcher's `theme` uses "" for the "no data-theme" case,
-		// so we normalize `default` to empty for it. Our dataTheme getter
-		// still returns 'default' for the UI.
 	},
 
 	setMode(m: Mode) {
@@ -86,16 +86,24 @@ export const lunarTheme = {
 	setFlavor(flavor: FlavorOverride) {
 		flavorState.current = flavor;
 		if (flavor !== null) {
-			// Pin the equivalent mode so mode-watcher stays in sync.
+			// Pin the equivalent mode so mode-watcher stays coherent.
 			setMode(flavor === 'latte' ? 'light' : 'dark');
 		}
 	}
 };
 
+/**
+ * Effect that composes theme + flavor into the data-theme attribute.
+ *
+ * mode-watcher writes just the theme name to <html data-theme="…">, which
+ * doesn't include Catppuccin flavor suffixes. This effect overwrites that
+ * with the composed value.
+ *
+ * Must be called during component setup (top of <script> in ThemeProvider).
+ */
 export function syncDataThemeAttribute() {
-	if (typeof document === 'undefined') return;
 	$effect(() => {
-		const composed = lunarTheme.dataTheme;
-		document.documentElement.dataset.theme = composed;
+		if (typeof document === 'undefined') return;
+		document.documentElement.dataset.theme = appTheme.dataTheme;
 	});
 }

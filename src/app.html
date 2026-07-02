@@ -6,8 +6,9 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="text-scale" content="scale" />
 		<script>
-			// FOUC prevention. Mirrors mode-watcher's own logic so that <html> is
-			// set up correctly before hydration. Keep in sync with ThemeProvider config.
+			// FOUC prevention. Mirrors mode-watcher's own logic so <html> is
+			// set up correctly before hydration. Keep in sync with the
+			// ThemeProvider config (storage keys, class names).
 			(function () {
 				try {
 					var theme = localStorage.getItem('lunar-ui:theme') || '';
@@ -22,7 +23,7 @@
 					var dataTheme = flavor ? (theme || 'default') + '-' + flavor : theme;
 					if (dataTheme) document.documentElement.dataset.theme = dataTheme;
 
-					// Apply mode class
+					// Apply mode class + inline color-scheme
 					var cls = flavor ? (flavor === 'latte' ? 'light' : 'dark') : isDark ? 'dark' : 'light';
 					document.documentElement.classList.add(cls);
 					document.documentElement.style.colorScheme = cls;

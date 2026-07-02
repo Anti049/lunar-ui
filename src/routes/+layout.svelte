@@ -1,11 +1,12 @@
 <script lang="ts">
+	import { ThemeProvider } from '$lib/svelte';
 	import '../app.css';
-	import { ModeWatcher } from 'mode-watcher';
 
 	const { children } = $props();
 </script>
 
-<ModeWatcher defaultTheme="default" />
-<div class="h-screen w-screen surface">
-	{@render children()}
-</div>
+<ThemeProvider initialTheme="default" initialMode="system">
+	<div class="h-screen w-screen surface">
+		{@render children()}
+	</div>
+</ThemeProvider>

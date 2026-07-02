@@ -1,5 +1,6 @@
-<script>
-	import { setTheme, setMode } from 'mode-watcher';
+<script lang="ts">
+	import { resolve } from '$app/paths';
+	import { appTheme } from '$lib/svelte';
 </script>
 
 <div class="p-8">
@@ -19,32 +20,33 @@
 			<p class="text-sm opacity-90">Catppuccin / Default secondary</p>
 		</div>
 
-		<div class="bg-surface text-on-surface p-6 rounded col-span-2">
-			<p class="font-bold">bg-surface (page background)</p>
-			<p class="text-sm opacity-75">Catppuccin Mocha: nearly black with blue tint</p>
-		</div>
-
 		<div class="flex flex-row gap-2 w-full">
-			<button class="button button-tonal button-secondary" onclick={() => setMode('light')}>
+			<button
+				class="button button-tonal button-secondary"
+				onclick={() => appTheme.setMode('light')}
+			>
 				Light Mode
 			</button>
-			<button class="button button-tonal button-secondary" onclick={() => setMode('dark')}>
+			<button class="button button-tonal button-secondary" onclick={() => appTheme.setMode('dark')}>
 				Dark Mode
 			</button>
-			<button class="button button-tonal button-secondary" onclick={() => setMode('system')}>
+			<button
+				class="button button-tonal button-secondary"
+				onclick={() => appTheme.setMode('system')}
+			>
 				System Mode
 			</button>
 		</div>
-
-		<div class="flex flex-row gap-2 w-full">
+		<div class="flex flex-row gap-2 w-full surface-container p-2 rounded-sm">
 			<button
 				class="button button-tonal button-primary button-lg"
-				onclick={() => setTheme('catppuccin')}>Catppuccin</button
+				onclick={() => appTheme.setTheme('catppuccin')}>Catppuccin</button
 			>
 			<button
 				class="button button-tonal button-primary button-lg"
-				onclick={() => setTheme('default')}>Default</button
+				onclick={() => appTheme.setTheme('default')}>Default</button
 			>
 		</div>
+		<a href={resolve('/hsr')} class="button button-tonal button-primary button-lg">Go to HSR</a>
 	</div>
 </div>

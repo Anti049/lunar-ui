@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { ModeWatcher } from 'mode-watcher';
 	import {
-		lunarTheme,
+		appTheme,
 		syncDataThemeAttribute,
 		type ThemeName,
 		type Mode,
@@ -25,16 +25,15 @@
 	}: Props = $props();
 
 	// Keep <html data-theme="…"> in sync with theme + flavor composition.
-	// mode-watcher writes just the theme name; we compose theme + flavor.
 	syncDataThemeAttribute();
 
 	// Apply initial flavor override (Catppuccin only). Runs once after mount
-	// so we don't fight the FOUC script or mode-watcher's own initialization.
-	// If the user has a persisted flavor in localStorage, that wins over
-	// initialFlavor — matching how mode-watcher's own initialMode + defaultMode work.
+	// so we don't fight the FOUC script or mode-watcher's rehydration.
+	// A persisted user choice wins over initialFlavor — mirrors mode-watcher's
+	// own defaultMode + defaultTheme behavior.
 	onMount(() => {
-		if (initialFlavor !== null && lunarTheme.flavor === null) {
-			lunarTheme.setFlavor(initialFlavor);
+		if (initialFlavor !== null && appTheme.flavor === null) {
+			appTheme.setFlavor(initialFlavor);
 		}
 	});
 </script>
@@ -43,8 +42,8 @@
   ModeWatcher renders no visible output. It's a state carrier that:
     - Listens to matchMedia('(prefers-color-scheme: dark)')
     - Persists mode and theme to localStorage
-    - Writes .dark/.light classes and color-scheme:… inline style to <html>
-    - Handles FOUC prevention when combined with the app.html script
+    - Writes .dark/.light classes and inline color-scheme to <html>
+    - Suppresses transitions during mode flips
 -->
 <ModeWatcher
 	defaultMode={initialMode}

@@ -9,6 +9,7 @@
 		type Mode,
 		type FlavorOverride
 	} from './theme.svelte';
+	import { initRipple } from '../actions';
 
 	interface Props {
 		initialTheme?: ThemeName;
@@ -35,6 +36,7 @@
 		if (initialFlavor !== null && appTheme.flavor === null) {
 			appTheme.setFlavor(initialFlavor);
 		}
+		initRipple();
 	});
 </script>
 

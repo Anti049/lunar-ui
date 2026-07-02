@@ -1,6 +1,6 @@
 /*
- * Material 3 state layers: hover/focus/pressed/dragged overlays for interactive
- * elements. Apply `interactive` to any element that should show these states.
+ * Material 3 state layer opacities and the .interactive utility that
+ * consumes them. Provides consistent hover/focus/pressed feedback.
  */
 @theme inline {
 	--opacity-hover: 0.1;
@@ -9,20 +9,38 @@
 	--opacity-dragged: 0.5;
 }
 
+/*
+ * Non-inheriting marker so the ripple delegation (initRipple) can find the
+ * interactive host even when the class is applied indirectly via `@apply
+ * interactive` (e.g. `.button`). Only the element that actually carries the
+ * interactive styles resolves `--interactive: 1`; children don't inherit it.
+ */
+@property --interactive {
+	syntax: '*';
+	inherits: false;
+}
+
 @utility animated {
 	@apply duration-200 ease-in-out;
 }
 
 @utility interactive {
-	/* Base */
+	--interactive: 1;
 	@apply relative overflow-clip not-disabled:cursor-pointer disabled:cursor-not-allowed;
-	/* Overlay pseudo-element */
 	@apply before:pointer-events-none before:absolute before:inset-0 before:bg-current before:opacity-0 before:transition-opacity;
-	/* State overlays */
 	@apply not-disabled:hover:before:opacity-hover not-disabled:focus-visible:before:opacity-focus not-disabled:active:before:opacity-pressed;
 }
 
-/* Dragged isn't a built-in variant, needs a plain selector */
+/*
+ * Opt out of the delegated ripple (initRipple / rippleRoot, which keys off
+ * `.interactive`). Marker utility: the delegation skips any `.interactive`
+ * inside a `.ripple-none` subtree while the hover/focus/pressed state layers
+ * above stay intact.
+ */
+@utility ripple-none {
+	--lunar-ripple: none;
+}
+
 .interactive.dragged:not(.disabled)::before {
 	@apply opacity-dragged;
 }

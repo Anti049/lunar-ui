@@ -1,0 +1,31 @@
+/*
+ * Material 3 ripple element.
+ *
+ * Static styling only — the `ripple` Svelte action (src/lib/svelte/actions)
+ * drives all motion via the Web Animations API so it can support press-and-hold
+ * (grow, hold while pressed, fade on release), stacked ripples, and reduced
+ * motion. Each span is sized and positioned inline by the action.
+ *
+ * Tints with `currentColor` so it matches whatever foreground the host paints,
+ * mirroring the `.interactive` state layer. The host must establish a
+ * positioning context and clip its overflow — the action handles both, and
+ * `.interactive` already provides `relative overflow-clip`.
+ */
+.lunar-ripple {
+	position: absolute;
+	border-radius: 9999px;
+	background-color: currentColor;
+	pointer-events: none;
+	transform: scale(0);
+	will-change: transform, opacity;
+}
+
+/*
+ * Press-and-hold opt-in (the action's `hold` option): while a held ripple is
+ * active the action sets `data-ripple-held`, suppressing the `.interactive`
+ * pressed/hover state layer so the ripple is the sole press feedback. The layer
+ * fades back in (via its own transition) the moment the pointer is released.
+ */
+.interactive[data-ripple-held]::before {
+	opacity: 0 !important;
+}

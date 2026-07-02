@@ -1,0 +1,329 @@
+/* =============================================================================
+ * SCAFFOLD
+ * =============================================================================
+ *
+ * A composable page-level container that coordinates fixed chrome (header,
+ * footer, sidebar) with a scrollable main content area.
+ *
+ * Three orthogonal axes compose into every scaffold:
+ *   sections  — .scaffold-header | .scaffold-footer | .scaffold-sidebar | .scaffold-main
+ *   sidebar   — .scaffold-sidebar-collapsed | .scaffold-sidebar-collapsible
+ *   sizing    — --scaffold-header-height, --scaffold-footer-height,
+ *               --scaffold-sidebar-width, --scaffold-sidebar-collapsed-width
+ *
+ * Structure:
+ *   <div class="scaffold">
+ *     <aside  class="scaffold-sidebar">…</aside>          (optional, full-height left)
+ *     <header class="scaffold-header">…</header>          (optional, top of right column)
+ *     <main   class="scaffold-main">…</main>              (scrollable, middle of right column)
+ *     <footer class="scaffold-footer">…</footer>          (optional, bottom of right column)
+ *   </div>
+ *
+ * Layout when all sections present:
+ *
+ *   ┌──────────┬───────────────────┐
+ *   │          │      header       │
+ *   │          ├───────────────────┤
+ *   │ sidebar  │                   │
+ *   │          │       main        │
+ *   │          │                   │
+ *   │          ├───────────────────┤
+ *   │          │      footer       │
+ *   └──────────┴───────────────────┘
+ *
+ * Behavior:
+ *   - Sidebar spans the FULL viewport height (all three rows)
+ *   - Header is sticky at the top of the right column
+ *   - Main content scrolls under the sticky header
+ *   - Sidebar does NOT scroll with main (own scroll container)
+ *   - Sidebar collapse is a smooth animation coordinated with main resize
+ *   - Collapse triggers: .scaffold-sidebar-collapsed on the scaffold root,
+ *     OR the .scaffold-sidebar-collapsible responsive breakpoint (medium)
+ *
+ * Layer priority (declared in core/layers.css, LOW → HIGH):
+ *   l3 — foundation (base .scaffold, sizing variables, grid layout)
+ *   l2 — sections (header, footer, sidebar, main slot styling)
+ *   l1 — state (collapsed, responsive collapsed)
+ *
+ * ⚠️  The scaffold is a single 2-column × 3-row CSS grid. The sidebar
+ *     spans all three rows (via `grid-area: sidebar` mapping to the entire
+ *     left column). Header/main/footer occupy individual cells in the
+ *     right column. This keeps the markup flat (no wrapper element around
+ *     header+main+footer) while still supporting a full-height sidebar.
+ *
+ * ⚠️  Transitioning grid-template-columns and grid-template-rows is
+ *     supported in Chrome 121+, Firefox 118+, Safari 17+. Older browsers
+ *     will jump instead of animate — an acceptable degradation.
+ * ========================================================================== */
+
+/* =============================================================================
+ * FOUNDATION (l3)
+ * ========================================================================== */
+
+@utility scaffold {
+	@layer scaffold.l3 {
+		/* -----------------------------------------------------------------------
+		 * Sizing variables. Override on .scaffold to customize.
+		 * -------------------------------------------------------------------- */
+		--scaffold-header-height: 4rem; /* 64px, Material 3 medium app bar */
+		--scaffold-footer-height: auto; /* auto = content height */
+		--scaffold-sidebar-width: 16rem; /* 256px, Material 3 nav drawer */
+		--scaffold-sidebar-collapsed-width: 4rem; /* 64px, nav rail width */
+		--scaffold-transition-duration: 250ms;
+		--scaffold-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+
+		/* -----------------------------------------------------------------------
+		 * Grid: 2 columns × 3 rows.
+		 *
+		 *   grid-template-areas:
+		 *     'sidebar header'
+		 *     'sidebar main'
+		 *     'sidebar footer'
+		 *
+		 * The `sidebar` area repeats down the left column, spanning all
+		 * three rows automatically thanks to how grid-template-areas parses
+		 * consecutive identical area names.
+		 *
+		 * Columns and rows start at 0 and get sized by :has() rules below
+		 * only when the corresponding sections are present.
+		 * -------------------------------------------------------------------- */
+		display: grid;
+		grid-template-columns: 0 1fr;
+		grid-template-rows: 0 1fr 0;
+		grid-template-areas:
+			'sidebar header'
+			'sidebar main'
+			'sidebar footer';
+
+		min-height: 100dvh;
+		width: 100%;
+
+		/* -----------------------------------------------------------------------
+		 * Coordinate all axis animations so sidebar collapse animates the
+		 * entire layout smoothly, not just the sidebar element.
+		 * -------------------------------------------------------------------- */
+		transition:
+			grid-template-columns var(--scaffold-transition-duration) var(--scaffold-transition-easing),
+			grid-template-rows var(--scaffold-transition-duration) var(--scaffold-transition-easing);
+
+		@media (prefers-reduced-motion: reduce) {
+			transition: none;
+		}
+	}
+}
+
+/* =============================================================================
+ * SECTIONS (l2)
+ * ========================================================================== */
+
+/*
+ * HEADER — sticky at the top of the right column.
+ *
+ * `position: sticky` with `top: 0` pins the header to the viewport top
+ * when main content scrolls past. Because the header sits in the right
+ * column of the grid, it only spans the width of that column — the sidebar
+ * is not covered.
+ */
+@utility scaffold-header {
+	@layer scaffold.l2 {
+		grid-area: header;
+
+		position: sticky;
+		top: 0;
+		z-index: 10;
+
+		width: 100%;
+		height: var(--scaffold-header-height);
+
+		background-color: var(--color-surface);
+	}
+}
+
+/*
+ * FOOTER — static bottom cell of the right column.
+ */
+@utility scaffold-footer {
+	@layer scaffold.l2 {
+		grid-area: footer;
+
+		width: 100%;
+		height: var(--scaffold-footer-height);
+
+		background-color: var(--color-surface);
+	}
+}
+
+/*
+ * SIDEBAR — full-height left column.
+ *
+ * The sidebar's grid-area maps to all three rows (via the repeated
+ * 'sidebar' name in grid-template-areas), so it naturally spans full
+ * viewport height. `position: sticky` with `top: 0` keeps it pinned when
+ * main content scrolls.
+ *
+ * ⚠️  `top: 0` — NOT `top: var(--scaffold-header-height)`. The sidebar
+ *     starts at the viewport top, not below the header. The header sits
+ *     in the right column, to the right of the sidebar's top portion.
+ */
+@utility scaffold-sidebar {
+	@layer scaffold.l2 {
+		grid-area: sidebar;
+
+		position: sticky;
+		top: 0;
+		align-self: start;
+
+		width: var(--scaffold-sidebar-width);
+		height: 100dvh;
+
+		/* Independent scroll container — long nav lists scroll inside the
+		 * sidebar, not with main. */
+		overflow-y: auto;
+		overflow-x: hidden;
+
+		/* Elevated background to distinguish from main content. */
+		background-color: var(--color-surface-container);
+
+		/* Layered above main (for shadows / overflow visuals), below header
+		 * (so a sticky header stays on top when scrolled). */
+		z-index: 5;
+
+		transition: width var(--scaffold-transition-duration) var(--scaffold-transition-easing);
+
+		@media (prefers-reduced-motion: reduce) {
+			transition: none;
+		}
+	}
+}
+
+/*
+ * MAIN — scrollable content, middle row of the right column.
+ *
+ * `min-width: 0` and `min-height: 0` prevent overflowing content from
+ * pushing the grid tracks larger than intended (a common flex/grid gotcha).
+ */
+@utility scaffold-main {
+	@layer scaffold.l2 {
+		grid-area: main;
+
+		width: 100%;
+		height: 100%;
+		min-width: 0;
+
+		overflow-y: auto;
+		overflow-x: hidden;
+
+		scroll-padding-top: var(--scaffold-header-height);
+		scroll-behavior: smooth;
+		overscroll-behavior: contain;
+
+		@media (prefers-reduced-motion: reduce) {
+			scroll-behavior: auto;
+		}
+	}
+}
+
+/* -----------------------------------------------------------------------------
+ * Progressive enhancement: activate grid tracks when sections are present.
+ *
+ * Without these :has() rules, header/footer/sidebar tracks would remain 0
+ * and their sections would collapse. :has() detects the presence of each
+ * section and sizes the corresponding track.
+ *
+ * ⚠️  :has() supported in Chrome 105+, Firefox 121+, Safari 15.4+. For
+ *     older browsers, consumers can apply scaffold-with-* utilities below.
+ * -------------------------------------------------------------------------- */
+
+.scaffold:has(> .scaffold-header) {
+	@layer scaffold.l2 {
+		grid-template-rows: var(--scaffold-header-height) 1fr var(--scaffold-footer-height, 0);
+	}
+}
+
+.scaffold:has(> .scaffold-footer) {
+	@layer scaffold.l2 {
+		grid-template-rows:
+			var(--scaffold-header-height, 0)
+			1fr
+			var(--scaffold-footer-height);
+	}
+}
+
+.scaffold:has(> .scaffold-header):has(> .scaffold-footer) {
+	@layer scaffold.l2 {
+		grid-template-rows:
+			var(--scaffold-header-height)
+			1fr
+			var(--scaffold-footer-height);
+	}
+}
+
+.scaffold:has(> .scaffold-sidebar) {
+	@layer scaffold.l2 {
+		grid-template-columns: var(--scaffold-sidebar-width) 1fr;
+	}
+}
+
+/* -----------------------------------------------------------------------------
+ * Explicit opt-in utilities.
+ *
+ * Optional backup for :has()-less browsers, or to force a track to appear
+ * even without content (e.g., reserving space for a header that will render
+ * dynamically without shifting content).
+ * -------------------------------------------------------------------------- */
+
+@utility scaffold-with-header {
+	@layer scaffold.l2 {
+		grid-template-rows: var(--scaffold-header-height) 1fr var(--scaffold-footer-height, 0);
+	}
+}
+
+@utility scaffold-with-footer {
+	@layer scaffold.l2 {
+		grid-template-rows:
+			var(--scaffold-header-height, 0)
+			1fr
+			var(--scaffold-footer-height);
+	}
+}
+
+@utility scaffold-with-sidebar {
+	@layer scaffold.l2 {
+		grid-template-columns: var(--scaffold-sidebar-width) 1fr;
+	}
+}
+
+/* =============================================================================
+ * STATE (l1)
+ * ========================================================================== */
+
+/*
+ * COLLAPSED — imperative state, toggled by JS.
+ * Narrows the sidebar track and the sidebar element's own width.
+ * Animation comes from the transitions declared in foundation (l3).
+ */
+.scaffold.scaffold-sidebar-collapsed:has(> .scaffold-sidebar) {
+	@layer scaffold.l1 {
+		grid-template-columns: var(--scaffold-sidebar-collapsed-width) 1fr;
+
+		& > .scaffold-sidebar {
+			width: var(--scaffold-sidebar-collapsed-width);
+		}
+	}
+}
+
+/*
+ * COLLAPSIBLE — responsive state, driven by viewport width.
+ * Auto-collapses at or below the medium breakpoint (960px).
+ */
+.scaffold.scaffold-sidebar-collapsible:has(> .scaffold-sidebar) {
+	@layer scaffold.l1 {
+		@media (max-width: theme(--breakpoint-medium)) {
+			grid-template-columns: var(--scaffold-sidebar-collapsed-width) 1fr;
+
+			& > .scaffold-sidebar {
+				width: var(--scaffold-sidebar-collapsed-width);
+			}
+		}
+	}
+}

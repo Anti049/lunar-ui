@@ -1,7 +1,3 @@
-/*
- * Material 3 type scale → Tailwind utilities.
- * Each role becomes text-{role} (e.g. text-display-large, text-label-small).
- */
 @theme inline {
 	/* Display - Large */
 	--text-display-large: 57pt;

@@ -1,9 +1,6 @@
 /*
- * Tell Tailwind to scan lunar-ui's own Svelte components for class references,
- * so utility classes used only inside our components survive tree-shaking
- * in the consumer's build.
- *
- * Path is resolved relative to this file. After publish, this resolves to
- * dist/svelte/**, which is where svelte-package outputs our compiled components.
+ * Tell Tailwind to scan lunar-ui's own Svelte components for class references.
+ * Without this, utility classes used only inside our components would be
+ * tree-shaken out of consumer builds.
  */
 @source '../../svelte/**/*.{svelte,ts}';

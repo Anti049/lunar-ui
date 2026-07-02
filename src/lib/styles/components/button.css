@@ -2,7 +2,7 @@
  * BUTTON
  * =============================================================================
  *
- * Compose three orthogonal axes:
+ * Three orthogonal axes compose into every button:
  *   variant   — filled | tonal | elevated | outlined | text
  *   color     — primary | secondary | tertiary | error | surface
  *                | success | warning | info | alert
@@ -10,22 +10,31 @@
  *
  * Plus optional modifiers:
  *   shape     — button-square | button-circle
- *   slots     — button-leading | button-trailing (when used with icons)
+ *   slots     — button-leading | button-trailing (icon adjacency)
  *   state     — .selected | [disabled] | :disabled | .disabled
  *
  * Usage:
- *   <button class="button button-filled button-primary button-md">…</button>
+ *   <button class="button button-filled button-primary button-md">Save</button>
  *   <button class="button button-outlined button-error button-sm" disabled>…</button>
  *
- * Layers (per layers.css):
- *   l3 — foundation (base button styles, always-on)
- *   l2 — variants, colors, sizes, shapes (override foundation)
+ * Layer priority (declared in core/layers.css, LOW → HIGH):
+ *   l3 — foundation (base .button, always-on)
+ *   l2 — axes (variants, colors, sizes, shapes, icon slots)
  *   l1 — state (disabled, selected — override everything else)
+ *
+ * ⚠️  Colors are read from Tailwind's --color-* semantic tokens (--color-primary,
+ *     --color-on-primary, etc.), NOT --theme-color-* internal tokens. This means
+ *     the button correctly picks up scoped [data-theme] values IF AND ONLY IF
+ *     semantics.css's `:root, [data-theme]` propagation block is present. Those
+ *     --color-* tokens come from @theme inline (which inlines them into
+ *     utilities but emits the vars only at :root, computed once), so without the
+ *     propagation block re-declaring them per scope, buttons inside a scoped
+ *     <ThemeScope> render the root theme's colors.
  * ========================================================================== */
 
 /* -----------------------------------------------------------------------------
- * Width reset for ancestor selectors using w-full etc.
- * Plain selector — not a utility, not meant for users to apply directly.
+ * :where reset for width utilities from ancestors.
+ * Zero specificity so consumers can override with `w-full`, `w-auto`, etc.
  * -------------------------------------------------------------------------- */
 :where(.button) {
 	@layer button.l3 {
@@ -34,8 +43,8 @@
 }
 
 /* -----------------------------------------------------------------------------
- * Custom variant: selected
- * Lets you write `selected:button-primary`, `selected:bg-primary-container`, etc.
+ * Custom variant: .selected
+ * Lets consumers write `selected:bg-primary-container` and similar.
  * -------------------------------------------------------------------------- */
 @custom-variant selected {
 	&:where(.selected) {
@@ -50,13 +59,17 @@
 
 @utility button {
 	@layer button.l3 {
-		@apply interactive inline-flex h-fit min-h-fit w-fit min-w-fit items-center justify-center rounded-sm border-0 border-transparent text-center align-middle font-medium ring-0 outline-offset-2 select-none focus-visible:outline-2;
-		/* Default size is md; can be overridden by another size utility */
+		/* Layout + typography defaults */
+		@apply interactive inline-flex h-fit min-h-fit w-fit min-w-fit items-center justify-center rounded-sm border-0 border-transparent text-center align-middle font-medium ring-0 outline-offset-2 select-none;
+
+		/* Default size is md; overridable by any button-{size} utility */
 		@apply button-md;
-		/* Outline color is picked by the color variant below;
-       defaults to on-surface if no color variant is present */
+
+		/* Outline color falls back to on-surface when no color variant is set.
+		 * Color variants override this via --button-outline-color. */
 		outline-color: var(--button-outline-color, var(--color-on-surface));
-		/* Smooth transitions for state changes */
+
+		/* Smooth state transitions */
 		transition:
 			background-color 150ms ease,
 			color 150ms ease,
@@ -67,14 +80,14 @@
 
 /* =============================================================================
  * STATE (l1)
- * Overrides everything else when active.
+ * Highest per-component priority. Wins over variants, colors, sizes, shapes.
  * ========================================================================== */
 
 /*
- * Disabled — covers all three forms:
- *   <button class="button disabled">      (manual class)
- *   <button class="button" disabled>      (HTML attribute)
- *   <button class="button" :disabled>     (CSS pseudo via real <button disabled>)
+ * Disabled — covers all three ways to express it:
+ *   <button class="button disabled">        (manual class)
+ *   <button class="button" disabled>        (HTML attribute)
+ *   <button class="button">…</button>       when :disabled matches a real <button disabled>
  */
 .button-disabled,
 .button.disabled,
@@ -82,31 +95,38 @@
 .button:disabled {
 	@layer button.l1 {
 		@apply cursor-not-allowed border-on-surface/12 text-on-surface/38 before:bg-transparent;
-		/* Body fill is the same disabled-tint UNLESS the variant is .button-text */
+
+		/* Body fill is the disabled tint UNLESS this is a text button (text buttons
+		 * don't have a fill by default, so filling them here would be wrong).
+		 * Exception: selected text buttons DO get filled — the selection is
+		 * conceptually "the fill." */
 		&:not(.button-text),
 		&.button-text.selected {
 			@apply bg-on-surface/10 selected:bg-on-surface/20;
 		}
-		/* No elevation when disabled */
+
+		/* Kill elevation when disabled — otherwise elevated buttons look active */
 		box-shadow: none;
 	}
 }
 
 /* =============================================================================
  * VARIANTS (l2)
- * Each variant defines its OWN colors using CSS variables that color utilities
- * (below) set. This decouples "shape" from "hue".
+ *
+ * Each variant defines its OWN colors using CSS variables that the color
+ * utilities (below) set. This decouples "shape/fill treatment" from "hue"
+ * so we don't repeat variant logic per color.
  *
  * Variables consumed by variants:
- *   --button-color           main themed color
- *   --button-on-color        contrast color (text on top of --button-color)
- *   --button-container       container variant of the color
- *   --button-on-container    contrast color for the container
+ *   --button-color             main themed color
+ *   --button-on-color          contrast color (text on top of --button-color)
+ *   --button-container         container variant of the color
+ *   --button-on-container      contrast color for the container
  * ========================================================================== */
 
 /*
  * FILLED — solid background using the chosen color.
- * The Material 3 default; what most people mean by "a button".
+ * The Material 3 default; what most people mean by "a button."
  */
 @utility button-filled {
 	@layer button.l2 {
@@ -147,6 +167,7 @@
 
 /*
  * ELEVATED — surface-container background with elevation, colored text.
+ * Adds elevation-1 when enabled, drops to elevation-0 when selected.
  */
 @utility button-elevated {
 	@layer button.l2 {
@@ -164,6 +185,7 @@
 
 /*
  * OUTLINED — transparent background, colored border + text.
+ * Border uses a color-mix to soften; on selected, fills with the color.
  */
 @utility button-outlined {
 	@layer button.l2 {
@@ -182,7 +204,7 @@
 
 /*
  * TEXT — no background, no border, just colored text.
- * Lowest visual weight.
+ * Lowest visual weight; use for tertiary actions inline with text.
  */
 @utility button-text {
 	@layer button.l2 {
@@ -198,9 +220,16 @@
 
 /* =============================================================================
  * COLORS (l2)
+ *
  * Each color utility sets the four CSS variables that variants consume.
  * Variants pick those variables up automatically — no need to repeat variant
  * logic per color.
+ *
+ * ⚠️  Reads from --color-* (Tailwind semantic tokens), NOT --theme-color-*.
+ *     This is what makes scoped [data-theme] work: --color-primary is
+ *     re-declared inside [data-theme] scopes by semantics.css's
+ *     `:root, [data-theme]` propagation block, so nested scopes correctly
+ *     resolve to the scope's palette.
  * ========================================================================== */
 
 @utility button-primary {
@@ -295,7 +324,7 @@
 
 /* =============================================================================
  * SIZES (l2)
- * Padding, gap, font size, icon size.
+ * Padding, gap, font size, icon size. Each is independent of variant/color.
  * ========================================================================== */
 
 @utility button-xs {
@@ -350,7 +379,6 @@
 
 @utility button-square {
 	@layer button.l2 {
-		/* Equal padding on all sides so the button is genuinely square */
 		aspect-ratio: 1 / 1;
 		padding-left: 0;
 		padding-right: 0;
@@ -367,14 +395,17 @@
 }
 
 /* =============================================================================
- * ICON SLOT ADJUSTMENTS (l2)
+ * ICON SLOTS (l2)
  *
  * When a button has a leading or trailing icon, reduce padding on that side
  * so the icon sits closer to the edge.
  *
- * Two ways to opt in:
- *   1. Add `.button-leading` / `.button-trailing` explicitly (preferred for SSR)
- *   2. Rely on :has() — works automatically for hand-written HTML
+ * Two opt-in mechanisms:
+ *   1. Explicit `.button-leading` / `.button-trailing` classes
+ *      (preferred for SSR + Svelte components — deterministic)
+ *   2. :has() progressive enhancement — auto-detects SVG icons in hand-written
+ *      HTML. Skipped when the icon is the only child (icon-only button)
+ *      or when a .sr-only sibling exists (accessible label pattern).
  * ========================================================================== */
 
 @utility button-leading {
@@ -418,7 +449,7 @@
 }
 
 /* Progressive enhancement: auto-detect SVG icons in hand-written HTML.
-   Skip if the only child is an SVG (icon-only button) or if the sibling is .sr-only. */
+ * Skip if the only child is an SVG (icon-only) or a .sr-only exists. */
 .button:has(> svg:first-child:not(:only-child)):not(:has(> .sr-only)) {
 	@layer button.l2 {
 		&.button-xs {

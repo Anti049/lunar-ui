@@ -1,26 +1,23 @@
 /*
- * Custom cascade layer order.
+ * Custom cascade layers.
  *
  * Tailwind v4 emits `@layer theme, base, components, utilities;` when its
- * import runs. Layer ordering follows the spec rule that the FIRST mention
- * of a layer name locks its position; new names appended after get higher
- * priority than the locked layers.
+ * import runs. Per the spec, the FIRST mention of a layer name locks its
+ * position; names appended afterward get higher priority than the locked ones.
  *
- * IMPORTANT: in CSS, LATER in an @layer list = HIGHER priority.
+ * IMPORTANT: in CSS, LATER in an @layer list = HIGHER priority — the opposite
+ * of most "priority list" conventions.
  *
- * So we declare our new layer names from LOW → HIGH priority:
+ * Colors are NOT layered: the mode mapper (colors/modes/semantic.css) and every
+ * theme file (hand-written and generate-theme.ts output alike) are un-layered
+ * and resolve by selector specificity + source order. Ramp tones
+ * (`--theme-color-*-40`) and semantic tokens (`--theme-color-primary`) use
+ * disjoint variable names, so they never collide.
  *
- *   mapping  — mode mapper (light/dark → semantic tokens via ramp steps)
- *   palette  — explicit per-theme overrides (Catppuccin flavors, user themes)
- *
- * Final effective priority (lowest → highest):
- *   theme < base < components < utilities < mapping < palette
- *
- * A theme file declaring `--theme-color-primary: oklch(…)` in @layer palette
- * therefore always wins over @layer mapping's ramp-step resolution.
+ * The only custom layers are per-component sub-layers, nested under Tailwind's
+ * `components` layer so they sit below utilities (e.g. `bg-red-500` still beats
+ * `.button`) but above `base`.
  */
-@layer mapping, palette;
-
 @layer components {
 	/*
 	 * Per-component cascade sub-layers, declared LOW → HIGH priority.
@@ -28,9 +25,9 @@
 	 *   l2 = size/variant/color adjustments (middle priority)
 	 *   l1 = state overrides (highest priority — disabled, pressed, dragged)
 	 *
-	 * Nested under Tailwind's `components` layer so they sit below utilities
-	 * (so `bg-red-500` can still override `.button`) but above the `base` layer.
+	 * Add a new line every time you add a new component.
 	 */
 	@layer button.l3, button.l2, button.l1;
+	@layer scaffold.l3, scaffold.l2, scaffold.l1;
 	@layer scrollbar.l3, scrollbar.l2, scrollbar.l1;
 }

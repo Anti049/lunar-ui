@@ -5,9 +5,7 @@
  *   @import 'tailwindcss';
  *   @import '@anti049/lunar-ui';
  *
- * Includes ALL themes by default. To skip the theme bundle and pick your own:
- *   @import '@anti049/lunar-ui/no-themes';
- *   @import '@anti049/lunar-ui/themes/default';
+ * Includes ALL themes by default.
  */
 
 @import './core/index.css';

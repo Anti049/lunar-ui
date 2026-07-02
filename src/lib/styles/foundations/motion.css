@@ -1,0 +1,23 @@
+/*
+ * Respect the user's `prefers-reduced-motion` setting.
+ *
+ * lunar-ui ships opinionated Material 3 motion — most notably the looping
+ * `--animate-alert` pulse and the `.interactive` state-layer transitions. When
+ * a user requests reduced motion we collapse animations/transitions to a
+ * near-instant, non-looping fallback rather than removing them outright
+ * (per WCAG 2.3.3 / Material guidance: reduce, don't eliminate).
+ *
+ * `!important` is required to override Tailwind motion utilities
+ * (`transition-all`, `animate-alert`, …). It only applies inside the media
+ * query, so it never affects users who haven't opted in.
+ */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	::before,
+	::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}

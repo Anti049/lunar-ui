@@ -1,16 +1,16 @@
 /*
- * Internal @reference target for component <style> blocks.
+ * Internal @reference target for consumer <style> blocks.
  *
- * Use inside .svelte files when you need to @apply lunar-ui's custom utilities:
+ * Consumers can @apply lunar-ui utilities inside component styles without
+ * duplicating the whole library into every component:
  *
  *   <style>
  *     @reference '@anti049/lunar-ui/reference';
- *     .foo { @apply primary elevation-1 rounded-card; }
+ *     .my-thing { @apply primary elevation-1 rounded-card; }
  *   </style>
  *
- * @reference loads the Tailwind + lunar-ui context WITHOUT emitting any CSS,
- * so component @apply works without duplicating the entire design system into
- * every component bundle.
+ * @reference loads Tailwind + lunar-ui context WITHOUT emitting any CSS.
+ * Only exposed via the "./reference" subpath — NOT imported from index.css.
  */
 @import 'tailwindcss';
 @import '../index.css';

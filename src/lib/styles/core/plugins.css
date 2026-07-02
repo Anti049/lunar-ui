@@ -1,7 +1,6 @@
 /*
- * Tailwind plugins that lunar-ui's CSS depends on.
- * These propagate to the consumer transitively — they don't need to install
- * or configure these plugins themselves.
+ * Tailwind v4 plugins bundled with lunar-ui.
+ * Consumers get these transitively — they don't need to install or @plugin them.
  */
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';

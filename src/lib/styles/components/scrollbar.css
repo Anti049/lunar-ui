@@ -1,59 +1,131 @@
-/*
- * Inspired by tailwind-scrollbar (MIT).
- * Reduced to a single themed scrollbar that always uses the current theme's
- * primary color. No color variants, no arbitrary values.
+/* =============================================================================
+ * SCROLLBAR
+ * =============================================================================
  *
- * Usage:
- *   <div class="scrollbar overflow-auto">…</div>
- *   <div class="scrollbar scrollbar-thin overflow-auto">…</div>
- *   <div class="scrollbar-none overflow-auto">…</div>
- */
+ * Themed scrollbar utilities. Applies to any scrollable element (overflow:
+ * auto or scroll). Uses Material 3's on-surface neutral for the thumb by
+ * default, with the primary color as an opt-in accent.
+ *
+ * Utilities:
+ *   .scrollbar         — full-featured themed scrollbar (12px on WebKit)
+ *   .scrollbar-thin    — narrower variant (8px on WebKit, `thin` on Firefox)
+ *   .scrollbar-none    — hides scrollbar entirely (content still scrollable)
+ *   .scrollbar-accent  — opt-in brand-color thumb
+ *
+ * Sizing/color variables (override on any ancestor):
+ *   --scrollbar-thumb-color         thumb fill color
+ *   --scrollbar-thumb-color-hover   thumb fill on hover
+ *   --scrollbar-track-color         track fill color (transparent by default)
+ *   --scrollbar-width               width of the scrollbar (12px default)
+ *   --scrollbar-thumb-radius        border radius of the thumb
+ *
+ * Layer priority (declared in core/layers.css, LOW → HIGH):
+ *   l3 — foundation (base .scrollbar with default sizing/colors)
+ *   l2 — variants (thin, none, accent)
+ *   l1 — state (none currently, reserved for future e.g. focus/scrolling)
+ *
+ * ⚠️  This uses BOTH the standard `scrollbar-*` properties (Firefox, and
+ *     Chrome 121+/Safari 18+) AND the older `-webkit-scrollbar-*` pseudo-
+ *     elements (Chrome/Safari all versions). Some duplication is required
+ *     for cross-browser support.
+ *
+ * ⚠️  `scrollbar-color` cannot be transitioned. Hover effects on the thumb
+ *     work via the -webkit-scrollbar-thumb:hover pseudo (Chromium/WebKit);
+ *     Firefox uses `scrollbar-color` with no hover state.
+ *
+ * Inspired by tailwind-scrollbar (MIT). Copyright attribution in
+ * THIRD_PARTY_NOTICES.md.
+ * ========================================================================== */
+
+/* =============================================================================
+ * FOUNDATION (l3)
+ * ========================================================================== */
 
 @utility scrollbar {
 	@layer scrollbar.l3 {
-		/* Firefox + standardized */
-		scrollbar-width: auto;
-		scrollbar-color: var(--color-primary) transparent;
+		/* ---------------------------------------------------------------------
+		 * Sizing + color variables. Neutral by default (Material 3 on-surface),
+		 * with theme-aware opacity via color-mix.
+		 * ------------------------------------------------------------------ */
+		--scrollbar-thumb-color: color-mix(in srgb, var(--color-on-surface) 30%, transparent);
+		--scrollbar-thumb-color-hover: color-mix(in srgb, var(--color-on-surface) 55%, transparent);
+		--scrollbar-track-color: transparent;
+		--scrollbar-width: 12px;
+		--scrollbar-thumb-radius: 9999px;
 
-		/* WebKit fallback for finer control + hover styling */
+		/* ---------------------------------------------------------------------
+		 * Firefox + modern Chromium: use the standard properties.
+		 * ------------------------------------------------------------------ */
+		scrollbar-width: auto;
+		scrollbar-color: var(--scrollbar-thumb-color) var(--scrollbar-track-color);
+
+		/* ---------------------------------------------------------------------
+		 * WebKit/Chromium legacy: use the pseudo-element approach for finer
+		 * control (border, radius, hover). Duplicates some Firefox properties
+		 * but they're independent — no conflict.
+		 * ------------------------------------------------------------------ */
 		&::-webkit-scrollbar {
-			width: 12px;
-			height: 12px;
+			width: var(--scrollbar-width);
+			height: var(--scrollbar-width);
 		}
+
 		&::-webkit-scrollbar-track {
-			background: transparent;
+			background: var(--scrollbar-track-color);
 		}
+
 		&::-webkit-scrollbar-thumb {
-			background: var(--color-primary);
-			border-radius: 9999px;
-			/* Inset border creates breathing room between thumb and track edge */
-			border: 3px solid transparent;
+			background: var(--scrollbar-thumb-color);
+			border-radius: var(--scrollbar-thumb-radius);
+
+			/* Inset border creates a "gap" between thumb and edge — a
+			 * classic OS scrollbar look. Border color must match the track
+			 * so it blends visually. */
+			border: 3px solid var(--scrollbar-track-color);
 			background-clip: padding-box;
 		}
+
 		&::-webkit-scrollbar-thumb:hover {
-			background: var(--color-primary-container);
+			background: var(--scrollbar-thumb-color-hover);
 			background-clip: padding-box;
 		}
+
+		/* Corner square where horizontal and vertical scrollbars meet */
 		&::-webkit-scrollbar-corner {
-			background: transparent;
+			background: var(--scrollbar-track-color);
 		}
 	}
 }
 
+/* =============================================================================
+ * VARIANTS (l2)
+ * ========================================================================== */
+
+/*
+ * THIN — narrower variant (8px WebKit width, Firefox `thin`).
+ * Same colors, just smaller.
+ */
 @utility scrollbar-thin {
 	@layer scrollbar.l2 {
+		--scrollbar-width: 8px;
+
 		scrollbar-width: thin;
 
 		&::-webkit-scrollbar {
-			width: 8px;
-			height: 8px;
+			width: var(--scrollbar-width);
+			height: var(--scrollbar-width);
 		}
+
 		&::-webkit-scrollbar-thumb {
 			border-width: 2px;
 		}
 	}
 }
 
+/*
+ * NONE — visually hides the scrollbar. Content still scrolls (via keyboard,
+ * touch, or JS-controlled scroll methods). Useful for chromeless carousels
+ * or interior scroll regions that shouldn't advertise themselves.
+ */
 @utility scrollbar-none {
 	@layer scrollbar.l2 {
 		scrollbar-width: none;
@@ -61,5 +133,20 @@
 		&::-webkit-scrollbar {
 			display: none;
 		}
+	}
+}
+
+/*
+ * ACCENT — opt-in brand-color thumb. Applies primary color at reduced
+ * opacity so it doesn't dominate the layout. Pair with .scrollbar or
+ * .scrollbar-thin.
+ *
+ * Reads --color-primary from Tailwind's semantic tokens — respects
+ * scoped [data-theme] via semantics.css's propagation block.
+ */
+@utility scrollbar-accent {
+	@layer scrollbar.l2 {
+		--scrollbar-thumb-color: color-mix(in srgb, var(--color-primary) 50%, transparent);
+		--scrollbar-thumb-color-hover: color-mix(in srgb, var(--color-primary) 80%, transparent);
 	}
 }

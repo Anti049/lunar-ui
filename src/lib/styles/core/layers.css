@@ -1,27 +1,36 @@
 /*
- * TOP-LEVEL cascade layer order.
- * Earlier in the list = HIGHER priority.
+ * Custom cascade layer order.
  *
- *   theme   — explicit theme overrides (Catppuccin flavors, user themes)
- *   mapping — mode mapper (light/dark → semantic tokens via ramp steps)
- *   base    — everything else (palette, foundations, components)
+ * Tailwind v4 emits `@layer theme, base, components, utilities;` when its
+ * import runs. Layer ordering follows the spec rule that the FIRST mention
+ * of a layer name locks its position; new names appended after get higher
+ * priority than the locked layers.
  *
- * This means a theme file declaring `--theme-color-primary: oklch(…)` always
- * wins over the mode mapper's `--theme-color-primary: var(--theme-color-primary-80)`
- * for that scope, regardless of selector specificity or source order.
+ * IMPORTANT: in CSS, LATER in an @layer list = HIGHER priority.
  *
- * Per-component cascade layers stay NESTED inside `base`, so component
- * styles always sit below theme + mapping.
+ * So we declare our new layer names from LOW → HIGH priority:
+ *
+ *   mapping  — mode mapper (light/dark → semantic tokens via ramp steps)
+ *   palette  — explicit per-theme overrides (Catppuccin flavors, user themes)
+ *
+ * Final effective priority (lowest → highest):
+ *   theme < base < components < utilities < mapping < palette
+ *
+ * A theme file declaring `--theme-color-primary: oklch(…)` in @layer palette
+ * therefore always wins over @layer mapping's ramp-step resolution.
  */
 @layer mapping, palette;
 
 @layer components {
 	/*
-   * Per-component layers. Earlier in each list = HIGHER priority.
-   *   l1 = state overrides (disabled, pressed, dragged)
-   *   l2 = size/variant/color adjustments
-   *   l3 = foundational base
-   */
-	@layer button.l1, button.l2, button.l3;
-	@layer scrollbar.l1, scrollbar.l2, scrollbar.l3;
+	 * Per-component cascade sub-layers, declared LOW → HIGH priority.
+	 *   l3 = foundational base (lowest priority — overridable)
+	 *   l2 = size/variant/color adjustments (middle priority)
+	 *   l1 = state overrides (highest priority — disabled, pressed, dragged)
+	 *
+	 * Nested under Tailwind's `components` layer so they sit below utilities
+	 * (so `bg-red-500` can still override `.button`) but above the `base` layer.
+	 */
+	@layer button.l3, button.l2, button.l1;
+	@layer scrollbar.l3, scrollbar.l2, scrollbar.l1;
 }

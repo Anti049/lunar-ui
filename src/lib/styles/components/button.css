@@ -81,7 +81,7 @@
 .button[disabled],
 .button:disabled {
 	@layer button.l1 {
-		@apply border-on-surface/12 text-on-surface/38 cursor-not-allowed before:bg-transparent;
+		@apply cursor-not-allowed border-on-surface/12 text-on-surface/38 before:bg-transparent;
 		/* Body fill is the same disabled-tint UNLESS the variant is .button-text */
 		&:not(.button-text),
 		&.button-text.selected {
@@ -300,7 +300,7 @@
 
 @utility button-xs {
 	@layer button.l2 {
-		@apply text-label-small gap-1 px-2 py-1;
+		@apply gap-1 px-2 py-1 text-label-small;
 		& svg {
 			@apply size-4;
 		}
@@ -309,7 +309,7 @@
 
 @utility button-sm {
 	@layer button.l2 {
-		@apply text-label-small gap-1.5 px-2.5 py-1.5;
+		@apply gap-1.5 px-2.5 py-1.5 text-label-small;
 		& svg {
 			@apply size-5;
 		}
@@ -318,7 +318,7 @@
 
 @utility button-md {
 	@layer button.l2 {
-		@apply text-label-medium gap-1.5 px-3 py-1.5;
+		@apply gap-1.5 px-3 py-1.5 text-label-medium;
 		& svg {
 			@apply size-6;
 		}
@@ -327,7 +327,7 @@
 
 @utility button-lg {
 	@layer button.l2 {
-		@apply text-label-large gap-2 px-5 py-3;
+		@apply gap-2 px-5 py-3 text-label-large;
 		& svg {
 			@apply size-8;
 		}
@@ -336,7 +336,7 @@
 
 @utility button-xl {
 	@layer button.l2 {
-		@apply text-label-large gap-3 px-6 py-4;
+		@apply gap-3 px-6 py-4 text-label-large;
 		& svg {
 			@apply size-8;
 		}

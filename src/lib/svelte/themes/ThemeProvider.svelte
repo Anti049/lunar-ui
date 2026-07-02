@@ -1,0 +1,59 @@
+<script lang="ts">
+	import type { Snippet } from 'svelte';
+	import { onMount } from 'svelte';
+	import { ModeWatcher } from 'mode-watcher';
+	import {
+		lunarTheme,
+		syncDataThemeAttribute,
+		type ThemeName,
+		type Mode,
+		type FlavorOverride
+	} from './theme.svelte';
+
+	interface Props {
+		initialTheme?: ThemeName;
+		initialMode?: Mode;
+		initialFlavor?: FlavorOverride;
+		children: Snippet;
+	}
+
+	let {
+		initialTheme = 'default',
+		initialMode = 'system',
+		initialFlavor = null,
+		children
+	}: Props = $props();
+
+	// Keep <html data-theme="…"> in sync with theme + flavor composition.
+	// mode-watcher writes just the theme name; we compose theme + flavor.
+	syncDataThemeAttribute();
+
+	// Apply initial flavor override (Catppuccin only). Runs once after mount
+	// so we don't fight the FOUC script or mode-watcher's own initialization.
+	// If the user has a persisted flavor in localStorage, that wins over
+	// initialFlavor — matching how mode-watcher's own initialMode + defaultMode work.
+	onMount(() => {
+		if (initialFlavor !== null && lunarTheme.flavor === null) {
+			lunarTheme.setFlavor(initialFlavor);
+		}
+	});
+</script>
+
+<!--
+  ModeWatcher renders no visible output. It's a state carrier that:
+    - Listens to matchMedia('(prefers-color-scheme: dark)')
+    - Persists mode and theme to localStorage
+    - Writes .dark/.light classes and color-scheme:… inline style to <html>
+    - Handles FOUC prevention when combined with the app.html script
+-->
+<ModeWatcher
+	defaultMode={initialMode}
+	defaultTheme={initialTheme === 'default' ? '' : initialTheme}
+	darkClassNames={['dark']}
+	lightClassNames={['light']}
+	disableTransitions
+	modeStorageKey="lunar-ui:mode"
+	themeStorageKey="lunar-ui:theme"
+/>
+
+{@render children()}

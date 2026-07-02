@@ -1,5 +1,5 @@
 <script>
-	// Toggle these by hand for now to verify each theme renders
+	import { setTheme, setMode } from 'mode-watcher';
 </script>
 
 <div class="p-8">
@@ -22,6 +22,29 @@
 		<div class="bg-surface text-on-surface p-6 rounded col-span-2">
 			<p class="font-bold">bg-surface (page background)</p>
 			<p class="text-sm opacity-75">Catppuccin Mocha: nearly black with blue tint</p>
+		</div>
+
+		<div class="flex flex-row gap-2 w-full">
+			<button class="button button-tonal button-secondary" onclick={() => setMode('light')}>
+				Light Mode
+			</button>
+			<button class="button button-tonal button-secondary" onclick={() => setMode('dark')}>
+				Dark Mode
+			</button>
+			<button class="button button-tonal button-secondary" onclick={() => setMode('system')}>
+				System Mode
+			</button>
+		</div>
+
+		<div class="flex flex-row gap-2 w-full">
+			<button
+				class="button button-tonal button-primary button-lg"
+				onclick={() => setTheme('catppuccin')}>Catppuccin</button
+			>
+			<button
+				class="button button-tonal button-primary button-lg"
+				onclick={() => setTheme('default')}>Default</button
+			>
 		</div>
 	</div>
 </div>

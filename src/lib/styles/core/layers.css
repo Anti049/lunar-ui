@@ -1,0 +1,20 @@
+/* 
+	Layers
+
+	Defines cascade layers for component creation.
+	Layers are used to control the cascade order of component styles, 
+	allowing for more predictable styling and easier overrides.
+*/
+@layer components {
+	/* 
+		Component styles go here.
+		- l3: Foundational styles (lowest priority)
+		- l2: Size/Variant/Color adjustments (medium priority)
+		- l1: State overrides (highest priority - disabled, hover, focus, active, etc.)
+
+		Add a new line for each new component
+	*/
+	@layer 	button.l3, 
+			button.l2, 
+			button.l1;
+}

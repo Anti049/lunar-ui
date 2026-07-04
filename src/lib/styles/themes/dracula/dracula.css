@@ -1,0 +1,75 @@
+/* 
+	Dracula Theme (Dark)
+
+	Dracula is a dark theme with a focus on readability and contrast.
+	It is designed to be easy on the eyes and to reduce eye strain.
+*/
+[data-theme='dracula'].dark {
+	/* Primary */
+	--theme-color-primary: #bd93f9;
+	--theme-color-on-primary: #302940;
+	--theme-color-primary-container: #4b3f63;
+	--theme-color-on-primary-container: #ebdffd;
+
+	/* Secondary */
+	--theme-color-secondary: #cdd0e4;
+	--theme-color-on-secondary: #33353c;
+	--theme-color-secondary-container: #50515d;
+	--theme-color-on-secondary-container: #f0f1f7;
+
+	/* Tertiary */
+	--theme-color-tertiary: #ff9fd6;
+	--theme-color-on-tertiary: #3d2b39;
+	--theme-color-tertiary-container: #5f4359;
+	--theme-color-on-tertiary-container: #ffe2f3;
+
+	/* Error */
+	--theme-color-error: #ff7b7b;
+	--theme-color-on-error: #3d2427;
+	--theme-color-error-container: #5f383d;
+	--theme-color-on-error-container: #ffd7d7;
+
+	/* Success */
+	--theme-color-success: #73fc96;
+	--theme-color-on-success: #213e2c;
+	--theme-color-success-container: #355e45;
+	--theme-color-on-success-container: #d5fee0;
+
+	/* Warning */
+	--theme-color-warning: #ffb86c;
+	--theme-color-on-warning: #3d3024;
+	--theme-color-warning-container: #5f4a39;
+	--theme-color-on-warning-container: #ffead3;
+
+	/* Alert */
+	--theme-color-alert: #f1fa8c;
+	--theme-color-on-alert: #3b3d2a;
+	--theme-color-alert-container: #5b5e42;
+	--theme-color-on-alert-container: #fbfedd;
+
+	/* Info */
+	--theme-color-info: #aff0fe;
+	--theme-color-on-info: #2d3b41;
+	--theme-color-info-container: #475b65;
+	--theme-color-on-info-container: #e7fbff;
+
+	/* Surface */
+	--theme-color-surface-dim: #1a1b23;
+	--theme-color-surface: #1a1b23;
+	--theme-color-surface-bright: #727690;
+	--theme-color-surface-container-lowest: #1e1f23;
+	--theme-color-surface-container-low: #282a36;
+	--theme-color-surface-container: #323443;
+	--theme-color-surface-container-high: #44475a;
+	--theme-color-surface-container-highest: #595d75;
+	--theme-color-on-surface: #dfe1ed;
+	--theme-color-on-surface-variant: #bdc3d6;
+
+	/* Outline */
+	--theme-color-outline: var(--theme-color-on-surface);
+	--theme-color-outline-variant: var(--theme-color-on-surface-variant);
+
+	/* Shadow/Scrim */
+	--theme-color-shadow: oklch(0 0 0);
+	--theme-color-scrim: oklch(0 0 0);
+}

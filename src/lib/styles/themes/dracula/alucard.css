@@ -1,0 +1,76 @@
+/* 
+	Alucard Theme (Light)
+
+	Alucard is a light theme with a focus on readability and contrast.
+	It is designed to be easy on the eyes and to reduce eye strain.
+*/
+[data-theme='alucard'],
+[data-theme='dracula'].light {
+	/* Primary */
+	--theme-color-primary: #644ac9;
+	--theme-color-on-primary: #cfcfde;
+	--theme-color-primary-container: #b3abdb;
+	--theme-color-on-primary-container: #281e50;
+
+	/* Secondary */
+	--theme-color-secondary: #444472;
+	--theme-color-on-secondary: #cfcfde;
+	--theme-color-secondary-container: #aaaac0;
+	--theme-color-on-secondary-container: #1b1b2e;
+
+	/* Tertiary */
+	--theme-color-tertiary: #a3144d;
+	--theme-color-on-tertiary: #cfcfde;
+	--theme-color-tertiary-container: #c69bb5;
+	--theme-color-on-tertiary-container: #41081f;
+
+	/* Error */
+	--theme-color-error: #cb3a2a;
+	--theme-color-on-error: #cfcfde;
+	--theme-color-error-container: #d2a6ab;
+	--theme-color-on-error-container: #511711;
+
+	/* Success */
+	--theme-color-success: #14710a;
+	--theme-color-on-success: #cfcfde;
+	--theme-color-success-container: #9bb7a1;
+	--theme-color-on-success-container: #082d04;
+
+	/* Warning */
+	--theme-color-warning: #a34d14;
+	--theme-color-on-warning: #cfcfde;
+	--theme-color-warning-container: #c6aca4;
+	--theme-color-on-warning-container: #411f08;
+
+	/* Alert */
+	--theme-color-alert: #846e15;
+	--theme-color-on-alert: #cfcfde;
+	--theme-color-alert-container: #bdb6a4;
+	--theme-color-on-alert-container: #352c08;
+
+	/* Info */
+	--theme-color-info: #036a96;
+	--theme-color-on-info: #cfcfde;
+	--theme-color-info-container: #96b5cb;
+	--theme-color-on-info-container: #012a3c;
+
+	/* Surface */
+	--theme-color-surface-dim: #7f7faf;
+	--theme-color-surface: #d5d5e2;
+	--theme-color-surface-bright: #d5d5e2;
+	--theme-color-surface-container-lowest: #cfcfde;
+	--theme-color-surface-container-low: #dedee8;
+	--theme-color-surface-container: #b1b1ca;
+	--theme-color-surface-container-high: #9696b7;
+	--theme-color-surface-container-highest: #8989b3;
+	--theme-color-on-surface: #2f2f51;
+	--theme-color-on-surface-variant: #444472;
+
+	/* Outline */
+	--theme-color-outline: var(--theme-color-on-surface);
+	--theme-color-outline-variant: var(--theme-color-on-surface-variant);
+
+	/* Shadow/Scrim */
+	--theme-color-shadow: oklch(0 0 0);
+	--theme-color-scrim: oklch(0 0 0);
+}

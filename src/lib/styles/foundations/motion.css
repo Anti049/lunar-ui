@@ -1,0 +1,28 @@
+/* 
+	Motion System
+
+	Respects user preferences for reduced motion.
+*/
+
+/* Standard Motion */
+@media (prefers-reduced-motion: no-preference) {
+	*,
+	::before,
+	::after {
+		transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+		transition-duration: 200ms;
+		transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	}
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	::before,
+	::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}

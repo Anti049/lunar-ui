@@ -1,0 +1,9 @@
+/* 
+	Font Imports
+
+	Imported from https://fontsource.org/ and used via the @fontsource-variable package.
+*/
+
+@import '@fontsource-variable/plus-jakarta-sans/wght.css';
+@import '@fontsource-variable/inter/wght.css';
+@import '@fontsource-variable/fira-code/wght.css';

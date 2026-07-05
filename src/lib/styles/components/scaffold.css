@@ -3,3 +3,135 @@
 
 	TODO: Add styles for the scaffold component
 */
+
+@custom-variant sidebar-expanded {
+	&:where(
+		.scaffold[data-sidebar-state='expanded'] *,
+		.scaffold[data-sidebar-state='collapsed']:has(> .scaffold-sidebar:hover) *
+	) {
+		@slot;
+	}
+}
+
+@custom-variant sidebar-collapsed {
+	&:where(.scaffold[data-sidebar-state='collapsed']:not(:has(> .scaffold-sidebar:hover)) *) {
+		@slot;
+	}
+}
+
+@custom-variant sidebar-hidden {
+	&:where(.scaffold[data-sidebar-state='hidden'] *) {
+		@slot;
+	}
+}
+
+@custom-variant sidebar-not-expanded {
+	&:where(
+		.scaffold[data-sidebar-state='collapsed']:not(:has(> .scaffold-sidebar:hover)) *,
+		.scaffold[data-sidebar-state='hidden'] *
+	) {
+		@slot;
+	}
+}
+
+/* Foundation */
+@utility scaffold {
+	@layer scaffold.l3 {
+		--scaffold-header-height: 5rem;
+		--scaffold-sidebar-width: 16rem;
+		--scaffold-sidebar-collapsed-width: 4rem;
+		--scaffold-transition-duration: var(--duration-short-4);
+		--scaffold-transition-easing: var(--ease-standard);
+
+		@apply grid h-dvh w-full grid-cols-[0_1fr] grid-rows-[0_1fr] overflow-hidden surface;
+
+		grid-template-areas:
+			'sidebar header'
+			'sidebar main';
+		transition:
+			grid-template-columns var(--scaffold-transition-duration) var(--scaffold-transition-easing),
+			grid-template-rows var(--scaffold-transition-duration) var(--scaffold-transition-easing);
+	}
+}
+
+/* Areas */
+@utility scaffold-header {
+	@layer scaffold.l2 {
+		@apply w-full surface-container;
+		grid-area: header;
+		height: var(--scaffold-header-height);
+	}
+}
+.scaffold:has(> .scaffold-header) {
+	@layer scaffold.l2 {
+		grid-template-rows: var(--scaffold-header-height) 1fr;
+	}
+}
+
+@utility scaffold-sidebar {
+	@layer scaffold.l2 {
+		@apply h-full w-(--scaffold-sidebar-width) overflow-x-hidden overflow-y-auto surface-container-low;
+		grid-area: sidebar;
+		transition:
+			width var(--scaffold-transition-duration) var(--scaffold-transition-easing),
+			opacity var(--scaffold-transition-duration) var(--scaffold-transition-easing);
+	}
+}
+.scaffold:has(> .scaffold-sidebar) {
+	@layer scaffold.l2 {
+		grid-template-columns: var(--scaffold-sidebar-width) 1fr;
+	}
+}
+
+@utility scaffold-main {
+	@layer scaffold.l2 {
+		@apply relative h-full w-full min-w-0 overflow-x-hidden overflow-y-auto surface;
+		grid-area: main;
+		scroll-behavior: smooth;
+		overscroll-behavior: contain;
+	}
+}
+
+@utility scaffold-content {
+	@layer scaffold.l2 {
+		@apply flex min-h-full w-full flex-col p-4;
+	}
+}
+
+@utility scaffold-with-sidebar {
+	@layer scaffold.l2 {
+		grid-template-columns: var(--scaffold-sidebar-width) 1fr;
+	}
+}
+
+/* State */
+.scaffold[data-sidebar-state='collapsed']:has(> .scaffold-sidebar) {
+	@layer scaffold.l1 {
+		grid-template-columns: var(--scaffold-sidebar-collapsed-width) 1fr;
+
+		& > .scaffold-sidebar {
+			width: var(--scaffold-sidebar-collapsed-width);
+		}
+	}
+}
+@media (hover: hover) {
+	.scaffold[data-sidebar-state='collapsed']:has(> .scaffold-sidebar:hover) {
+		@layer scaffold.l1 {
+			grid-template-columns: var(--scaffold-sidebar-width) 1fr;
+
+			& > .scaffold-sidebar {
+				width: var(--scaffold-sidebar-width);
+			}
+		}
+	}
+}
+.scaffold[data-sidebar-state='hidden']:has(> .scaffold-sidebar) {
+	@layer scaffold.l1 {
+		grid-template-columns: 0 1fr;
+
+		& > .scaffold-sidebar {
+			@apply pointer-events-none overflow-hidden opacity-0;
+			width: 0;
+		}
+	}
+}

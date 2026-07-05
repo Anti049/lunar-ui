@@ -1,11 +1,18 @@
 <script lang="ts">
+	import { Scaffold } from '$lib/svelte';
 	import '../app.css';
 
 	const { children } = $props();
 </script>
 
-<div
-	class="w-screen h-screen surface text-body-small dark flex flex-col p-4 compact:p-6 medium:p-8"
->
+<Scaffold>
+	{#snippet header()}
+		<header class="scaffold-header">Header</header>
+	{/snippet}
+
+	{#snippet sidebar()}
+		<aside class="scaffold-sidebar">Sidebar</aside>
+	{/snippet}
+
 	{@render children()}
-</div>
+</Scaffold>

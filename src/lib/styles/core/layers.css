@@ -14,7 +14,10 @@
 
 		Add a new line for each new component
 	*/
-	@layer 	button.l3, 
+	@layer button.l3, 
 			button.l2, 
 			button.l1;
+	@layer scaffold.l3, 
+			scaffold.l2, 
+			scaffold.l1;
 }

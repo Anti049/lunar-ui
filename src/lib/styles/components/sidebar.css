@@ -3,3 +3,9 @@
 
 	TODO: Add styles for the sidebar component
 */
+
+@utility sidebar {
+	@layer sidebar.l3 {
+		@apply flex h-full w-full flex-col gap-4 surface-container;
+	}
+}

@@ -103,6 +103,9 @@
 /* Scrollbar */
 @import './scrollbar.css';
 
+/* Section */
+@import './section.css';
+
 /* Select */
 @import './select.css';
 

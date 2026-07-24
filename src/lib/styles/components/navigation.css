@@ -1,5 +1,132 @@
 /* 
 	Navigation
 
-	TODO: Add styles for the navigation components
+	The navigation lives inside the scaffold sidebar and owns its own sizing.
+	Rather than hardcoding widths here, it exposes a `collapsed` variant so the
+	widths are supplied as utilities on the element itself, e.g.
+
+		<nav class="navigation w-64 collapsed:w-16"></nav>
+
+	The `collapsed` variant is active whenever the navigation should show its
+	rail (narrow) form:
+
+	  - ≥ medium              → expanded (base width)
+	  - compact – medium      → collapsed, expands on hover
+	  - manually minimized    → collapsed (no hover expand)
+	  - < compact             → hidden (width 0)
+
+	Selectors are wrapped in :where() so the variant keeps the same specificity
+	as any width utility and resolves by source order.
 */
+
+@custom-variant collapsed {
+	/* Auto-collapsed below the medium breakpoint; the whole rail (labels
+	   included) expands while the rail itself is hovered */
+	@media (width < theme(--breakpoint-medium)) {
+		&:where(.nav-rail:not(:hover), .nav-rail:not(:hover) *) {
+			@slot;
+		}
+	}
+
+	/* Manually minimized at any size (never expands on hover) */
+	&:where(.scaffold[data-minimized] *) {
+		@slot;
+	}
+}
+
+@utility nav-rail {
+	@apply flex h-full flex-col overflow-hidden surface-container-low;
+	transition: width var(--duration-short-4) var(--ease-standard);
+}
+
+/* Below compact: fully hidden */
+@media (width < theme(--breakpoint-compact)) {
+	.nav-rail {
+		width: 0;
+		padding-inline: 0;
+	}
+}
+
+@custom-variant nav-link-active {
+	&:where(.nav-link[data-active] *, .nav-link[data-active]) {
+		@slot;
+	}
+}
+@utility nav-link {
+	@layer nav-link.l3 {
+		@apply flex h-16 w-full flex-row items-center gap-4 overflow-clip rounded-sm surface-container p-2 text-title-medium transition-all select-none not-disabled:interactive in-collapsed:aspect-square;
+	}
+	@apply not-disabled:nav-link-primary;
+}
+.nav-link-disabled,
+.nav-link.disabled,
+.nav-link[disabled],
+.nav-link:disabled {
+	@layer nav-link.l1 {
+		@apply cursor-not-allowed text-on-surface/38 before:bg-transparent;
+	}
+}
+
+@utility nav-link-primary {
+	@layer nav-link.l2 {
+		@apply nav-link-active:primary-container;
+	}
+}
+@utility nav-link-secondary {
+	@layer nav-link.l2 {
+		@apply nav-link-active:secondary-container;
+	}
+}
+@utility nav-link-tertiary {
+	@layer nav-link.l2 {
+		@apply nav-link-active:tertiary-container;
+	}
+}
+@utility nav-link-error {
+	@layer nav-link.l2 {
+		@apply nav-link-active:error-container;
+	}
+}
+@utility nav-link-surface {
+	@layer nav-link.l2 {
+		@apply nav-link-active:surface-container-highest;
+	}
+}
+@utility nav-link-success {
+	@layer nav-link.l2 {
+		@apply nav-link-active:success-container;
+	}
+}
+@utility nav-link-warning {
+	@layer nav-link.l2 {
+		@apply nav-link-active:warning-container;
+	}
+}
+@utility nav-link-info {
+	@layer nav-link.l2 {
+		@apply nav-link-active:info-container;
+	}
+}
+@utility nav-link-alert {
+	@layer nav-link.l2 {
+		@apply nav-link-active:alert-container;
+	}
+}
+
+@utility nav-link-icon {
+	@layer nav-link.l2 {
+		@apply aspect-square h-full bg-current object-contain transition-all;
+	}
+}
+
+@utility nav-link-label {
+	@layer nav-link.l2 {
+		@apply whitespace-nowrap opacity-100 transition-all in-collapsed:opacity-0;
+	}
+}
+
+@utility nav-link-small {
+	@layer nav-link.l2 {
+		@apply h-12 in-collapsed:pl-4;
+	}
+}

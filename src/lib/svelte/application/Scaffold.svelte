@@ -4,7 +4,7 @@
 
 	interface ScaffoldProps {
 		class?: string;
-		state?: 'collapsed' | 'expanded';
+		minimized?: boolean;
 		headerClass?: string;
 		header?: Snippet<[]>;
 		sidebarClass?: string;
@@ -15,7 +15,7 @@
 	}
 	let {
 		class: className = '',
-		state: sidebarState = 'expanded',
+		minimized = false,
 		headerClass = '',
 		header,
 		sidebarClass = '',
@@ -24,64 +24,18 @@
 		contentClass = '',
 		children
 	}: ScaffoldProps = $props();
-
-	/**
-	 * Whether the viewport is currently below the shared `--breakpoint-medium`
-	 * token. Driven by `matchMedia` so the layout auto-collapses without any
-	 * layout thrashing.
-	 */
-	let belowMedium = $state(false);
-	let belowCompact = $state(false);
-
-	/**
-	 * The effective sidebar state, exposed on the DOM via `data-sidebar-state`.
-	 * This is the single source of truth the scaffold CSS keys off:
-	 *   - no sidebar snippet        → "hidden"
-	 *   - viewport below compact     → "hidden" (auto-hide)
-	 *   - viewport below medium     → "collapsed" (auto-collapse)
-	 *   - otherwise                 → the caller's `state` prop
-	 */
-	let resolvedState = $derived(
-		sidebar == null ? 'hidden' : belowCompact ? 'hidden' : belowMedium ? 'collapsed' : sidebarState
-	);
-
-	$effect(() => {
-		// Read the breakpoint from the design token so this stays bound to
-		// --breakpoint-medium rather than a hardcoded pixel value. matchMedia
-		// can't resolve var(), so we resolve it once from the computed style.
-		const mediumBreakpoint = getComputedStyle(document.documentElement)
-			.getPropertyValue('--breakpoint-medium')
-			.trim();
-		const compactBreakpoint = getComputedStyle(document.documentElement)
-			.getPropertyValue('--breakpoint-compact')
-			.trim();
-		const mediumQuery = window.matchMedia(`(max-width: ${mediumBreakpoint})`);
-		const compactQuery = window.matchMedia(`(max-width: ${compactBreakpoint})`);
-		const update = () => {
-			belowMedium = mediumQuery.matches;
-			belowCompact = compactQuery.matches;
-		};
-
-		update();
-		mediumQuery.addEventListener('change', update);
-		compactQuery.addEventListener('change', update);
-		return () => {
-			mediumQuery.removeEventListener('change', update);
-			compactQuery.removeEventListener('change', update);
-		};
-	});
 </script>
 
-<div class={cn('scaffold', className)} data-sidebar-state={resolvedState}>
-	{#if header}
-		<header class={cn('scaffold-header', headerClass)}>
-			{@render header()}
-		</header>
-	{/if}
+<div class={cn('scaffold', className)} data-minimized={minimized ? '' : undefined}>
 	{#if sidebar}
 		<aside class={cn('scaffold-sidebar', sidebarClass)}>
 			{@render sidebar()}
 		</aside>
+	{/if}
+	{#if header}
+		<header class={cn('scaffold-header', headerClass)}>
+			{@render header()}
+		</header>
 	{/if}
 	<main class={cn('scaffold-main', mainClass)}>
 		<div class={cn('scaffold-content', contentClass)}>

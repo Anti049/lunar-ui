@@ -29,7 +29,7 @@
 /* Interactive Utility Class */
 @utility interactive {
 	/* Interactive Marker */
-	--interactive: true;
+	--interactive: 1;
 	/* Standard Properties */
 	@apply relative overflow-clip not-disabled:cursor-pointer disabled:cursor-not-allowed;
 	/* Overlay Properties */
@@ -40,6 +40,10 @@
 
 /* Ripple Opt-Out Utility Class */
 @utility no-ripple {
+	--lunar-ripple: none;
+}
+
+@utility ripple-none {
 	--lunar-ripple: none;
 }
 

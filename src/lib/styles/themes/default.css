@@ -2,7 +2,7 @@
 	Default Theme
 
 	Standard Material 3 theme, using "#0956AA" as the seed color. /* Color(0xFF0956AA) */
-*/ :where(:root),
+:where(:root),
 [data-theme='default'] {
 	--theme-color-primary-0: #000000; /* Color(0xFF000000) */
 	--theme-color-primary-2: #00061c; /* Color(0xFF00061C) */

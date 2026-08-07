@@ -26,6 +26,9 @@
 	@layer scaffold.l3, 
 			scaffold.l2, 
 			scaffold.l1;
+	@layer select.l3, 
+			select.l2, 
+			select.l1;
 	@layer swap.l3, 
 			swap.l2, 
 			swap.l1;

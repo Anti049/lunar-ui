@@ -1,13 +1,20 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { MaskedImage, Scaffold } from '$lib/svelte';
-	import { PanelLeftClose, PanelLeftOpen, Search } from '@lucide/svelte';
+	import { MaskedImage, Scaffold, ThemedSVG, initRipple } from '$lib/svelte';
+	import { Moon, PanelLeftClose, PanelLeftOpen, Search, Sun, SunMoon } from '@lucide/svelte';
+	import { onMount } from 'svelte';
 	import '../app.css';
 	import { cn } from '$lib/utils';
+	import { ModeWatcher, userPrefersMode as mode, setMode } from 'mode-watcher';
 
 	const { children } = $props();
 
+	const moonColors = {
+		'#cdd6f4': 'fill-on-surface',
+		'#7f849c': 'stroke-on-surface-variant',
+		'#313244': 'fill-surface-container-high'
+	};
 	let minimized = $state(false);
 	let links = [
 		{
@@ -320,7 +327,22 @@
 			disabled: true
 		}
 	];
+	function cycleMode() {
+		console.log(mode.current);
+		if (mode.current === 'light') {
+			setMode('dark');
+		} else if (mode.current === 'dark') {
+			setMode('system');
+		} else {
+			setMode('light');
+		}
+		console.log(mode.current);
+	}
+
+	onMount(() => initRipple());
 </script>
+
+<ModeWatcher defaultTheme="default" darkClassNames={['dark']} lightClassNames={['light']} />
 
 <Scaffold {minimized}>
 	{#snippet header()}
@@ -358,12 +380,25 @@
 				</button>
 			</div>
 			<div class="appbar-body">
-				<p class="appbar-title">Title</p>
-				<p class="appbar-subtitle">Subtitle</p>
+				<ThemedSVG
+					src="/moon_monochrome.svg"
+					replacements={moonColors}
+					class="aspect-square h-full appbar-title"
+					ariaLabel="Logo"
+				/>
 			</div>
 			<div class="appbar-trailing">
 				<button class="button button-square button-md button-text">
 					<Search />
+				</button>
+				<button class="button button-square button-md button-text" onclick={cycleMode}>
+					{#if mode.current === 'light'}
+						<Sun />
+					{:else if mode.current === 'dark'}
+						<Moon />
+					{:else}
+						<SunMoon />
+					{/if}
 				</button>
 			</div>
 		</div>

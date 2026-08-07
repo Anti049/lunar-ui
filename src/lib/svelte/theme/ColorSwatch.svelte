@@ -140,7 +140,7 @@
 <div
 	bind:this={swatchElement}
 	class={cn(
-		'flex justify-between rounded-sm p-2 text-caption-small medium:text-body-small compact:text-label-small',
+		'flex justify-between rounded-sm p-2 text-caption-small compact:text-label-small medium:text-body-small',
 		color,
 		interactive && 'interactive',
 		direction === 'horizontal' ? 'flex-row' : 'flex-col',

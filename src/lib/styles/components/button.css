@@ -59,7 +59,7 @@
 		/* -----------------------------------------------------------------------
 		 * Layout + typography defaults via @apply.
 		 * -------------------------------------------------------------------- */
-		@apply interactive inline-flex h-fit min-h-fit w-fit min-w-fit items-center justify-center rounded-sm border-0 border-transparent text-center align-middle font-medium ring-0 outline-offset-2 select-none;
+		@apply interactive inline-flex h-fit min-h-fit w-fit min-w-fit origin-center items-center justify-center rounded-sm border-0 border-transparent text-center align-middle font-medium ring-0 outline-offset-2 select-none active:scale-95;
 
 		/* Default size is md; overridable by any button-{size} utility */
 		@apply button-md;
@@ -82,7 +82,8 @@
 			background-color 150ms ease,
 			color 150ms ease,
 			border-color 150ms ease,
-			box-shadow 150ms ease;
+			box-shadow 150ms ease,
+			scale 150ms ease;
 	}
 }
 

@@ -1,14 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import { page } from '$app/state';
-	import { MaskedImage, Scaffold } from '$lib/svelte';
-	import { PanelLeftClose, PanelLeftOpen, Search } from '@lucide/svelte';
-	import '../app.css';
-	import { cn } from '$lib/utils';
 
-	const { children } = $props();
-
-	let minimized = $state(false);
 	let links = [
 		{
 			href: resolve('/components/3d-block'),
@@ -322,101 +314,21 @@
 	];
 </script>
 
-<Scaffold {minimized}>
-	{#snippet header()}
-		<!-- Desktop Header -->
-		<!-- <div class="hidden compact:flex w-full h-20 surface-container items-center justify-between p-4">
-			<button
-				class="button button-text button-square button-md swap swap-rotate"
-				onclick={() => (test = !test)}
-			>
-				<input type="checkbox" bind:checked={test} />
-				<PanelLeftClose class="swap-off" />
-				<PanelLeftOpen class="swap-on" />
-			</button>
-		</div> -->
-		<!-- Mobile Header -->
-		<!-- <div class="flex compact:hidden w-full h-16 p-2 items-center justify-between">
-			<button
-				class="button button-text button-square button-md swap swap-rotate"
-				onclick={() => (minimized = !minimized)}
-			>
-				<input type="checkbox" bind:checked={minimized} />
-				<Menu class="swap-off" />
-				<X class="swap-on" />
-			</button>
-		</div> -->
-		<div class="appbar appbar-centered">
-			<div class="appbar-leading">
-				<button
-					class="button swap button-square button-md button-text"
-					onclick={() => (minimized = !minimized)}
-				>
-					<input type="checkbox" bind:checked={minimized} />
-					<PanelLeftClose class="swap-off" />
-					<PanelLeftOpen class="swap-on" />
-				</button>
+<div
+	class="grid h-full w-full grid-cols-1 gap-4 compact:grid-cols-2 medium:grid-cols-3 expanded:grid-cols-4"
+>
+	{#each links as link (link.href)}
+		<a
+			href={link.href}
+			class="flex flex-col gap-2 rounded-sm surface-container p-4 elevation-2 transition-all duration-200 hover:-translate-y-2 hover:elevation-4 {link.disabled
+				? 'pointer-events-none opacity-50'
+				: ''}"
+		>
+			<p class="text-title-medium font-semibold">{link.label}</p>
+			<div class="h-0.5 w-full rounded-full surface-container-high"></div>
+			<div class="component-card-body">
+				<p>{link.label} component description goes here.</p>
 			</div>
-			<div class="appbar-body">
-				<p class="appbar-title">Title</p>
-				<p class="appbar-subtitle">Subtitle</p>
-			</div>
-			<div class="appbar-trailing">
-				<button class="button button-square button-md button-text">
-					<Search />
-				</button>
-			</div>
-		</div>
-	{/snippet}
-
-	{#snippet sidebar()}
-		<nav class="nav-rail w-64 gap-2 border-r border-r-surface-container p-2 collapsed:w-16">
-			<a
-				href={resolve('/')}
-				class="nav-link"
-				data-active={page.url.pathname === '/' ? '' : undefined}
-			>
-				<MaskedImage src="/icons/navigation/house.svg" alt="Home" class="nav-link-icon" />
-				<span class="nav-link-label">Home</span>
-			</a>
-			<div class="h-0.5 w-full rounded-full surface-container"></div>
-			<div
-				class="flex h-full w-full flex-1 scrollbar-hidden flex-col gap-2 overflow-x-clip overflow-y-auto"
-			>
-				{#each links as link (link.href)}
-					<a
-						href={link.href}
-						class={cn('nav-link nav-link-small', link.disabled && 'disabled')}
-						data-active={page.url.pathname === link.href ? '' : undefined}
-					>
-						<MaskedImage src={link.icon} alt={link.label} class="nav-link-icon" />
-						<span class="nav-link-label">{link.label}</span>
-					</a>
-				{/each}
-			</div>
-			<div class="h-0.5 w-full rounded-full surface-container"></div>
-			<a
-				href={resolve('/test')}
-				class="nav-link"
-				data-active={page.url.pathname === '/test' ? '' : undefined}
-			>
-				<MaskedImage
-					src="/icons/navigation/test-tube-diagonal.svg"
-					alt="Test"
-					class="nav-link-icon"
-				/>
-				<span class="nav-link-label">Test</span>
-			</a>
-			<a
-				href={resolve('/settings')}
-				class="nav-link"
-				data-active={page.url.pathname === '/settings' ? '' : undefined}
-			>
-				<MaskedImage src="/icons/navigation/settings.svg" alt="Settings" class="nav-link-icon" />
-				<span class="nav-link-label">Settings</span>
-			</a>
-		</nav>
-	{/snippet}
-
-	{@render children()}
-</Scaffold>
+		</a>
+	{/each}
+</div>

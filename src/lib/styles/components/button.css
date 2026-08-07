@@ -341,7 +341,7 @@
 
 @utility button-xs {
 	@layer button.l2 {
-		@apply gap-1 px-2 py-1 text-label-small;
+		@apply gap-1 px-2 py-1 text-caption-medium;
 		& svg {
 			@apply size-4;
 		}

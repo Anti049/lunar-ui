@@ -1,6 +1,6 @@
 {
-	"name": "lunar-ui",
-	"version": "0.0.1",
+	"name": "@anti049/lunar-ui",
+	"version": "0.0.4",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && npm run prepack",
@@ -18,15 +18,34 @@
 		"!dist/**/*.spec.*"
 	],
 	"sideEffects": [
-		"**/*.css"
+		"./dist/styles/index.css"
 	],
 	"svelte": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"type": "module",
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org"
+	},
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
-			"svelte": "./dist/index.js"
+			"svelte": "./dist/index.js",
+			"import": "./dist/index.js",
+			"default": "./dist/index.js"
+		},
+		"./styles": {
+			"types": "./dist/styles/index.css",
+			"style": "./dist/styles/index.css",
+			"import": "./dist/styles/index.css",
+			"svelte": "./dist/styles/index.css",
+			"development": "./dist/styles/index.css",
+			"default": "./dist/styles/index.css"
+		},
+		"./styles.css": {
+			"style": "./dist/styles/index.css",
+			"import": "./dist/styles/index.css",
+			"default": "./dist/styles/index.css"
 		}
 	},
 	"peerDependencies": {
@@ -38,8 +57,6 @@
 		"@sveltejs/kit": "^2.63.0",
 		"@sveltejs/package": "^2.5.8",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
-		"@tailwindcss/forms": "^0.5.11",
-		"@tailwindcss/typography": "^0.5.19",
 		"@tailwindcss/vite": "^4.3.0",
 		"@types/node": "^24",
 		"eslint": "^10.4.1",
@@ -61,6 +78,8 @@
 		"svelte"
 	],
 	"dependencies": {
+		"@tailwindcss/forms": "^0.5.11",
+		"@tailwindcss/typography": "^0.5.19",
 		"@fontsource-variable/fira-code": "^5.2.7",
 		"@fontsource-variable/inter": "^5.2.8",
 		"@fontsource-variable/plus-jakarta-sans": "^5.2.8",

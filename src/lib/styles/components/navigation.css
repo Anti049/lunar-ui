@@ -54,7 +54,7 @@
 }
 @utility nav-link {
 	@layer nav-link.l3 {
-		@apply flex h-16 w-full flex-row items-center gap-4 overflow-clip rounded-sm surface-container p-2 text-title-medium transition-all select-none not-disabled:interactive in-collapsed:aspect-square;
+		@apply flex h-12 w-full flex-row items-center gap-4 overflow-clip rounded-sm surface-container p-2 text-title-medium transition-all select-none not-disabled:interactive in-collapsed:aspect-square;
 	}
 	@apply not-disabled:nav-link-primary;
 }
@@ -127,6 +127,6 @@
 
 @utility nav-link-small {
 	@layer nav-link.l2 {
-		@apply h-12 in-collapsed:pl-4;
+		@apply h-10 in-collapsed:pl-3;
 	}
 }

@@ -6,17 +6,20 @@
 */
 @theme {
 	/* Animations */
-	--animation-alert: 			alert 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+	--animation-alert: alert 1s cubic-bezier(0, 0, 0.2, 1) infinite;
 
 	/* Breakpoints */
-	--breakpoint-compact: 		620px; 	/* Phone in portrait */
-	--breakpoint-medium: 		960px; 	/* Tablet in portrait, Foldable in portrait (unfolded) */
-	--breakpoint-expanded: 		1301px; /* Phone in landscape, Tablet in landscape, Foldable in landscape (unfolded), Desktop */
-	--breakpoint-large: 		1600px; /* Desktop */
-	--breakpoint-extralarge: 	1920px; /* Desktop, Ultra-wide monitors */
-	
+	--breakpoint-compact: 620px; /* Phone in portrait */
+	--breakpoint-medium: 960px; /* Tablet in portrait, Foldable in portrait (unfolded) */
+	--breakpoint-expanded: 1301px; /* Phone in landscape, Tablet in landscape, Foldable in landscape (unfolded), Desktop */
+	--breakpoint-large: 1600px; /* Desktop */
+	--breakpoint-extralarge: 1920px; /* Desktop, Ultra-wide monitors */
+
 	/* Fonts */
-	--font-sans: 				'Plus Jakarta Sans Variable', 'Inter Variable', ui-sans-serif, system-ui;
-	--font-serif: 				'Inter Variable', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
-	--font-mono: 				'Fira Code Variable', ui-monospace, monospace;
+	--font-sans: 'Plus Jakarta Sans Variable', 'Inter Variable', ui-sans-serif, system-ui;
+	--font-serif: 'Inter Variable', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+	--font-mono: 'Fira Code Variable', ui-monospace, monospace;
+}
+
+@layer utilities {
 }

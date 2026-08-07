@@ -1,5 +1,117 @@
 /* 
 	Appbar
-
-	TODO: Add styles for the appbar component
 */
+
+/* =============================================================================
+ * FOUNDATION (l3)
+ * The base .appbar utility. Every appbar has this.
+ * ========================================================================== */
+@utility appbar {
+	@layer appbar.l3 {
+		@apply relative flex w-full flex-row items-center gap-4 border-b border-b-surface-container surface-container-low p-2 transition-colors duration-200 ease-in-out;
+
+		/* Default size is small */
+		@apply appbar-sm;
+	}
+}
+
+/* =============================================================================
+ * STATE (l1)
+ * Highest per-component priority. Wins over sizes and foundation.
+ * ========================================================================== */
+@utility appbar-scrolled {
+	@layer appbar.l1 {
+		@apply surface-container elevation-1;
+	}
+}
+
+/* =============================================================================
+ * VARIANTS (l2)
+ * Define different visual variants for the appbar component.
+ * ========================================================================== */
+@utility appbar-centered {
+	@layer appbar.l2 {
+		@apply justify-center;
+
+		/* With a leading or trailing slot present, spread items to the edges
+		 * so the centered body stays visually centered between them. */
+		&:has(.appbar-leading, .appbar-trailing) {
+			@apply justify-between;
+		}
+	}
+}
+
+/* =============================================================================
+ * SIZES (l2)
+ * Define different height and padding for various appbar sizes.
+ * ========================================================================== */
+@utility appbar-sm {
+	@layer appbar.l2 {
+		@apply h-16 px-2;
+		& .appbar-title {
+			@apply text-title-medium-emphasized;
+		}
+		& .appbar-subtitle {
+			@apply text-label-small;
+		}
+	}
+}
+
+@utility appbar-md {
+	@layer appbar.l2 {
+		@apply h-20 px-4;
+		& .appbar-title {
+			@apply text-title-large-emphasized;
+		}
+		& .appbar-subtitle {
+			@apply text-label-medium;
+		}
+	}
+}
+
+@utility appbar-lg {
+	@layer appbar.l2 {
+		@apply h-24 px-6;
+		& .appbar-title {
+			@apply text-headline-small-emphasized;
+		}
+		& .appbar-subtitle {
+			@apply text-label-large;
+		}
+	}
+}
+
+/* =============================================================================
+ * SLOTS (l2)
+ * Define different slots for the appbar component.
+ * ========================================================================== */
+@utility appbar-leading {
+	@layer appbar.l2 {
+		@apply flex aspect-square h-full items-center justify-center;
+	}
+}
+@utility appbar-trailing {
+	@layer appbar.l2 {
+		@apply flex aspect-square h-full items-center justify-center;
+	}
+}
+@utility appbar-body {
+	@layer appbar.l2 {
+		@apply flex h-full w-fit flex-col justify-center overflow-clip text-ellipsis select-none;
+
+		/* When the appbar is centered, fill the space and center the text. */
+		.appbar-centered & {
+			@apply w-full text-center;
+		}
+	}
+}
+@utility appbar-title {
+	@layer appbar.l2 {
+		@apply text-on-surface;
+	}
+}
+@utility appbar-subtitle {
+	@layer appbar.l2 {
+		@apply text-on-surface-variant;
+	}
+}

@@ -1,0 +1,56 @@
+name: Publish To npm
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Package
+        run: npm run prepack
+
+      - name: Check If Version Is Already Published
+        id: version_check
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          PUBLISHED_VERSION=$(npm view "$PACKAGE_NAME" version 2>/dev/null || echo "")
+          echo "package_name=$PACKAGE_NAME" >> "$GITHUB_OUTPUT"
+          echo "package_version=$PACKAGE_VERSION" >> "$GITHUB_OUTPUT"
+          if [ "$PACKAGE_VERSION" = "$PUBLISHED_VERSION" ]; then
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+            echo "Version $PACKAGE_VERSION is already published."
+          else
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+            echo "Publishing version $PACKAGE_VERSION."
+          fi
+
+      - name: Publish To npm
+        if: steps.version_check.outputs.should_publish == 'true'
+        run: npm publish --access public --provenance
+
+      - name: Publish Summary
+        run: |
+          echo "Package: ${{ steps.version_check.outputs.package_name }}"
+          echo "Version: ${{ steps.version_check.outputs.package_version }}"
+          echo "Published: ${{ steps.version_check.outputs.should_publish }}"

@@ -1,0 +1,40 @@
+/* 
+	Collapse
+
+	TODO: Add styles for the collapse component
+*/
+
+.collapse:not(td, tr, colgroup) {
+	visibility: revert-layer;
+}
+
+@utility collapse {
+	@layer collapse.l3 {
+		@apply relative isolate grid w-full grid-cols-[minmax(0,1fr)] grid-rows-[max-content_0fr] rounded-sm;
+
+		> input:is([type='checkbox'], [type='radio']) {
+			@apply col-start-1 row-start-1 appearance-none opacity-0;
+		}
+
+		&:is(
+			[open],
+			[tabindex]:focus:not(.collapse-close),
+			[tabindex]:focus-within:not(.collapse-close)
+		),
+		&:not(.collapse-close):has(> input:is([type='checkbox'], [type='radio']):checked) {
+			@apply grid-rows-[max-content_1fr];
+		}
+
+		&:is(
+				[open],
+				[tabindex]:focus:not(.collapse-close),
+				[tabindex]:focus-within:not(.collapse-close)
+			)
+			> .collapse-content,
+		&:not(.collapse-close)
+			> :where(input:is([type='checkbox'], [type='radio']):checked)
+			~ .collapse-content {
+			@apply opacity-100;
+		}
+	}
+}

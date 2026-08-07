@@ -14,10 +14,19 @@
 
 		Add a new line for each new component
 	*/
+	@layer appbar.l3, 
+			appbar.l2, 
+			appbar.l1;
 	@layer button.l3, 
 			button.l2, 
 			button.l1;
+	@layer nav-link.l3, 
+			nav-link.l2, 
+			nav-link.l1;
 	@layer scaffold.l3, 
 			scaffold.l2, 
 			scaffold.l1;
+	@layer swap.l3, 
+			swap.l2, 
+			swap.l1;
 }

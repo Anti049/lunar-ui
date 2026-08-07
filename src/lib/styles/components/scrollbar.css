@@ -3,3 +3,17 @@
 
 	TODO: Add styles for the scrollbar component
 */
+
+/* Hide scrollbar for IE, Edge, and Firefox */
+@utility scrollbar-hidden {
+	@layer scrollbar.l1 {
+		-ms-overflow-style: none; /* IE and Edge */
+		scrollbar-width: none; /* Firefox */
+	}
+}
+/* Hide scrollbar for Chrome, Safari, and Opera */
+.no-scrollbar::-webkit-scrollbar {
+	@layer scrollbar.l1 {
+		display: none;
+	}
+}

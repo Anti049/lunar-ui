@@ -1,0 +1,17 @@
+@utility component-preview {
+	@layer component-preview.l3 {
+		@apply flex flex-col gap-4;
+	}
+}
+
+@utility component-preview-header {
+	@apply flex flex-row items-center gap-4 text-title-small compact:text-title-medium medium:text-title-large;
+}
+
+@utility component-preview-anchor {
+	@apply button button-square size-6 button-outlined border-on-surface-variant/50 surface p-1;
+}
+
+@utility component-preview-body {
+	@apply flex h-fit w-full flex-row flex-wrap items-center justify-center gap-2 rounded-sm border border-on-surface-variant/15 surface-container-lowest p-4;
+}

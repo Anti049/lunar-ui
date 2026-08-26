@@ -1,17 +1,33 @@
 @utility component-preview {
 	@layer component-preview.l3 {
-		@apply flex flex-col gap-4;
+		@apply flex flex-col overflow-clip rounded-sm border border-on-surface-variant/15;
 	}
 }
 
 @utility component-preview-header {
-	@apply flex flex-row items-center gap-4 text-title-small compact:text-title-medium medium:text-title-large;
+	@apply flex w-full flex-col justify-center gap-2;
+}
+
+@utility component-preview-label {
+	@apply flex flex-row items-center gap-4;
+}
+
+@utility component-preview-title {
+	@apply text-title-small text-on-surface compact:text-title-medium medium:text-title-large;
+}
+
+@utility component-preview-subtitle {
+	@apply text-body-small text-on-surface-variant compact:text-body-medium medium:text-body-large;
 }
 
 @utility component-preview-anchor {
-	@apply button button-square size-6 button-outlined border-on-surface-variant/50 surface p-1;
+	@apply button button-square size-8 button-outlined border-on-surface-variant/50 surface p-1;
 }
 
 @utility component-preview-body {
-	@apply flex h-fit w-full flex-row flex-wrap items-center justify-center gap-2 rounded-sm border border-on-surface-variant/15 surface-container-lowest p-4;
+	@apply flex h-fit w-full flex-row flex-wrap items-center justify-center gap-2 surface-container-lowest p-4;
+}
+
+@utility component-preview-body-pattern {
+	@apply surface-container-lowest bg-[repeating-linear-gradient(315deg,var(--color-surface-container)_0,var(--color-surface-container)_1px,transparent_0,transparent_50%)] bg-size-[10px_10px] bg-fixed;
 }

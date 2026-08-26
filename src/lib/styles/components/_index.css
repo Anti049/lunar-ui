@@ -1,5 +1,5 @@
 /* 3D Block */
-@import './3dblock.css';
+@import './3d-viewer.css';
 
 /* Accordion */
 @import './accordion.css';
@@ -14,7 +14,7 @@
 @import './badge.css';
 
 /* Breadcrumbs */
-@import './breadcrumbs.css';
+@import './breadcrumb.css';
 
 /* Button */
 @import './button.css';
@@ -24,6 +24,9 @@
 
 /* Card */
 @import './card.css';
+
+/* Chart */
+@import './chart.css';
 
 /* Carousel */
 @import './carousel.css';
@@ -35,7 +38,10 @@
 @import './checkbox.css';
 
 /* Collapse */
-@import './collapse.css';
+@import './collapsible.css';
+
+/* Code Block */
+@import './code-block.css';
 
 /* Component Preview */
 @import './component-preview.css';
@@ -168,3 +174,31 @@
 
 /* Tristate */
 @import './tristate.css';
+
+/* Planned components */
+@import './avatar.css';
+@import './combobox.css';
+@import './command.css';
+@import './data-table.css';
+@import './date-picker.css';
+@import './dialog.css';
+@import './file-upload.css';
+@import './form.css';
+@import './hover-card.css';
+@import './hover-gallery.css';
+@import './input-otp.css';
+@import './marquee.css';
+@import './mask.css';
+@import './mockup.css';
+@import './panel.css';
+@import './popover.css';
+@import './portal.css';
+@import './qr-code.css';
+@import './rating.css';
+@import './resizable.css';
+@import './scroll-area.css';
+@import './skeleton.css';
+@import './spinner.css';
+@import './text-reel.css';
+@import './toast.css';
+@import './toggle.css';

@@ -1,6 +1,6 @@
 <script lang="ts">
+	import ComponentPreview from '$lib/svelte/demo/ComponentPreview.svelte';
 	import { cn } from '$lib/utils';
-	import { Hash } from '@lucide/svelte';
 
 	let values = [
 		{
@@ -45,154 +45,249 @@
 	let tonalValue = $state(values[0]);
 	let outlinedValue = $state(values[0]);
 	let textValue = $state(values[0]);
+	let sizes = [
+		{
+			key: 'Extra Small',
+			value: 'select-xs'
+		},
+		{
+			key: 'Small',
+			value: 'select-sm'
+		},
+		{
+			key: 'Medium',
+			value: 'select-md'
+		},
+		{
+			key: 'Large',
+			value: 'select-lg'
+		},
+		{
+			key: 'Extra Large',
+			value: 'select-xl'
+		}
+	];
+	let sizeValue = $state(sizes[2]);
 </script>
 
 <div class="flex h-full w-full flex-col gap-8">
+	<!-- Custom Select -->
+	<div class="flex flex-col gap-2">
+		<p class="text-headline-large-emphasized text-primary">Select</p>
+		<p class="text-body-medium text-on-surface-variant">
+			Displays a list of options for the user to choose from, triggered by a button.
+		</p>
+	</div>
 	<!-- Elevated -->
-	<div id="elevated" class="component-preview">
-		<div class="component-preview-header">
-			<a href="#elevated" class="component-preview-anchor">
-				<Hash />
-			</a>
-			<p>Elevated Select</p>
-		</div>
-		<div class="component-preview-body">
-			<select
-				class={cn('select w-full max-w-64 select-elevated', elevatedValue.value)}
-				bind:value={elevatedValue.value}
-			>
-				{#each values as item (item.value)}
-					<option value={item.value}>{item.key}</option>
-				{/each}
-			</select>
-		</div>
-	</div>
+	<ComponentPreview
+		id="elevated"
+		title="Elevated Select"
+		description="Elevated selects are used for high emphasis actions."
+		code={`
+<select
+	class={cn('select select-elevated', elevatedValue.value)}
+	bind:value={elevatedValue.value}
+>
+	{#each values as item (item.value)}
+		<option value={item.value}>{item.key}</option>
+	{/each}
+</select>
+		`}
+	>
+		<select
+			class={cn('select w-full max-w-64 select-elevated', elevatedValue.value)}
+			bind:value={elevatedValue.value}
+		>
+			{#each values as item (item.value)}
+				<option value={item.value}>{item.key}</option>
+			{/each}
+		</select>
+	</ComponentPreview>
 	<!-- Filled -->
-	<div id="filled" class="component-preview">
-		<div class="component-preview-header">
-			<a href="#filled" class="component-preview-anchor">
-				<Hash />
-			</a>
-			<p>Filled Select</p>
-		</div>
-		<div class="component-preview-body">
-			<select
-				class={cn('select w-full max-w-64 select-filled', filledValue.value)}
-				bind:value={filledValue.value}
-			>
-				{#each values as item (item.value)}
-					<option value={item.value}>{item.key}</option>
-				{/each}
-			</select>
-		</div>
-	</div>
+	<ComponentPreview
+		id="filled"
+		title="Filled Select"
+		description="Filled selects are used for medium emphasis actions."
+		code={`
+<select
+	class={cn('select select-filled', filledValue.value)}
+	bind:value={filledValue.value}
+>
+	{#each values as item (item.value)}
+		<option value={item.value}>{item.key}</option>
+	{/each}
+</select>
+		`}
+	>
+		<select
+			class={cn('select w-full max-w-64 select-filled', filledValue.value)}
+			bind:value={filledValue.value}
+		>
+			{#each values as item (item.value)}
+				<option value={item.value}>{item.key}</option>
+			{/each}
+		</select>
+	</ComponentPreview>
 	<!-- Tonal -->
-	<div id="tonal" class="component-preview">
-		<div class="component-preview-header">
-			<a href="#tonal" class="component-preview-anchor">
-				<Hash />
-			</a>
-			<p>Tonal Select</p>
-		</div>
-		<div class="component-preview-body">
-			<select
-				class={cn('select w-full max-w-64 select-tonal', tonalValue.value)}
-				bind:value={tonalValue.value}
-			>
-				{#each values as item (item.value)}
-					<option value={item.value}>{item.key}</option>
-				{/each}
-			</select>
-		</div>
-	</div>
+	<ComponentPreview
+		id="tonal"
+		title="Tonal Select"
+		description="Tonal selects are used for medium emphasis actions."
+		code={`
+<select
+	class={cn('select select-tonal', tonalValue.value)}
+	bind:value={tonalValue.value}
+>
+	{#each values as item (item.value)}
+		<option value={item.value}>{item.key}</option>
+	{/each}
+</select>
+		`}
+	>
+		<select
+			class={cn('select w-full max-w-64 select-tonal', tonalValue.value)}
+			bind:value={tonalValue.value}
+		>
+			{#each values as item (item.value)}
+				<option value={item.value}>{item.key}</option>
+			{/each}
+		</select>
+	</ComponentPreview>
 	<!-- Outlined -->
-	<div id="outlined" class="component-preview">
-		<div class="component-preview-header">
-			<a href="#outlined" class="component-preview-anchor">
-				<Hash />
-			</a>
-			<p>Outlined Select</p>
-		</div>
-		<div class="component-preview-body">
-			<select
-				class={cn('select w-full max-w-64 select-outlined', outlinedValue.value)}
-				bind:value={outlinedValue.value}
-			>
-				{#each values as item (item.value)}
-					<option value={item.value}>{item.key}</option>
-				{/each}
-			</select>
-		</div>
-	</div>
+	<ComponentPreview
+		id="outlined"
+		title="Outlined Select"
+		description="Outlined selects are used for medium emphasis actions."
+		code={`
+<select
+	class={cn('select select-outlined', outlinedValue.value)}
+	bind:value={outlinedValue.value}
+>
+	{#each values as item (item.value)}
+		<option value={item.value}>{item.key}</option>
+	{/each}
+</select>
+		`}
+	>
+		<select
+			class={cn('select w-full max-w-64 select-outlined', outlinedValue.value)}
+			bind:value={outlinedValue.value}
+		>
+			{#each values as item (item.value)}
+				<option value={item.value}>{item.key}</option>
+			{/each}
+		</select>
+	</ComponentPreview>
 	<!-- Text -->
-	<div id="text" class="component-preview">
-		<div class="component-preview-header">
-			<a href="#text" class="component-preview-anchor">
-				<Hash />
-			</a>
-			<p>Text Select</p>
-		</div>
-		<div class="component-preview-body">
-			<select
-				class={cn('select w-full max-w-64 select-text', textValue.value)}
-				bind:value={textValue.value}
-			>
-				{#each values as item (item.value)}
-					<option value={item.value}>{item.key}</option>
-				{/each}
-			</select>
-		</div>
-	</div>
+	<ComponentPreview
+		id="text"
+		title="Text Select"
+		description="Text selects are used for medium emphasis actions."
+		code={`
+<select
+	class={cn('select select-text', textValue.value)}
+	bind:value={textValue.value}
+>
+	{#each values as item (item.value)}
+		<option value={item.value}>{item.key}</option>
+	{/each}
+</select>
+		`}
+	>
+		<select
+			class={cn('select w-full max-w-64 select-text', textValue.value)}
+			bind:value={textValue.value}
+		>
+			{#each values as item (item.value)}
+				<option value={item.value}>{item.key}</option>
+			{/each}
+		</select>
+	</ComponentPreview>
 	<!-- Sizes -->
-	<div id="sizes" class="component-preview">
-		<div class="component-preview-header">
-			<a href="#sizes" class="component-preview-anchor">
-				<Hash />
-			</a>
-			<p>Select Sizes</p>
-		</div>
-		<div class="component-preview-body">
-			<select class="select w-full max-w-64 select-xs select-tonal">
-				{#each values as item (item.value)}
-					<option value={item.value}>{item.key}</option>
-				{/each}
-			</select>
-			<select class="select w-full max-w-64 select-sm select-tonal">
-				{#each values as item (item.value)}
-					<option value={item.value}>{item.key}</option>
-				{/each}
-			</select>
-			<select class="select w-full max-w-64 select-md select-tonal">
-				{#each values as item (item.value)}
-					<option value={item.value}>{item.key}</option>
-				{/each}
-			</select>
-			<select class="select w-full max-w-64 select-lg select-tonal">
-				{#each values as item (item.value)}
-					<option value={item.value}>{item.key}</option>
-				{/each}
-			</select>
-			<select class="select w-full max-w-64 select-xl select-tonal">
-				{#each values as item (item.value)}
-					<option value={item.value}>{item.key}</option>
-				{/each}
-			</select>
-		</div>
-	</div>
+	<ComponentPreview
+		id="sizes"
+		title="Select Sizes"
+		description="Selects can be sized to fit the needs of the user."
+		code={`
+<select 
+	class={cn('select select-tonal', sizeValue.value)} 
+	bind:value={sizeValue.value}
+>
+	{#each sizes as item (item.value)}
+		<option value={item.value}>{item.key}</option>
+	{/each}
+</select>
+		`}
+	>
+		<select
+			class={cn('select w-full max-w-64 select-elevated', sizeValue.value)}
+			bind:value={sizeValue.value}
+		>
+			{#each sizes as item (item.value)}
+				<option value={item.value}>{item.key}</option>
+			{/each}
+		</select>
+	</ComponentPreview>
 	<!-- Disabled -->
-	<div id="disabled" class="component-preview">
-		<div class="component-preview-header">
-			<a href="#disabled" class="component-preview-anchor">
-				<Hash />
-			</a>
-			<p>Disabled Select</p>
-		</div>
-		<div class="component-preview-body">
-			<select class="select w-full max-w-64 select-tonal" disabled>
-				{#each values as item (item.value)}
-					<option value={item.value}>{item.key}</option>
-				{/each}
-			</select>
-		</div>
-	</div>
+	<ComponentPreview
+		id="disabled"
+		title="Disabled Select"
+		description="Selects can be disabled to prevent user interaction."
+		code={`
+<select class="select select-tonal" disabled>
+	<option value="surface">Surface</option>
+	<option value="primary">Primary</option>
+	<option value="secondary">Secondary</option>
+	<option value="tertiary">Tertiary</option>
+	<option value="error">Error</option>
+	<option value="success">Success</option>
+	<option value="warning">Warning</option>
+	<option value="info">Info</option>
+	<option value="alert">Alert</option>
+</select>
+`}
+	>
+		<select class="select w-full max-w-64 select-tonal" disabled>
+			{#each values as item (item.value)}
+				<option value={item.value}>{item.key}</option>
+			{/each}
+		</select>
+	</ComponentPreview>
+	<!-- Native Select -->
+	<ComponentPreview
+		id="native-select"
+		title="Native Select"
+		description="Native selects can also be used for consistent styling across different platforms."
+		code={`
+<select class="select select-tonal">
+	<option value="surface">Surface</option>
+	<option value="primary">Primary</option>
+	<option value="secondary">Secondary</option>
+	<option value="tertiary">Tertiary</option>
+	<option value="error">Error</option>
+	<option value="success">Success</option>
+	<option value="warning">Warning</option>
+	<option value="info">Info</option>
+	<option value="alert">Alert</option>
+</select>
+...
+`}
+	>
+		<select
+			class={cn('select w-full max-w-64 select-tonal', tonalValue.value)}
+			bind:value={tonalValue.value}
+		>
+			{#each values as item (item.value)}
+				<option value={item.value}>{item.key}</option>
+			{/each}
+		</select>
+		<select
+			class={cn('select w-full max-w-64 select-filled', filledValue.value)}
+			bind:value={filledValue.value}
+		>
+			{#each values as item (item.value)}
+				<option value={item.value}>{item.key}</option>
+			{/each}
+		</select>
+	</ComponentPreview>
 </div>

@@ -8,7 +8,7 @@
 	};
 </script>
 
-<div class="flex h-full w-full flex-col gap-4 p-6">
+<div class="flex h-full w-full flex-col items-center gap-4 p-6">
 	<div class="max-w-xl space-y-2">
 		<h1 class="text-title-large-emphasized">Themed SVG</h1>
 		<p class="text-body-medium text-on-surface-variant">

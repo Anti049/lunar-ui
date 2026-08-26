@@ -8,7 +8,7 @@
  * ========================================================================== */
 @utility appbar {
 	@layer appbar.l3 {
-		@apply relative flex w-full flex-row items-center gap-4 border-b border-b-surface-container surface-container-low p-2 transition-colors duration-200 ease-in-out;
+		@apply relative flex w-full flex-row items-center gap-2 border-b border-b-surface-container surface-container-low p-2 transition-colors duration-200 ease-in-out;
 
 		/* Default size is small */
 		@apply appbar-sm;
@@ -97,7 +97,7 @@
 }
 @utility appbar-body {
 	@layer appbar.l2 {
-		@apply flex h-full w-fit flex-col justify-center overflow-clip text-ellipsis select-none;
+		@apply flex h-full w-full flex-col justify-center overflow-clip text-ellipsis select-none;
 
 		/* When the appbar is centered, fill the space and center the text. */
 		.appbar-centered & {
@@ -112,6 +112,6 @@
 }
 @utility appbar-subtitle {
 	@layer appbar.l2 {
-		@apply text-on-surface-variant;
+		@apply hidden text-on-surface-variant compact:flex;
 	}
 }

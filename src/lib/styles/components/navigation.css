@@ -63,7 +63,7 @@
 .nav-link[disabled],
 .nav-link:disabled {
 	@layer nav-link.l1 {
-		@apply cursor-not-allowed text-on-surface/38 before:bg-transparent;
+		@apply pointer-events-none cursor-not-allowed text-on-surface/38 before:bg-transparent;
 	}
 }
 

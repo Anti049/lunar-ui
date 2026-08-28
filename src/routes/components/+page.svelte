@@ -9,7 +9,7 @@
 	{#each componentLinks as link (link.href)}
 		<a
 			href={link.href}
-			class="flex flex-col gap-2 rounded-sm surface-container p-4 elevation-2 transition-all duration-200 hover:-translate-y-2 hover:elevation-4 {isDisabled(
+			class="flex flex-col gap-2 rounded-sm surface-container p-4 elevation-2 transition-all animated hover:-translate-y-2 hover:elevation-4 {isDisabled(
 				link
 			)
 				? 'pointer-events-none opacity-50'

@@ -8,10 +8,7 @@
  * ========================================================================== */
 @utility appbar {
 	@layer appbar.l3 {
-		@apply relative flex w-full flex-row items-center gap-2 border-b border-b-surface-container surface-container-low p-2 transition-colors duration-200 ease-in-out;
-
-		/* Default size is small */
-		@apply appbar-sm;
+		@apply relative flex h-16 w-full items-center gap-2 surface-container-low px-3 py-2;
 	}
 }
 
@@ -19,9 +16,9 @@
  * STATE (l1)
  * Highest per-component priority. Wins over sizes and foundation.
  * ========================================================================== */
-@utility appbar-scrolled {
+@utility appbar-scrollable {
 	@layer appbar.l1 {
-		@apply surface-container elevation-1;
+		@apply transition-colors animated data-scrolled:surface-container data-scrolled:elevation-1;
 	}
 }
 
@@ -42,76 +39,57 @@
 }
 
 /* =============================================================================
- * SIZES (l2)
- * Define different height and padding for various appbar sizes.
- * ========================================================================== */
-@utility appbar-sm {
-	@layer appbar.l2 {
-		@apply h-16 px-2;
-		& .appbar-title {
-			@apply text-title-medium-emphasized;
-		}
-		& .appbar-subtitle {
-			@apply text-label-small;
-		}
-	}
-}
-
-@utility appbar-md {
-	@layer appbar.l2 {
-		@apply h-20 px-4;
-		& .appbar-title {
-			@apply text-title-large-emphasized;
-		}
-		& .appbar-subtitle {
-			@apply text-label-medium;
-		}
-	}
-}
-
-@utility appbar-lg {
-	@layer appbar.l2 {
-		@apply h-24 px-6;
-		& .appbar-title {
-			@apply text-headline-small-emphasized;
-		}
-		& .appbar-subtitle {
-			@apply text-label-large;
-		}
-	}
-}
-
-/* =============================================================================
  * SLOTS (l2)
  * Define different slots for the appbar component.
  * ========================================================================== */
 @utility appbar-leading {
 	@layer appbar.l2 {
-		@apply flex aspect-square h-full flex-row items-center justify-center gap-2;
+		@apply inline-flex max-w-1/2 items-center gap-2;
+
+		/* Tighten the appbar's left edge when a leading slot is present. */
+		.appbar:has(> &) {
+			@apply pl-2;
+		}
 	}
 }
 @utility appbar-trailing {
 	@layer appbar.l2 {
-		@apply flex aspect-square h-full flex-row items-center justify-center gap-2;
+		@apply inline-flex max-w-1/2 items-center gap-2;
+
+		/* Tighten the appbar's right edge when a trailing slot is present. */
+		.appbar:has(> &) {
+			@apply pr-2;
+		}
 	}
 }
 @utility appbar-body {
 	@layer appbar.l2 {
-		@apply flex h-full w-full flex-col justify-center overflow-clip text-ellipsis select-none;
+		/* min-w-0 lets the body shrink below its content width so the title
+		 * truncates instead of pushing the leading/trailing slots. */
+		@apply flex h-full w-full min-w-0 flex-col justify-center overflow-hidden select-none;
 
 		/* When the appbar is centered, fill the space and center the text. */
 		.appbar-centered & {
 			@apply w-full text-center;
 		}
+
+		/* Pad an edge only when its adjacent slot is absent, so the body text
+		 * doesn't double up spacing against a leading/trailing slot. */
+		.appbar:not(:has(.appbar-leading)) &:has(.appbar-title, .appbar-subtitle) {
+			@apply pl-2;
+		}
+		.appbar:not(:has(.appbar-trailing)) &:has(.appbar-title, .appbar-subtitle) {
+			@apply pr-2;
+		}
 	}
 }
 @utility appbar-title {
 	@layer appbar.l2 {
-		@apply text-on-surface;
+		@apply w-full truncate text-title-medium-emphasized text-on-surface;
 	}
 }
 @utility appbar-subtitle {
 	@layer appbar.l2 {
-		@apply hidden text-on-surface-variant compact:flex;
+		@apply w-full truncate text-label-small text-on-surface-variant;
 	}
 }

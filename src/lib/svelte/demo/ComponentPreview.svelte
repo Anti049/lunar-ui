@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount, type Snippet } from 'svelte';
 	import { Hash, Eye, Code } from '@lucide/svelte';
+	import * as prettier from 'prettier/standalone';
+	import * as htmlPlugin from 'prettier/plugins/html';
 	import CodeBlock from '../components/CodeBlock.svelte';
 	import { cn } from '$lib/utils';
 
@@ -23,17 +25,66 @@
 		children
 	}: ComponentPreviewProps = $props();
 	let previewBody: HTMLDivElement | undefined = $state();
-	let codeContents = $derived(getCodeOfChildren());
+
+	// Placeholder emitted in place of a Lucide <svg>, swapped for a component tag post-format.
+	const LUCIDE_TOKEN = /%%LUCIDE:([A-Za-z0-9]+)%%/g;
+
+	function lucideComponentName(el: Element): string | null {
+		const cls = Array.from(el.classList).find(
+			(c) => c.startsWith('lucide-') && c !== 'lucide-icon'
+		);
+		if (!cls) return null;
+		return cls
+			.slice('lucide-'.length)
+			.replace(/(^|-)([a-z0-9])/g, (_, __, ch: string) => ch.toUpperCase());
+	}
+
+	function stripBlankComments(root: Element): void {
+		const walker = document.createTreeWalker(root, NodeFilter.SHOW_COMMENT);
+		const blanks: Comment[] = [];
+		while (walker.nextNode()) {
+			const node = walker.currentNode as Comment;
+			if (!node.data.trim()) blanks.push(node);
+		}
+		blanks.forEach((node) => node.remove());
+	}
 
 	function getCodeOfChildren(): string {
-		return previewBody
-			? Array.from(previewBody.children)
-					.map((child) => child.outerHTML)
-					.join('\n')
-			: '';
+		if (!previewBody) return '';
+		return Array.from(previewBody.children)
+			.map((child) => {
+				const clone = child.cloneNode(true) as Element;
+				const rootName = clone instanceof SVGElement ? lucideComponentName(clone) : null;
+				if (rootName) return `%%LUCIDE:${rootName}%%`;
+				stripBlankComments(clone);
+				clone.querySelectorAll('svg').forEach((svg) => {
+					const name = lucideComponentName(svg);
+					if (name) svg.replaceWith(`%%LUCIDE:${name}%%`);
+				});
+				return clone.outerHTML;
+			})
+			.join('\n');
 	}
-	onMount(() => {
-		codeContents = getCodeOfChildren();
+
+	async function formatCode(raw: string): Promise<string> {
+		if (!raw.trim()) return '';
+		let output = raw;
+		try {
+			output = await prettier.format(raw, {
+				parser: 'html',
+				plugins: [htmlPlugin],
+				useTabs: true,
+				printWidth: 100,
+				htmlWhitespaceSensitivity: 'ignore'
+			});
+		} catch {
+			// Fall back to the unformatted markup.
+		}
+		return output.replace(LUCIDE_TOKEN, '<$1 />').trim();
+	}
+
+	onMount(async () => {
+		code = await formatCode(getCodeOfChildren());
 	});
 </script>
 

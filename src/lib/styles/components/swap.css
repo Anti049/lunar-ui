@@ -41,7 +41,7 @@
 
 		/* Stack every direct child into the same grid cell so they overlap. */
 		> * {
-			@apply col-start-1 row-start-1 transition-[opacity,transform] duration-200 ease-in-out;
+			@apply col-start-1 row-start-1 transition-[opacity,transform] animated;
 		}
 
 		/* Hide the driving checkbox without removing it from the a11y tree. */

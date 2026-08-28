@@ -26,7 +26,6 @@
 		} else {
 			setMode('light');
 		}
-		console.log(mode.current);
 	}
 
 	onMount(() => initRipple());
@@ -58,7 +57,7 @@
 				<X class="swap-on" />
 			</button>
 		</div> -->
-		<div class="appbar appbar-centered">
+		<div class="appbar appbar-centered border-b border-b-surface-container">
 			<div class="appbar-leading">
 				<button
 					class="button swap button-square button-md button-text"

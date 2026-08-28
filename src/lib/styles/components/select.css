@@ -21,7 +21,7 @@
 		outline-color: var(--select-outline-color, var(--color-on-surface));
 
 		/* Transitions */
-		@apply transition-all duration-200 ease-in-out;
+		@apply transition-all;
 	}
 }
 

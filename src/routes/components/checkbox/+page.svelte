@@ -1,2 +1,89 @@
-<h1 class="text-3xl font-bold mb-4">Checkbox</h1>
-<p>Documentation and examples for the Checkbox component.</p>
+<script lang="ts">
+	import ComponentPreview from '$lib/svelte/demo/ComponentPreview.svelte';
+</script>
+
+<div class="flex h-full w-full flex-col gap-8">
+	<!-- Header -->
+	<div class="flex flex-col gap-2">
+		<p class="text-headline-large-emphasized text-primary">Checkbox</p>
+		<p class="text-body-medium text-on-surface-variant">
+			Checkboxes allow the user to select one or more items from a set.
+		</p>
+	</div>
+	<!-- Elevated -->
+	<ComponentPreview
+		id="elevated"
+		title="Elevated Checkbox"
+		description="Elevated checkboxes are used for high emphasis actions."
+	>
+		<input type="checkbox" class="checkbox checkbox-elevated checkbox-surface" />
+		<input type="checkbox" class="checkbox checkbox-elevated checkbox-primary" />
+		<input type="checkbox" class="checkbox checkbox-elevated checkbox-secondary" />
+		<input type="checkbox" class="checkbox checkbox-elevated checkbox-tertiary" />
+		<input type="checkbox" class="checkbox checkbox-elevated checkbox-error" />
+		<input type="checkbox" class="checkbox checkbox-elevated checkbox-success" />
+		<input type="checkbox" class="checkbox checkbox-elevated checkbox-warning" />
+		<input type="checkbox" class="checkbox checkbox-elevated checkbox-info" />
+		<input type="checkbox" class="checkbox checkbox-elevated checkbox-alert" />
+	</ComponentPreview>
+	<!-- Filled -->
+	<ComponentPreview
+		id="filled"
+		title="Filled Checkbox"
+		description="Filled checkboxes are used for medium emphasis actions."
+	>
+		<input type="checkbox" class="checkbox checkbox-filled checkbox-surface" />
+		<input type="checkbox" class="checkbox checkbox-filled checkbox-primary" />
+		<input type="checkbox" class="checkbox checkbox-filled checkbox-secondary" />
+		<input type="checkbox" class="checkbox checkbox-filled checkbox-tertiary" />
+		<input type="checkbox" class="checkbox checkbox-filled checkbox-error" />
+		<input type="checkbox" class="checkbox checkbox-filled checkbox-success" />
+		<input type="checkbox" class="checkbox checkbox-filled checkbox-warning" />
+		<input type="checkbox" class="checkbox checkbox-filled checkbox-info" />
+		<input type="checkbox" class="checkbox checkbox-filled checkbox-alert" />
+	</ComponentPreview>
+	<!-- Tonal -->
+	<ComponentPreview
+		id="tonal"
+		title="Tonal Checkbox"
+		description="Tonal checkboxes are used for low emphasis actions."
+	>
+		<input type="checkbox" class="checkbox checkbox-tonal checkbox-surface" />
+		<input type="checkbox" class="checkbox checkbox-tonal checkbox-primary" />
+		<input type="checkbox" class="checkbox checkbox-tonal checkbox-secondary" />
+		<input type="checkbox" class="checkbox checkbox-tonal checkbox-tertiary" />
+		<input type="checkbox" class="checkbox checkbox-tonal checkbox-error" />
+		<input type="checkbox" class="checkbox checkbox-tonal checkbox-success" />
+		<input type="checkbox" class="checkbox checkbox-tonal checkbox-warning" />
+		<input type="checkbox" class="checkbox checkbox-tonal checkbox-info" />
+		<input type="checkbox" class="checkbox checkbox-tonal checkbox-alert" />
+	</ComponentPreview>
+	<!-- Outlined -->
+	<ComponentPreview
+		id="outlined"
+		title="Outlined Checkbox"
+		description="Outlined checkboxes are used for low emphasis actions."
+	>
+		<input type="checkbox" class="checkbox checkbox-outlined checkbox-surface" />
+		<input type="checkbox" class="checkbox checkbox-outlined checkbox-primary" />
+		<input type="checkbox" class="checkbox checkbox-outlined checkbox-secondary" />
+		<input type="checkbox" class="checkbox checkbox-outlined checkbox-tertiary" />
+		<input type="checkbox" class="checkbox checkbox-outlined checkbox-error" />
+		<input type="checkbox" class="checkbox checkbox-outlined checkbox-success" />
+		<input type="checkbox" class="checkbox checkbox-outlined checkbox-warning" />
+		<input type="checkbox" class="checkbox checkbox-outlined checkbox-info" />
+		<input type="checkbox" class="checkbox checkbox-outlined checkbox-alert" />
+	</ComponentPreview>
+	<!-- Sizes -->
+	<ComponentPreview
+		id="sizes"
+		title="Checkbox Sizes"
+		description="Checkboxes come in different sizes."
+	>
+		<input type="checkbox" class="checkbox checkbox-xs checkbox-primary" />
+		<input type="checkbox" class="checkbox checkbox-sm checkbox-primary" />
+		<input type="checkbox" class="checkbox checkbox-md checkbox-primary" />
+		<input type="checkbox" class="checkbox checkbox-lg checkbox-primary" />
+		<input type="checkbox" class="checkbox checkbox-xl checkbox-primary" />
+	</ComponentPreview>
+</div>

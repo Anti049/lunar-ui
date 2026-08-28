@@ -1,38 +1,30 @@
 <script lang="ts">
 	import ComponentPreview from '$lib/svelte/demo/ComponentPreview.svelte';
-
-	let code = $state(`
-<!-- Surface -->
-<button class="button button-elevated button-surface">
-	Surface
-</button>
-<!-- Primary -->
-<button class="button button-elevated button-primary">Primary</button>
-<!-- Secondary -->
-<button class="button button-elevated button-secondary">Secondary</button>
-<!-- Tertiary -->
-<button class="button button-elevated button-tertiary">Tertiary</button>
-<!-- Error -->
-<button class="button button-elevated button-error">Error</button>
-<!-- Success -->
-<button class="button button-elevated button-success">Success</button>
-<!-- Warning -->
-<button class="button button-elevated button-warning">Warning</button>
-<!-- Info -->
-<button class="button button-elevated button-info">Info</button>
-<!-- Alert -->
-<button class="button button-elevated button-alert">Test</button>
-`);
 </script>
 
 <div class="flex h-full w-full flex-col gap-8">
+	<!-- Header -->
+	<div class="flex flex-col gap-2">
+		<p class="text-headline-large-emphasized text-primary">Button</p>
+		<p class="text-body-medium text-on-surface-variant">
+			Buttons allow the user to take actions or make choices.
+		</p>
+	</div>
 	<!-- Elevated -->
 	<ComponentPreview
 		id="elevated"
 		title="Elevated Button"
 		description="Elevated buttons are used for high emphasis actions."
 	>
-		{@html code}
+		<button class="button button-elevated button-surface">Surface</button>
+		<button class="button button-elevated button-primary">Primary</button>
+		<button class="button button-elevated button-secondary">Secondary</button>
+		<button class="button button-elevated button-tertiary">Tertiary</button>
+		<button class="button button-elevated button-error">Error</button>
+		<button class="button button-elevated button-success">Success</button>
+		<button class="button button-elevated button-warning">Warning</button>
+		<button class="button button-elevated button-info">Info</button>
+		<button class="button button-elevated button-alert">Alert</button>
 	</ComponentPreview>
 	<!-- Filled -->
 	<ComponentPreview

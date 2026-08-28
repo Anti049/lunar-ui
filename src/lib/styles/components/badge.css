@@ -1,5 +1,175 @@
 /* 
 	Badge
-
-	TODO: Add styles for the badge component
 */
+
+@utility badge {
+	@layer badge.l3 {
+		@apply pointer-events-none flex h-fit min-h-4 w-fit min-w-4 items-center justify-center gap-2 rounded-sm px-1 py-0.5 align-middle;
+		@apply badge-filled badge-surface;
+	}
+}
+
+.badge-disabled,
+.badge.disabled,
+.badge[disabled] {
+	@layer badge.l1 {
+		@apply bg-on-surface/38 text-surface/76;
+	}
+}
+
+.badge:empty {
+	@layer badge.l3 {
+		@apply rounded-full;
+		/* If being used as an indicator, update the offset to better attach the smaller badge */
+		--indicator-translate-amount: 33%;
+	}
+}
+
+/* Variants */
+@utility badge-filled {
+	@layer badge.l2 {
+		background-color: var(--badge-color, var(--color-primary));
+		color: var(--badge-on-color, var(--color-on-primary));
+	}
+}
+@utility badge-tonal {
+	@layer badge.l2 {
+		background-color: var(--badge-container, var(--color-primary-container));
+		color: var(--badge-on-container, var(--color-on-primary-container));
+	}
+}
+@utility badge-elevated {
+	@layer badge.l2 {
+		@apply bg-surface-container enabled:elevation-1;
+		color: var(--badge-color, var(--color-primary));
+	}
+}
+@utility badge-outlined {
+	@layer badge.l2 {
+		@apply bg-transparent;
+		color: var(--badge-color, var(--color-on-surface));
+		border: 1px solid
+			color-mix(in srgb, var(--badge-color, var(--color-on-surface-variant)) 85%, transparent);
+	}
+}
+@utility badge-text {
+	@layer badge.l2 {
+		@apply bg-transparent;
+		color: var(--badge-color, var(--color-on-surface));
+	}
+}
+
+/* Colors */
+@utility badge-primary {
+	@layer badge.l2 {
+		--badge-color: var(--color-primary);
+		--badge-on-color: var(--color-on-primary);
+		--badge-container: var(--color-primary-container);
+		--badge-on-container: var(--color-on-primary-container);
+		--badge-outline-color: var(--color-primary);
+	}
+}
+
+@utility badge-secondary {
+	@layer badge.l2 {
+		--badge-color: var(--color-secondary);
+		--badge-on-color: var(--color-on-secondary);
+		--badge-container: var(--color-secondary-container);
+		--badge-on-container: var(--color-on-secondary-container);
+		--badge-outline-color: var(--color-secondary);
+	}
+}
+
+@utility badge-tertiary {
+	@layer badge.l2 {
+		--badge-color: var(--color-tertiary);
+		--badge-on-color: var(--color-on-tertiary);
+		--badge-container: var(--color-tertiary-container);
+		--badge-on-container: var(--color-on-tertiary-container);
+		--badge-outline-color: var(--color-tertiary);
+	}
+}
+
+@utility badge-error {
+	@layer badge.l2 {
+		--badge-color: var(--color-error);
+		--badge-on-color: var(--color-on-error);
+		--badge-container: var(--color-error-container);
+		--badge-on-container: var(--color-on-error-container);
+		--badge-outline-color: var(--color-error);
+	}
+}
+
+@utility badge-surface {
+	@layer badge.l2 {
+		--badge-color: var(--color-inverse-surface);
+		--badge-on-color: var(--color-on-inverse-surface);
+		--badge-container: var(--color-surface-container);
+		--badge-on-container: var(--color-on-surface);
+		--badge-outline-color: var(--color-on-surface);
+	}
+}
+
+@utility badge-success {
+	@layer badge.l2 {
+		--badge-color: var(--color-success);
+		--badge-on-color: var(--color-on-success);
+		--badge-container: var(--color-success-container);
+		--badge-on-container: var(--color-on-success-container);
+		--badge-outline-color: var(--color-success);
+	}
+}
+
+@utility badge-warning {
+	@layer badge.l2 {
+		--badge-color: var(--color-warning);
+		--badge-on-color: var(--color-on-warning);
+		--badge-container: var(--color-warning-container);
+		--badge-on-container: var(--color-on-warning-container);
+		--badge-outline-color: var(--color-warning);
+	}
+}
+
+@utility badge-info {
+	@layer badge.l2 {
+		--badge-color: var(--color-info);
+		--badge-on-color: var(--color-on-info);
+		--badge-container: var(--color-info-container);
+		--badge-on-container: var(--color-on-info-container);
+		--badge-outline-color: var(--color-info);
+	}
+}
+
+@utility badge-alert {
+	@layer badge.l2 {
+		--badge-color: var(--color-alert);
+		--badge-on-color: var(--color-on-alert);
+		--badge-container: var(--color-alert-container);
+		--badge-on-container: var(--color-on-alert-container);
+		--badge-outline-color: var(--color-alert);
+	}
+}
+
+/* Animation */
+@keyframes badge-alert {
+	75%,
+	100% {
+		transform: scale(1.5);
+		opacity: 0;
+	}
+}
+@utility badge-animate-alert {
+	@layer badge.l1 {
+		&::after {
+			@apply absolute inset-0 -z-10 bg-inherit content-[''];
+			/* Inherit the badge's radius so the halo matches dot and pill shapes. */
+			border-radius: inherit;
+			animation: badge-alert 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+		}
+	}
+}
+@utility badge-animate-bounce {
+	@layer badge.l1 {
+		@apply animate-bounce;
+	}
+}

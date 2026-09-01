@@ -1,33 +1,28 @@
 <script lang="ts">
-	import CodeBlock from '$lib/svelte/components/CodeBlock.svelte';
-
-	let code = /* html */ `/* Example Svelte component */
-<style lang="postcss">
-	.foo {
-		color: var(--color-on-surface);
-		background-color: #000000;
-		@apply flex flex-col gap-2;
-	}
-<\/style>
-<script>
-	export let user = {
-		name: 'John Doe',
-		role: 'Admin',
-		age: 32
-	};
-	let age: number = user.age;
-	// Function to handle button click
-	function handleClick() {
-		alert('Clicked!');
-	}
-<\/script>
-<div class="user-card">
-	<h2>\${user.name} - User 0</h2>
-	<p>Role: <strong>\${user.role}</strong></p>
-	<button onclick={handleClick}>View Profile</button>
-</div>`;
+	import ComponentPreview from '$lib/svelte/demo/ComponentPreview.svelte';
 </script>
 
-<div data-theme="gaziter">
-	<CodeBlock {code} lang="svelte" />
+<div class="flex h-full w-full grow flex-row items-center justify-center gap-4">
+	<ComponentPreview id="before" title="Before" class="flex-1">
+		<button class="button button-filled button-surface" disabled>Surface</button>
+		<button class="button button-filled button-primary" disabled>Primary</button>
+		<button class="button button-filled button-secondary">Secondary</button>
+		<button class="button button-filled button-tertiary">Tertiary</button>
+		<button class="button button-filled button-error">Error</button>
+		<button class="button button-filled button-success">Success</button>
+		<button class="button button-filled button-warning">Warning</button>
+		<button class="button button-filled button-info">Info</button>
+		<button class="button button-filled button-alert">Alert</button>
+	</ComponentPreview>
+	<ComponentPreview id="after" title="After" class="flex-1">
+		<button class="btn btn-filled btn-surface" disabled>Surface</button>
+		<button class="btn btn-filled btn-primary" disabled>Primary</button>
+		<button class="btn btn-filled btn-secondary">Secondary</button>
+		<button class="btn btn-filled btn-tertiary">Tertiary</button>
+		<button class="btn btn-filled btn-error">Error</button>
+		<button class="btn btn-filled btn-success">Success</button>
+		<button class="btn btn-filled btn-warning">Warning</button>
+		<button class="btn btn-filled btn-info">Info</button>
+		<button class="btn btn-filled btn-alert">Alert</button>
+	</ComponentPreview>
 </div>

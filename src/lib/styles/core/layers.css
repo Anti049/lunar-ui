@@ -41,4 +41,7 @@
 	@layer swap.l3, 
 			swap.l2, 
 			swap.l1;
+	@layer tooltip.l3, 
+			tooltip.l2, 
+			tooltip.l1;
 }

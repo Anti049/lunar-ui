@@ -1,11 +1,11 @@
 @utility component-preview {
 	@layer component-preview.l3 {
-		@apply flex flex-col overflow-clip rounded-sm border border-on-surface-variant/15;
+		@apply flex flex-col rounded-sm border border-on-surface-variant/15;
 	}
 }
 
 @utility component-preview-header {
-	@apply flex w-full flex-col justify-center gap-2;
+	@apply flex w-full flex-col justify-center gap-2 border-b border-b-surface-container;
 }
 
 @utility component-preview-label {
@@ -25,7 +25,7 @@
 }
 
 @utility component-preview-body {
-	@apply flex h-fit w-full flex-row flex-wrap items-center justify-center gap-2 surface-container-lowest p-4;
+	@apply flex h-fit min-h-32 w-full grow flex-row flex-wrap items-center justify-center gap-2 surface-container-lowest p-4;
 }
 
 @utility component-preview-body-pattern {

@@ -56,23 +56,13 @@
 
 @utility button {
 	@layer button.l3 {
-		/* -----------------------------------------------------------------------
-		 * Layout + typography defaults via @apply.
-		 * -------------------------------------------------------------------- */
-		@apply interactive inline-flex h-fit min-h-fit w-fit min-w-fit origin-center items-center justify-center rounded-sm text-center align-middle font-medium focusable transition-[background-color,color,border-color,box-shadow,scale] select-none active:scale-95;
-
-		/* Default size is md; overridable by any button-{size} utility */
+		@apply interactive inline-flex h-fit min-h-fit w-fit min-w-fit origin-center items-center justify-center gap-2 rounded-sm text-center align-middle focusable outline-(--button-outline-color)! transition-[background-color,color,border-color,box-shadow,scale] select-none;
+		/* Default size is medium */
 		@apply button-md;
-
-		/* Default variant is filled; overridable by any button-{variant} utility */
+		/* Default variant is filled */
 		@apply button-filled;
-
-		/* -----------------------------------------------------------------------
-		 * Outline color falls back to on-surface when no color variant is set.
-		 * Color variants override this via --button-outline-color.
-		 * (No @apply — this is a raw fallback expression with a custom var.)
-		 * -------------------------------------------------------------------- */
-		outline-color: var(--button-outline-color, var(--color-on-surface)) !important;
+		/* Default color is primary */
+		@apply button-primary;
 	}
 }
 
@@ -93,7 +83,7 @@
 .button[disabled],
 .button:disabled {
 	@layer button.l1 {
-		@apply cursor-not-allowed border-on-surface/12 text-on-surface/38 before:bg-transparent;
+		@apply pointer-events-none border-on-surface/12 text-on-surface/38 elevation-0 before:bg-transparent;
 
 		/*
 		 * Body fill is the disabled tint UNLESS this is a text button (text
@@ -105,9 +95,6 @@
 		&.button-text.selected {
 			@apply bg-on-surface/10 selected:bg-on-surface/20;
 		}
-
-		/* Kill elevation when disabled — otherwise elevated buttons look active */
-		box-shadow: none;
 	}
 }
 
@@ -381,13 +368,13 @@
 
 @utility button-square {
 	@layer button.l2 {
-		@apply aspect-square px-0;
+		@apply aspect-square;
 	}
 }
 
 @utility button-circle {
 	@layer button.l2 {
-		@apply aspect-square rounded-full px-0;
+		@apply aspect-square rounded-full;
 	}
 }
 
@@ -407,67 +394,17 @@
  * ⚠️  Padding values match half of the base horizontal padding for each size.
  *     Keep in sync with SIZES utilities if you tune the base padding.
  * ========================================================================== */
-
-@utility button-leading {
-	@layer button.l2 {
-		&.button-xs {
-			@apply pl-1;
-		} /* half of px-2   */
-		&.button-sm {
-			@apply pl-1.5;
-		} /* half of px-2.5 */
-		&.button-md {
-			@apply pl-2;
-		} /* half of px-3   */
-		&.button-lg {
-			@apply pl-3;
-		} /* half of px-5   */
-		&.button-xl {
-			@apply pl-3.5;
-		} /* half of px-6   */
-	}
-}
-
-@utility button-trailing {
-	@layer button.l2 {
-		&.button-xs {
-			@apply pr-1;
-		}
-		&.button-sm {
-			@apply pr-1.5;
-		}
-		&.button-md {
-			@apply pr-2;
-		}
-		&.button-lg {
-			@apply pr-3;
-		}
-		&.button-xl {
-			@apply pr-3.5;
-		}
-	}
-}
-
-/*
- * Progressive enhancement: auto-detect SVG icons in hand-written HTML.
- * Skip if the only child is an SVG (icon-only) or a .sr-only exists.
- *
- * Note: these can't use @apply for the per-size branching because they're
- * not inside a @utility block — they're free-standing rules with :has().
- * Padding values must match the button-leading/trailing @utility above.
- */
 .button:has(> svg:first-child:not(:only-child)):not(:has(> .sr-only)):not(.button-square):not(
 		.button-circle
-	) {
+	),
+.button:has(> .button-leading) {
 	@layer button.l2 {
+		@apply pl-2;
 		&.button-xs {
 			@apply pl-1;
 		}
 		&.button-sm {
 			@apply pl-1.5;
-		}
-		&.button-md {
-			@apply pl-2;
 		}
 		&.button-lg {
 			@apply pl-3;
@@ -477,19 +414,17 @@
 		}
 	}
 }
-
 .button:has(> svg:last-child:not(:only-child)):not(:has(> .sr-only)):not(.button-square):not(
 		.button-circle
-	) {
+	),
+.button:has(> .button-trailing) {
 	@layer button.l2 {
+		@apply pr-2;
 		&.button-xs {
 			@apply pr-1;
 		}
 		&.button-sm {
 			@apply pr-1.5;
-		}
-		&.button-md {
-			@apply pr-2;
 		}
 		&.button-lg {
 			@apply pr-3;

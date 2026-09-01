@@ -30,7 +30,7 @@
  * ========================================================================== */
 @utility checkbox {
 	@layer checkbox.l3 {
-		@apply relative inline-block shrink-0 cursor-pointer appearance-none rounded-sm border-0 bg-none bg-auto p-1 align-middle focusable transition-[background-color,color,border-color,box-shadow,scale];
+		@apply relative inline-block shrink-0 cursor-pointer appearance-none rounded-sm border-0 bg-none bg-auto align-middle focusable transition-[background-color,color,border-color,box-shadow,scale];
 
 		/* Check */
 		&:before {
@@ -264,26 +264,26 @@
  * ========================================================================== */
 @utility checkbox-xs {
 	@layer checkbox.l2 {
-		@apply size-4 p-0.5;
+		@apply size-4 p-0.75;
 	}
 }
 @utility checkbox-sm {
 	@layer checkbox.l2 {
-		@apply size-5 p-0.75;
+		@apply size-5 p-1;
 	}
 }
 @utility checkbox-md {
 	@layer checkbox.l2 {
-		@apply size-6 p-1;
+		@apply size-8 p-1.5;
 	}
 }
 @utility checkbox-lg {
 	@layer checkbox.l2 {
-		@apply size-8 p-1.25;
+		@apply size-10 p-1.75;
 	}
 }
 @utility checkbox-xl {
 	@layer checkbox.l2 {
-		@apply size-10 p-1.5;
+		@apply size-12 p-2;
 	}
 }

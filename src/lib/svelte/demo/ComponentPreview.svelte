@@ -13,6 +13,7 @@
 		view?: 'component' | 'code';
 		code?: string;
 		editable?: boolean;
+		class?: string;
 		children: Snippet<[]>;
 	}
 	let {
@@ -22,6 +23,7 @@
 		view = $bindable('component'),
 		code = $bindable(''),
 		editable = false,
+		class: className = '',
 		children
 	}: ComponentPreviewProps = $props();
 	let previewBody: HTMLDivElement | undefined = $state();
@@ -88,10 +90,10 @@
 	});
 </script>
 
-<div {id} class="component-preview">
-	<div class="appbar">
+<div {id} class={cn('component-preview', className)}>
+	<div class="appbar border-b border-on-surface-variant/15">
 		<div class="appbar-leading">
-			<a href={'#' + id} class="button button-square button-md button-text button-surface">
+			<a href={'#' + id} class="button button-square button-md button-text button-info">
 				<Hash />
 			</a>
 		</div>
@@ -102,28 +104,32 @@
 			{/if}
 		</div>
 		<div class="appbar-trailing">
-			<button
-				class={cn(
-					'button button-square button-md button-surface',
-					view === 'component' ? 'button-tonal' : 'button-text'
-				)}
-				aria-label="Show component"
-				title="Show component"
-				onclick={() => (view = 'component')}
-			>
-				<Eye />
-			</button>
-			<button
-				class={cn(
-					'button button-square button-md button-surface',
-					view === 'code' ? 'button-tonal' : 'button-text'
-				)}
-				aria-label="Show code"
-				title="Show code"
-				onclick={() => (view = 'code')}
-			>
-				<Code />
-			</button>
+			<div class="tooltip tooltip-end" data-tooltip="Show component">
+				<button
+					class={cn(
+						'button button-square button-md button-surface',
+						view === 'component' ? 'button-tonal' : 'button-text'
+					)}
+					aria-label="Show component"
+					title="Show component"
+					onclick={() => (view = 'component')}
+				>
+					<Eye />
+				</button>
+			</div>
+			<div class="tooltip tooltip-end" data-tooltip="Show code">
+				<button
+					class={cn(
+						'button button-square button-md button-surface',
+						view === 'code' ? 'button-tonal' : 'button-text'
+					)}
+					aria-label="Show code"
+					title="Show code"
+					onclick={() => (view = 'code')}
+				>
+					<Code />
+				</button>
+			</div>
 		</div>
 	</div>
 	<div

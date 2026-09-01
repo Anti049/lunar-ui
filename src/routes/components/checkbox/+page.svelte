@@ -11,11 +11,7 @@
 		</p>
 	</div>
 	<!-- Elevated -->
-	<ComponentPreview
-		id="elevated"
-		title="Elevated Checkbox"
-		description="Elevated checkboxes are used for high emphasis actions."
-	>
+	<ComponentPreview id="elevated" title="Elevated Checkbox">
 		<input type="checkbox" class="checkbox checkbox-elevated checkbox-surface" />
 		<input type="checkbox" class="checkbox checkbox-elevated checkbox-primary" />
 		<input type="checkbox" class="checkbox checkbox-elevated checkbox-secondary" />
@@ -27,11 +23,7 @@
 		<input type="checkbox" class="checkbox checkbox-elevated checkbox-alert" />
 	</ComponentPreview>
 	<!-- Filled -->
-	<ComponentPreview
-		id="filled"
-		title="Filled Checkbox"
-		description="Filled checkboxes are used for medium emphasis actions."
-	>
+	<ComponentPreview id="filled" title="Filled Checkbox">
 		<input type="checkbox" class="checkbox checkbox-filled checkbox-surface" />
 		<input type="checkbox" class="checkbox checkbox-filled checkbox-primary" />
 		<input type="checkbox" class="checkbox checkbox-filled checkbox-secondary" />
@@ -43,11 +35,7 @@
 		<input type="checkbox" class="checkbox checkbox-filled checkbox-alert" />
 	</ComponentPreview>
 	<!-- Tonal -->
-	<ComponentPreview
-		id="tonal"
-		title="Tonal Checkbox"
-		description="Tonal checkboxes are used for low emphasis actions."
-	>
+	<ComponentPreview id="tonal" title="Tonal Checkbox">
 		<input type="checkbox" class="checkbox checkbox-tonal checkbox-surface" />
 		<input type="checkbox" class="checkbox checkbox-tonal checkbox-primary" />
 		<input type="checkbox" class="checkbox checkbox-tonal checkbox-secondary" />
@@ -59,11 +47,7 @@
 		<input type="checkbox" class="checkbox checkbox-tonal checkbox-alert" />
 	</ComponentPreview>
 	<!-- Outlined -->
-	<ComponentPreview
-		id="outlined"
-		title="Outlined Checkbox"
-		description="Outlined checkboxes are used for low emphasis actions."
-	>
+	<ComponentPreview id="outlined" title="Outlined Checkbox">
 		<input type="checkbox" class="checkbox checkbox-outlined checkbox-surface" />
 		<input type="checkbox" class="checkbox checkbox-outlined checkbox-primary" />
 		<input type="checkbox" class="checkbox checkbox-outlined checkbox-secondary" />
@@ -75,11 +59,7 @@
 		<input type="checkbox" class="checkbox checkbox-outlined checkbox-alert" />
 	</ComponentPreview>
 	<!-- Sizes -->
-	<ComponentPreview
-		id="sizes"
-		title="Checkbox Sizes"
-		description="Checkboxes come in different sizes."
-	>
+	<ComponentPreview id="sizes" title="Checkbox Sizes">
 		<input type="checkbox" class="checkbox checkbox-xs checkbox-primary" />
 		<input type="checkbox" class="checkbox checkbox-sm checkbox-primary" />
 		<input type="checkbox" class="checkbox checkbox-md checkbox-primary" />

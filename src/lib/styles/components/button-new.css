@@ -1,0 +1,229 @@
+@utility btn {
+	@layer lunarui.l1.l2.l3 {
+		@apply interactive inline-flex h-fit min-h-fit w-fit min-w-fit origin-center items-center justify-center gap-2 rounded-sm text-center align-middle focusable outline-(--btn-outline-color)! transition-[background-color,color,border-color,box-shadow,scale] select-none;
+		/* Default size is medium */
+		@apply btn-md;
+		/* Default variant is filled */
+		@apply btn-filled;
+		/* Default color is primary */
+		@apply btn-primary;
+	}
+}
+
+.btn.disabled,
+.btn:disabled,
+.btn[disabled] {
+	@layer lunarui.l1.l2.l3 {
+		@apply pointer-events-none border-on-surface/12 bg-on-surface/10 text-on-surface/38 elevation-0 before:bg-transparent;
+	}
+}
+
+/* Variants */
+@utility btn-elevated {
+	@layer lunarui.l1.l2 {
+		@apply bg-surface-container text-(--btn-color) elevation-1;
+	}
+}
+@utility btn-filled {
+	@layer lunarui.l1.l2 {
+		@apply bg-(--btn-color) text-(--btn-on-color);
+	}
+}
+@utility btn-tonal {
+	@layer lunarui.l1.l2 {
+		@apply bg-(--btn-container) text-(--btn-on-container);
+	}
+}
+@utility btn-outlined {
+	@layer lunarui.l1.l2 {
+		@apply border-2 border-(--btn-color)/85 bg-transparent text-(--btn-color);
+	}
+}
+@utility btn-text {
+	@layer lunarui.l1.l2 {
+		@apply bg-transparent text-(--btn-color);
+	}
+}
+
+/* Colors */
+@utility btn-primary {
+	@layer lunarui.l1.l2 {
+		--btn-color: var(--color-primary);
+		--btn-on-color: var(--color-on-primary);
+		--btn-container: var(--color-primary-container);
+		--btn-on-container: var(--color-on-primary-container);
+		--btn-outline-color: var(--color-primary);
+	}
+}
+@utility btn-secondary {
+	@layer lunarui.l1.l2 {
+		--btn-color: var(--color-secondary);
+		--btn-on-color: var(--color-on-secondary);
+		--btn-container: var(--color-secondary-container);
+		--btn-on-container: var(--color-on-secondary-container);
+		--btn-outline-color: var(--color-secondary);
+	}
+}
+@utility btn-tertiary {
+	@layer lunarui.l1.l2 {
+		--btn-color: var(--color-tertiary);
+		--btn-on-color: var(--color-on-tertiary);
+		--btn-container: var(--color-tertiary-container);
+		--btn-on-container: var(--color-on-tertiary-container);
+		--btn-outline-color: var(--color-tertiary);
+	}
+}
+@utility btn-error {
+	@layer lunarui.l1.l2 {
+		--btn-color: var(--color-error);
+		--btn-on-color: var(--color-on-error);
+		--btn-container: var(--color-error-container);
+		--btn-on-container: var(--color-on-error-container);
+		--btn-outline-color: var(--color-error);
+	}
+}
+@utility btn-surface {
+	@layer lunarui.l1.l2 {
+		--btn-color: var(--color-inverse-surface);
+		--btn-on-color: var(--color-on-inverse-surface);
+		--btn-container: var(--color-surface-container);
+		--btn-on-container: var(--color-on-surface);
+		--btn-outline-color: var(--color-on-surface);
+	}
+}
+@utility btn-success {
+	@layer lunarui.l1.l2 {
+		--btn-color: var(--color-success);
+		--btn-on-color: var(--color-on-success);
+		--btn-container: var(--color-success-container);
+		--btn-on-container: var(--color-on-success-container);
+		--btn-outline-color: var(--color-success);
+	}
+}
+@utility btn-warning {
+	@layer lunarui.l1.l2 {
+		--btn-color: var(--color-warning);
+		--btn-on-color: var(--color-on-warning);
+		--btn-container: var(--color-warning-container);
+		--btn-on-container: var(--color-on-warning-container);
+		--btn-outline-color: var(--color-warning);
+	}
+}
+@utility btn-info {
+	@layer lunarui.l1.l2 {
+		--btn-color: var(--color-info);
+		--btn-on-color: var(--color-on-info);
+		--btn-container: var(--color-info-container);
+		--btn-on-container: var(--color-on-info-container);
+		--btn-outline-color: var(--color-info);
+	}
+}
+@utility btn-alert {
+	@layer lunarui.l1.l2 {
+		--btn-color: var(--color-alert);
+		--btn-on-color: var(--color-on-alert);
+		--btn-container: var(--color-alert-container);
+		--btn-on-container: var(--color-on-alert-container);
+		--btn-outline-color: var(--color-alert);
+	}
+}
+
+/* Sizes */
+@utility btn-xs {
+	@layer lunarui.l1.l2 {
+		@apply gap-1 px-2 py-1 text-caption-medium;
+		& svg {
+			@apply size-4;
+		}
+	}
+}
+@utility btn-sm {
+	@layer lunarui.l1.l2 {
+		@apply gap-1.5 px-2.5 py-1.5 text-label-small;
+		& svg {
+			@apply size-5;
+		}
+	}
+}
+@utility btn-md {
+	@layer lunarui.l1.l2 {
+		@apply gap-1.5 px-3 py-1.5 text-label-medium;
+		& svg {
+			@apply size-6;
+		}
+	}
+}
+@utility btn-lg {
+	@layer lunarui.l1.l2 {
+		@apply gap-2 px-5 py-3 text-label-large;
+		& svg {
+			@apply size-8;
+		}
+	}
+}
+@utility btn-xl {
+	@layer lunarui.l1.l2 {
+		@apply gap-3 px-6 py-4 text-label-large;
+		& svg {
+			@apply size-8;
+		}
+	}
+}
+
+/* Shapes */
+@utility btn-square {
+	@layer lunarui.l1.l2 {
+		@apply aspect-square;
+	}
+}
+@utility btn-circle {
+	@layer lunarui.l1.l2 {
+		@apply aspect-square rounded-full;
+	}
+}
+
+/* Slots */
+.btn:has(> svg:first-child:not(:only-child)):not(:has(> .sr-only)):not(.btn-square):not(
+		.btn-circle
+	),
+.btn:has(> .btn-leading) {
+	@layer lunarui.l1 {
+		@apply pl-2;
+		&.btn-xs {
+			@apply pl-1;
+		}
+		&.btn-sm {
+			@apply pl-1.5;
+		}
+		&.btn-lg {
+			@apply pl-3;
+		}
+		&.btn-xl {
+			@apply pl-3.5;
+		}
+	}
+}
+.btn:has(> svg:last-child:not(:only-child)):not(:has(> .sr-only)):not(.btn-square):not(.btn-circle),
+.btn:has(> .btn-trailing) {
+	@layer lunarui.l1 {
+		@apply pr-2;
+		&.btn-xs {
+			@apply pr-1;
+		}
+		&.btn-sm {
+			@apply pr-1.5;
+		}
+		&.btn-lg {
+			@apply pr-3;
+		}
+		&.btn-xl {
+			@apply pr-3.5;
+		}
+	}
+}
+
+.btn svg {
+	@layer lunarui.l1.l2 {
+		@apply pointer-events-none;
+	}
+}

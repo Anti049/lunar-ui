@@ -9,11 +9,10 @@
 
 	The `collapsed` variant is active whenever the navigation should show its
 	rail (narrow) form:
-
-	  - ≥ medium              → expanded (base width)
-	  - compact – medium      → collapsed, expands on hover
-	  - manually minimized    → collapsed (no hover expand)
-	  - < compact             → hidden (width 0)
+	- ≥ medium              → expanded (base width)
+	- compact – medium      → collapsed, expands on hover
+	- manually minimized    → collapsed (no hover expand)
+	- < compact             → hidden (width 0)
 
 	Selectors are wrapped in :where() so the variant keeps the same specificity
 	as any width utility and resolves by source order.
@@ -35,7 +34,7 @@
 }
 
 @utility nav-rail {
-	@apply flex h-full flex-col overflow-hidden surface-container-low;
+	@apply flex h-full flex-col surface-container-low;
 	transition: width var(--duration-short-4) var(--ease-standard);
 }
 

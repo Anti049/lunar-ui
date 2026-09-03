@@ -1,0 +1,63 @@
+{
+	"name": "@anti049/lunar-ui-svelte",
+	"version": "0.1.0",
+	"description": "Svelte 5 components for lunar-ui.",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Anti049/lunar-ui-old.git",
+		"directory": "packages/svelte"
+	},
+	"type": "module",
+	"scripts": {
+		"build": "svelte-package && publint",
+		"dev": "svelte-package --watch",
+		"check": "svelte-check --tsconfig ./tsconfig.json",
+		"prepack": "svelte-package && publint"
+	},
+	"sideEffects": [
+		"**/*.css"
+	],
+	"svelte": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist",
+		"!dist/**/*.test.*",
+		"!dist/**/*.spec.*"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"svelte": "./dist/index.js",
+			"default": "./dist/index.js"
+		},
+		"./styles.css": "./dist/styles.css",
+		"./package.json": "./package.json"
+	},
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org"
+	},
+	"dependencies": {
+		"clsx": "^2.1.1",
+		"tailwind-merge": "^3.6.0"
+	},
+	"peerDependencies": {
+		"@anti049/lunar-ui": "^0.1.0",
+		"svelte": "^5.0.0"
+	},
+	"devDependencies": {
+		"@anti049/lunar-ui": "workspace:*",
+		"@sveltejs/package": "^2.5.8",
+		"@sveltejs/vite-plugin-svelte": "^7.1.2",
+		"publint": "^0.3.21",
+		"svelte": "^5.56.1",
+		"svelte-check": "^4.6.0",
+		"typescript": "^6.0.3"
+	},
+	"keywords": [
+		"svelte",
+		"svelte5",
+		"ui",
+		"components"
+	]
+}

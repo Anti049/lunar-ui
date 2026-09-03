@@ -1,0 +1,12 @@
+/*
+	Tailwind source registration.
+
+	Tells Tailwind to scan lunar-ui's packaged Svelte components for class
+	references, so utilities used inside them survive tree-shaking in consumer
+	builds. The glob is relative to this file, which ships as `dist/styles.css`
+	alongside the compiled components.
+
+	Import this only if you use `@anti049/lunar-ui-svelte`; the CSS library
+	itself (`@anti049/lunar-ui`) does not depend on it.
+*/
+@source './**/*.{svelte,js}';

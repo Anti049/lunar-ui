@@ -1,8 +1,0 @@
-/* 
-	Source Files
-
-	Tells Tailwind to scan lunar-ui's own Svelte components for class references.
-	Prevents utility classes used inside lunar-ui components from being tree-shaken
-	out of consumer builds.
-*/
-@source '../../svelte/**/*.{svelte,ts}';

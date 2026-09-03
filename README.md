@@ -1,65 +1,67 @@
-# Svelte library
+# lunar-ui
 
-Everything you need to build a Svelte library, powered by [`sv`](https://npmjs.com/package/sv).
+A monorepo containing lunar-ui's CSS layer, its Svelte bindings, and the docs site.
 
-Read more about creating a library [in the docs](https://svelte.dev/docs/kit/packaging).
+| Workspace                                          | Package                     | Published | What it is                                                        |
+| -------------------------------------------------- | --------------------------- | --------- | ----------------------------------------------------------------- |
+| [`packages/core`](packages/core)                    | `@anti049/lunar-ui`         | yes       | Framework-agnostic Tailwind v4 styles, design tokens, and themes.  |
+| [`packages/svelte`](packages/svelte)                | `@anti049/lunar-ui-svelte`  | yes       | Svelte 5 components built on top of the CSS layer.                 |
+| [`apps/docs`](apps/docs)                            | `@anti049/lunar-ui-docs`    | no        | SvelteKit documentation and demo site.                             |
 
-## Creating a project
+`packages/core` has no build step — it ships raw CSS, because Tailwind v4 has to
+process `@plugin`, `@theme`, and `@layer` in the consumer's own build. Nothing
+in it depends on Svelte, so it can be used from any framework.
 
-If you're seeing this, you've probably already done this step. Congrats!
-
-```sh
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
-```
-
-To recreate this project with the same configuration:
+## Getting started
 
 ```sh
-# recreate this project
-bun x sv@0.16.1 create --template library --types ts --add prettier eslint tailwindcss="plugins:typography,forms" --install bun lunar-ui
+bun install
+bun run dev      # docs site at http://localhost:5173
 ```
 
-## Developing
+The docs app aliases `@anti049/lunar-ui-svelte` to its source (see
+[apps/docs/vite.config.ts](apps/docs/vite.config.ts)), so component edits
+hot-reload without a package rebuild.
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Common tasks
 
 ```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+bun run build            # build every workspace
+bun run build:packages   # build the publishable packages only
+bun run check            # svelte-check + publint across all workspaces
+bun run lint             # prettier --check and eslint
+bun run format           # prettier --write
 ```
 
-Everything inside `src/lib` is part of your library, everything inside `src/routes` can be used as a showcase or preview app.
+To run a script in one workspace: `bun run --filter '@anti049/lunar-ui-svelte' build`.
 
-## Building
-
-To build your library:
+## Consuming the packages
 
 ```sh
-npm pack
+npm install @anti049/lunar-ui @anti049/lunar-ui-svelte
 ```
 
-To create a production version of your showcase app:
+```css
+/* app.css */
+@import 'tailwindcss';
+@import '@anti049/lunar-ui';
+
+/* Optional: bundled font faces. Install the @fontsource-variable packages first. */
+@import '@anti049/lunar-ui/fonts.css';
+
+/* Only if you use the Svelte components — keeps their utility classes from
+   being tree-shaken out of your build. */
+@import '@anti049/lunar-ui-svelte/styles.css';
+```
+
+## Releasing
+
+Versioning and publishing run through [Changesets](https://github.com/changesets/changesets).
 
 ```sh
-npm run build
+bun run changeset   # describe your change, then commit the generated file
 ```
 
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
-
-## Publishing
-
-Go into the `package.json` and give your package the desired name through the `"name"` option. Also consider adding a `"license"` field and point it to a `LICENSE` file which you can create from a template (one popular option is the [MIT license](https://opensource.org/license/mit/)).
-
-To publish your library to [npm](https://www.npmjs.com):
-
-```sh
-npm publish
-```
+Merging to `main` opens a "Version Packages" PR; merging that PR publishes to
+npm via [.github/workflows/release.yml](.github/workflows/release.yml). The two
+published packages are versioned in lockstep.

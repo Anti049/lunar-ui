@@ -5,8 +5,10 @@
 	"deno.enable": true,
 	"json.schemas": [
 		{
-			"fileMatch": ["src/lib/docs/components/*.json"],
-			"url": "./src/lib/docs/component-doc.schema.json"
+			"fileMatch": [
+				"apps/docs/src/lib/docs/components/*.json"
+			],
+			"url": "./apps/docs/src/lib/docs/component-doc.schema.json"
 		}
 	]
 }

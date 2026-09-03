@@ -6,7 +6,7 @@ bun.lock
 bun.lockb
 
 # Miscellaneous
-/static/
+apps/docs/static/
 
 # SvelteKit
 .svelte-kit/

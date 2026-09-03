@@ -108,7 +108,7 @@
 <div class="appbar appbar-centered border-b border-b-surface-container">
 	<div class="appbar-leading">
 		<button
-			class="button swap inline-grid button-square button-md button-text compact:hidden"
+			class="button swap inline-grid button-square button-md button-text button-surface compact:hidden"
 			onclick={toggleMobileMenu}
 		>
 			<input type="checkbox" checked={mobileMenuVisible} />
@@ -116,7 +116,7 @@
 			<X class="swap-on" />
 		</button>
 		<button
-			class="button swap hidden button-square button-md button-text compact:inline-grid"
+			class="button swap hidden button-square button-md button-text button-surface compact:inline-grid"
 			onclick={() => (minimized = !minimized)}
 		>
 			<input type="checkbox" bind:checked={minimized} />
@@ -136,7 +136,7 @@
 		{/if}
 	</div>
 	<div class="appbar-trailing">
-		<button class="button button-square button-md button-text" onclick={cycleMode}>
+		<button class="button button-square button-md button-text button-surface" onclick={cycleMode}>
 			{#if mode.current === 'light'}
 				<Sun />
 			{:else if mode.current === 'dark'}

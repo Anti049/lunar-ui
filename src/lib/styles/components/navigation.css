@@ -8,7 +8,8 @@
 		<nav class="navigation w-64 collapsed:w-16"></nav>
 
 	The `collapsed` variant is active whenever the navigation should show its
-	rail (narrow) form:
+	rail (narrow) form. It only ever matches inside a `.nav-rail`, so the same
+	links rendered elsewhere (the mobile drawer) are never collapsed:
 	- ≥ medium              → expanded (base width)
 	- compact – medium      → collapsed, expands on hover
 	- manually minimized    → collapsed (no hover expand)
@@ -27,8 +28,10 @@
 		}
 	}
 
-	/* Manually minimized at any size (never expands on hover) */
-	&:where(.scaffold[data-minimized] *) {
+	/* Manually minimized at any size (never expands on hover). Scoped to the rail
+	   like the clause above: NavLinks also renders in the mobile drawer, which is
+	   full width and must keep its labels no matter how the rail is set. */
+	&:where(.scaffold[data-minimized] .nav-rail, .scaffold[data-minimized] .nav-rail *) {
 		@slot;
 	}
 }
@@ -46,6 +49,69 @@
 	}
 }
 
+/*
+	The rail's scrolling section.
+
+	Scrolling vertically makes this a scroll container, and a scroll container
+	clips in *both* axes — so a collapsed rail's tooltips get cut off at the
+	rail's edge. `overflow-clip-margin` does not rescue it; it is ignored once
+	the other axis scrolls. What does work is widening the scrollport itself:
+	the box is grown by --nav-rail-reach and the growth is handed straight back
+	as a negative margin, so layout is unchanged while the clip box (the padding
+	box) now extends past the rail and tooltips paint into it.
+
+	Only rails do this — the mobile drawer renders NavLinks at full width and
+	shows no tooltips, so it keeps the plain scroll container.
+*/
+@utility nav-rail-scroll {
+	@apply flex w-full flex-1 flex-col overflow-x-clip overflow-y-auto;
+}
+
+.nav-rail .nav-rail-scroll {
+	--nav-rail-reach: 20rem;
+	/* The widened strip overlaps the main content, so it stays click-through and
+	   the links take pointer events back. Wheeling over the gaps between links
+	   scrolls the page rather than the rail, which is the cost of that. */
+	@apply pointer-events-none;
+	width: calc(100% + var(--nav-rail-reach));
+	padding-inline-end: var(--nav-rail-reach);
+	margin-inline-end: calc(-1 * var(--nav-rail-reach));
+	/* A visible scrollbar would sit at the far edge of the reach, not the rail */
+	scrollbar-width: none;
+
+	& > * {
+		@apply pointer-events-auto;
+	}
+}
+
+/*
+	Rail tooltips
+
+	NavLinks marks its tooltips `tooltip-disabled`, so they are off everywhere by
+	default — in the mobile drawer, and in an expanded rail, the label is already
+	on screen. They are switched back on only while the rail is both visible and
+	collapsed. `--tooltip-enabled` inherits, so landing in a later layer than the
+	`tooltip-disabled` utility (tooltip.l2) is all that is needed to win.
+*/
+@media (width >= theme(--breakpoint-compact)) {
+	/* Auto-collapsed rail. Hovering the rail expands it, so this mainly serves
+	   keyboard users tabbing through a rail that is still in its narrow form. */
+	@media (width < theme(--breakpoint-medium)) {
+		.nav-rail:not(:hover) .tooltip {
+			@layer tooltip.l1 {
+				--tooltip-enabled: 1;
+			}
+		}
+	}
+
+	/* Manually minimized rail: it never expands, so the tooltip is the only label */
+	.scaffold[data-minimized] .nav-rail .tooltip {
+		@layer tooltip.l1 {
+			--tooltip-enabled: 1;
+		}
+	}
+}
+
 @custom-variant nav-link-active {
 	&:where(.nav-link[data-active] *, .nav-link[data-active]) {
 		@slot;
@@ -53,7 +119,7 @@
 }
 @utility nav-link {
 	@layer nav-link.l3 {
-		@apply flex h-12 w-full flex-row items-center gap-4 overflow-clip rounded-sm surface-container p-2 text-title-medium transition-all select-none not-disabled:interactive in-collapsed:aspect-square;
+		@apply flex h-12 w-full flex-row items-center gap-2 overflow-clip rounded-sm surface-container p-2 text-title-small transition-all select-none not-disabled:interactive in-collapsed:aspect-square;
 	}
 	@apply not-disabled:nav-link-primary;
 }
@@ -120,7 +186,7 @@
 
 @utility nav-link-label {
 	@layer nav-link.l2 {
-		@apply whitespace-nowrap opacity-100 transition-all in-collapsed:opacity-0;
+		@apply flex grow whitespace-nowrap opacity-100 transition-all in-collapsed:opacity-0;
 	}
 }
 

@@ -61,8 +61,8 @@
 		@apply button-md;
 		/* Default variant is filled */
 		@apply button-filled;
-		/* Default color is primary */
-		@apply button-primary;
+		/* Default color is surface */
+		@apply button-surface;
 	}
 }
 
@@ -113,6 +113,23 @@
  * ========================================================================== */
 
 /*
+ * ELEVATED — surface-container background with elevation, colored text.
+ * Adds elevation-1 when enabled, drops to elevation-0 when selected.
+ */
+@utility button-elevated {
+	@layer button.l2 {
+		@apply bg-surface-container enabled:elevation-1;
+		color: var(--button-color, var(--color-primary));
+
+		&.selected {
+			@apply elevation-0;
+			background-color: var(--button-color, var(--color-primary));
+			color: var(--button-on-color, var(--color-on-primary));
+		}
+	}
+}
+
+/*
  * FILLED — solid background using the chosen color.
  * The Material 3 default; what most people mean by "a button."
  */
@@ -147,23 +164,6 @@
 		color: var(--button-on-container, var(--color-on-primary-container));
 
 		&.selected {
-			background-color: var(--button-color, var(--color-primary));
-			color: var(--button-on-color, var(--color-on-primary));
-		}
-	}
-}
-
-/*
- * ELEVATED — surface-container background with elevation, colored text.
- * Adds elevation-1 when enabled, drops to elevation-0 when selected.
- */
-@utility button-elevated {
-	@layer button.l2 {
-		@apply bg-surface-container enabled:elevation-1;
-		color: var(--button-color, var(--color-primary));
-
-		&.selected {
-			@apply elevation-0;
 			background-color: var(--button-color, var(--color-primary));
 			color: var(--button-on-color, var(--color-on-primary));
 		}
@@ -221,46 +221,6 @@
  *     `:root, [data-theme]` propagation block.
  * ========================================================================== */
 
-@utility button-primary {
-	@layer button.l2 {
-		--button-color: var(--color-primary);
-		--button-on-color: var(--color-on-primary);
-		--button-container: var(--color-primary-container);
-		--button-on-container: var(--color-on-primary-container);
-		--button-outline-color: var(--color-primary);
-	}
-}
-
-@utility button-secondary {
-	@layer button.l2 {
-		--button-color: var(--color-secondary);
-		--button-on-color: var(--color-on-secondary);
-		--button-container: var(--color-secondary-container);
-		--button-on-container: var(--color-on-secondary-container);
-		--button-outline-color: var(--color-secondary);
-	}
-}
-
-@utility button-tertiary {
-	@layer button.l2 {
-		--button-color: var(--color-tertiary);
-		--button-on-color: var(--color-on-tertiary);
-		--button-container: var(--color-tertiary-container);
-		--button-on-container: var(--color-on-tertiary-container);
-		--button-outline-color: var(--color-tertiary);
-	}
-}
-
-@utility button-error {
-	@layer button.l2 {
-		--button-color: var(--color-error);
-		--button-on-color: var(--color-on-error);
-		--button-container: var(--color-error-container);
-		--button-on-container: var(--color-on-error-container);
-		--button-outline-color: var(--color-error);
-	}
-}
-
 @utility button-surface {
 	@layer button.l2 {
 		--button-color: var(--color-inverse-surface);
@@ -270,7 +230,42 @@
 		--button-outline-color: var(--color-on-surface);
 	}
 }
-
+@utility button-primary {
+	@layer button.l2 {
+		--button-color: var(--color-primary);
+		--button-on-color: var(--color-on-primary);
+		--button-container: var(--color-primary-container);
+		--button-on-container: var(--color-on-primary-container);
+		--button-outline-color: var(--color-primary);
+	}
+}
+@utility button-secondary {
+	@layer button.l2 {
+		--button-color: var(--color-secondary);
+		--button-on-color: var(--color-on-secondary);
+		--button-container: var(--color-secondary-container);
+		--button-on-container: var(--color-on-secondary-container);
+		--button-outline-color: var(--color-secondary);
+	}
+}
+@utility button-tertiary {
+	@layer button.l2 {
+		--button-color: var(--color-tertiary);
+		--button-on-color: var(--color-on-tertiary);
+		--button-container: var(--color-tertiary-container);
+		--button-on-container: var(--color-on-tertiary-container);
+		--button-outline-color: var(--color-tertiary);
+	}
+}
+@utility button-error {
+	@layer button.l2 {
+		--button-color: var(--color-error);
+		--button-on-color: var(--color-on-error);
+		--button-container: var(--color-error-container);
+		--button-on-container: var(--color-on-error-container);
+		--button-outline-color: var(--color-error);
+	}
+}
 @utility button-success {
 	@layer button.l2 {
 		--button-color: var(--color-success);
@@ -280,7 +275,6 @@
 		--button-outline-color: var(--color-success);
 	}
 }
-
 @utility button-warning {
 	@layer button.l2 {
 		--button-color: var(--color-warning);
@@ -290,7 +284,6 @@
 		--button-outline-color: var(--color-warning);
 	}
 }
-
 @utility button-info {
 	@layer button.l2 {
 		--button-color: var(--color-info);
@@ -300,7 +293,6 @@
 		--button-outline-color: var(--color-info);
 	}
 }
-
 @utility button-alert {
 	@layer button.l2 {
 		--button-color: var(--color-alert);
@@ -324,7 +316,6 @@
 		}
 	}
 }
-
 @utility button-sm {
 	@layer button.l2 {
 		@apply gap-1.5 px-2.5 py-1.5 text-label-small;
@@ -333,7 +324,6 @@
 		}
 	}
 }
-
 @utility button-md {
 	@layer button.l2 {
 		@apply gap-1.5 px-3 py-1.5 text-label-medium;
@@ -342,7 +332,6 @@
 		}
 	}
 }
-
 @utility button-lg {
 	@layer button.l2 {
 		@apply gap-2 px-5 py-3 text-label-large;
@@ -351,7 +340,6 @@
 		}
 	}
 }
-
 @utility button-xl {
 	@layer button.l2 {
 		@apply gap-3 px-6 py-4 text-label-large;
@@ -371,7 +359,6 @@
 		@apply aspect-square;
 	}
 }
-
 @utility button-circle {
 	@layer button.l2 {
 		@apply aspect-square rounded-full;
@@ -434,7 +421,6 @@
 		}
 	}
 }
-
 .button svg {
 	@layer button.l2 {
 		@apply pointer-events-none;

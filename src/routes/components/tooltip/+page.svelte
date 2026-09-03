@@ -1,18 +1,14 @@
 <script lang="ts">
 	import ComponentPreview from '$lib/svelte/demo/ComponentPreview.svelte';
+	import ComponentClassTable from '$lib/svelte/demo/ComponentClassTable.svelte';
 </script>
 
-<div class="flex h-full w-full flex-col gap-8">
-	<!-- Header -->
-	<div class="flex flex-col gap-2">
-		<p class="text-headline-large-emphasized text-primary">Tooltip</p>
-		<p class="text-body-medium text-on-surface-variant">
-			Tooltips display informative text when users hover over, focus on, or tap an element.
-		</p>
-	</div>
+<div class="flex h-full w-full flex-col gap-4">
+	<!-- Header/Classes -->
+	<ComponentClassTable name="tooltip" />
 	<!-- Tooltip -->
 	<ComponentPreview id="tooltip" title="Tooltip">
-		<div class="tooltip tooltip-left" data-tooltip="This is a tooltip">
+		<div class="tooltip" data-tooltip="This is a tooltip">
 			<button class="button button-md button-elevated button-surface">Hover me</button>
 		</div>
 	</ComponentPreview>
@@ -64,13 +60,13 @@
 	<!-- Left -->
 	<ComponentPreview id="tooltip-left" title="Left">
 		<div class="flex flex-col items-center justify-center gap-8">
-			<div class="tooltip-open tooltip tooltip-start tooltip-left" data-tooltip="Top">
+			<div class="tooltip-open tooltip tooltip-left tooltip-start" data-tooltip="Top">
 				<button class="button button-md button-elevated button-surface">Hover me</button>
 			</div>
-			<div class="tooltip-open tooltip tooltip-center tooltip-left" data-tooltip="Center">
+			<div class="tooltip-open tooltip tooltip-left tooltip-center" data-tooltip="Center">
 				<button class="button button-md button-elevated button-surface">Hover me</button>
 			</div>
-			<div class="tooltip-open tooltip tooltip-end tooltip-left" data-tooltip="Bottom">
+			<div class="tooltip-open tooltip tooltip-left tooltip-end" data-tooltip="Bottom">
 				<button class="button button-md button-elevated button-surface">Hover me</button>
 			</div>
 		</div>
@@ -78,48 +74,48 @@
 	<!-- Right -->
 	<ComponentPreview id="tooltip-right" title="Right">
 		<div class="flex flex-col items-center justify-center gap-8">
-			<div class="tooltip-open tooltip tooltip-start tooltip-right" data-tooltip="Top">
+			<div class="tooltip-open tooltip tooltip-right tooltip-start" data-tooltip="Top">
 				<button class="button button-md button-elevated button-surface">Hover me</button>
 			</div>
-			<div class="tooltip-open tooltip tooltip-center tooltip-right" data-tooltip="Center">
+			<div class="tooltip-open tooltip tooltip-right tooltip-center" data-tooltip="Center">
 				<button class="button button-md button-elevated button-surface">Hover me</button>
 			</div>
-			<div class="tooltip-open tooltip tooltip-end tooltip-right" data-tooltip="Bottom">
+			<div class="tooltip-open tooltip tooltip-right tooltip-end" data-tooltip="Bottom">
 				<button class="button button-md button-elevated button-surface">Hover me</button>
 			</div>
 		</div>
 	</ComponentPreview>
 	<!-- Colors -->
 	<ComponentPreview id="tooltip-colors" title="Colors">
-		<div class="tooltip-open tooltip tooltip-top" data-tooltip="Default">
-			<button class="button button-md button-tonal">Hover me</button>
+		<div class="tooltip tooltip-top" data-tooltip="Default">
+			<button class="button button-md button-tonal">Default</button>
 		</div>
-		<div class="tooltip-open tooltip tooltip-top tooltip-surface" data-tooltip="Surface">
-			<button class="button button-md button-tonal button-surface">Hover me</button>
+		<div class="tooltip tooltip-top tooltip-surface" data-tooltip="Surface">
+			<button class="button button-md button-tonal button-surface">Surface</button>
 		</div>
-		<div class="tooltip-open tooltip tooltip-top tooltip-primary" data-tooltip="Primary">
-			<button class="button button-md button-tonal button-primary">Hover me</button>
+		<div class="tooltip tooltip-top tooltip-primary" data-tooltip="Primary">
+			<button class="button button-md button-tonal button-primary">Primary</button>
 		</div>
-		<div class="tooltip-open tooltip tooltip-top tooltip-secondary" data-tooltip="Secondary">
-			<button class="button button-md button-tonal button-secondary">Hover me</button>
+		<div class="tooltip tooltip-top tooltip-secondary" data-tooltip="Secondary">
+			<button class="button button-md button-tonal button-secondary">Secondary</button>
 		</div>
-		<div class="tooltip-open tooltip tooltip-top tooltip-tertiary" data-tooltip="Tertiary">
-			<button class="button button-md button-tonal button-tertiary">Hover me</button>
+		<div class="tooltip tooltip-top tooltip-tertiary" data-tooltip="Tertiary">
+			<button class="button button-md button-tonal button-tertiary">Tertiary</button>
 		</div>
-		<div class="tooltip-open tooltip tooltip-top tooltip-error" data-tooltip="Error">
-			<button class="button button-md button-tonal button-error">Hover me</button>
+		<div class="tooltip tooltip-top tooltip-error" data-tooltip="Error">
+			<button class="button button-md button-tonal button-error">Error</button>
 		</div>
-		<div class="tooltip-open tooltip tooltip-top tooltip-success" data-tooltip="Success">
-			<button class="button button-md button-tonal button-success">Hover me</button>
+		<div class="tooltip tooltip-top tooltip-success" data-tooltip="Success">
+			<button class="button button-md button-tonal button-success">Success</button>
 		</div>
-		<div class="tooltip-open tooltip tooltip-top tooltip-warning" data-tooltip="Warning">
-			<button class="button button-md button-tonal button-warning">Hover me</button>
+		<div class="tooltip tooltip-top tooltip-warning" data-tooltip="Warning">
+			<button class="button button-md button-tonal button-warning">Warning</button>
 		</div>
-		<div class="tooltip-open tooltip tooltip-top tooltip-info" data-tooltip="Info">
-			<button class="button button-md button-tonal button-info">Hover me</button>
+		<div class="tooltip tooltip-top tooltip-info" data-tooltip="Info">
+			<button class="button button-md button-tonal button-info">Info</button>
 		</div>
-		<div class="tooltip-open tooltip tooltip-top tooltip-alert" data-tooltip="Alert">
-			<button class="button button-md button-tonal button-alert">Hover me</button>
+		<div class="tooltip tooltip-top tooltip-alert" data-tooltip="Alert">
+			<button class="button button-md button-tonal button-alert">Alert</button>
 		</div>
 	</ComponentPreview>
 </div>

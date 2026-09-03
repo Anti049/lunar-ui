@@ -3,6 +3,7 @@
 	import { Ellipsis, Menu, Search } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { ScrollState } from 'runed';
+	import ComponentClassTable from '$lib/svelte/demo/ComponentClassTable.svelte';
 
 	let appbarElement = $state<HTMLElement>();
 	let scrollState = $state<ScrollState>();
@@ -15,13 +16,8 @@
 </script>
 
 <div class="flex h-full w-full flex-col gap-8">
-	<!-- Header -->
-	<div class="flex flex-col gap-2">
-		<p class="text-headline-large-emphasized text-primary">App Bar</p>
-		<p class="text-body-medium text-on-surface-variant">
-			App bars are used to display information and actions relating to the current screen.
-		</p>
-	</div>
+	<!-- Header/Classes -->
+	<ComponentClassTable name="appbar" />
 	<!-- Scrollable -->
 	<ComponentPreview
 		id="medium"

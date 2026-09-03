@@ -1,7 +1,14 @@
 /* 
 	Badge
+
+	A compact label for counts, statuses and indicators. Composes on the same
+	variant/color axes as the button, and renders as a dot when empty.
 */
 
+/* =============================================================================
+ * FOUNDATION (l3)
+ * The base .badge utility. Every badge has this.
+ * ========================================================================== */
 @utility badge {
 	@layer badge.l3 {
 		@apply pointer-events-none flex h-fit min-h-4 w-fit min-w-4 items-center justify-center gap-2 rounded-sm px-1 py-0.5 align-middle;
@@ -9,6 +16,10 @@
 	}
 }
 
+/* =============================================================================
+ * STATE (l1)
+ * Highest per-component priority. Wins over variants, colors and foundation.
+ * ========================================================================== */
 .badge-disabled,
 .badge.disabled,
 .badge[disabled] {
@@ -25,7 +36,10 @@
 	}
 }
 
-/* Variants */
+/* =============================================================================
+ * VARIANTS (l2)
+ * Fill treatments that read the color variables set by the color utilities.
+ * ========================================================================== */
 @utility badge-filled {
 	@layer badge.l2 {
 		background-color: var(--badge-color, var(--color-primary));
@@ -59,7 +73,10 @@
 	}
 }
 
-/* Colors */
+/* =============================================================================
+ * COLORS (l2)
+ * Each color utility sets the CSS variables that variants consume.
+ * ========================================================================== */
 @utility badge-primary {
 	@layer badge.l2 {
 		--badge-color: var(--color-primary);
@@ -150,7 +167,10 @@
 	}
 }
 
-/* Animation */
+/* =============================================================================
+ * ANIMATIONS (l1)
+ * Optional attention-grabbing motion.
+ * ========================================================================== */
 @keyframes badge-alert {
 	75%,
 	100% {

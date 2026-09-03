@@ -1,15 +1,11 @@
 <script lang="ts">
 	import ComponentPreview from '$lib/svelte/demo/ComponentPreview.svelte';
+	import ComponentClassTable from '$lib/svelte/demo/ComponentClassTable.svelte';
 </script>
 
 <div class="flex h-full w-full flex-col gap-8">
-	<!-- Header -->
-	<div class="flex flex-col gap-2">
-		<p class="text-headline-large-emphasized text-primary">Checkbox</p>
-		<p class="text-body-medium text-on-surface-variant">
-			Checkboxes allow the user to select one or more items from a set.
-		</p>
-	</div>
+	<!-- Header/Classes -->
+	<ComponentClassTable name="checkbox" />
 	<!-- Elevated -->
 	<ComponentPreview id="elevated" title="Elevated Checkbox">
 		<input type="checkbox" class="checkbox checkbox-elevated checkbox-surface" />

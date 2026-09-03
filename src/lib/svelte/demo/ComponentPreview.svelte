@@ -111,7 +111,6 @@
 						view === 'component' ? 'button-tonal' : 'button-text'
 					)}
 					aria-label="Show component"
-					title="Show component"
 					onclick={() => (view = 'component')}
 				>
 					<Eye />
@@ -124,7 +123,6 @@
 						view === 'code' ? 'button-tonal' : 'button-text'
 					)}
 					aria-label="Show code"
-					title="Show code"
 					onclick={() => (view = 'code')}
 				>
 					<Code />

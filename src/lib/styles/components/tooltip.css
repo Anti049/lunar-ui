@@ -1,47 +1,108 @@
-/* 
+/*
 	Tooltip
+
+	A CSS-only tooltip. `.tooltip` wraps the trigger and is the positioning
+	context. The bubble is either the `data-tooltip` attribute (drawn through
+	::before) or a `.tooltip-content` child; `::after` draws the tail.
+
+	Bubble and tail read the same background, the same alignment variables and
+	the same enter transform, so they fade, slide and recolor as one shape. The
+	tail always sits *outside* the bubble: it is offset from the trigger by
+	`--tooltip-gap`, the bubble by `--tooltip-gap + --tooltip-tail-size`. It then
+	grows back toward the bubble by `--tooltip-tail-overlap` so no antialiased
+	seam shows between the two.
+
+	Placement (top/bottom/left/right) owns the offsets, the tail's size and the
+	tail's clip-path. Alignment (start/center/end) only sets variables, so the
+	two groups can never fight over a property.
 */
 
+/* =============================================================================
+ * FOUNDATION (l3)
+ * The base .tooltip utility. Every tooltip has this.
+ * ========================================================================== */
 @utility tooltip {
 	@layer tooltip.l3 {
 		@apply relative inline-block;
 
-		--tt-bg: var(--color-inverse-surface);
-		--tt-off: calc(100% + 0.5rem);
-		--tt-tail: calc(100% + 0.25rem);
-		--tt-tail-off: 0.5rem;
+		/* Color */
+		--tooltip-bg: var(--color-inverse-surface);
+		--tooltip-fg: var(--color-on-inverse-surface);
+
+		/* Shape */
+		--tooltip-gap: 0.25rem; /* trigger -> tail tip */
+		--tooltip-tail-size: 0.375rem; /* tail depth (base -> tip) */
+		--tooltip-tail-width: 0.75rem; /* tail base */
+		--tooltip-tail-overlap: 1px; /* seam cover between tail and bubble */
+		--tooltip-tail-offset: 0.75rem; /* tail inset from the edge when start/end aligned */
+
+		/* Motion */
+		--tooltip-travel: 0.25rem; /* distance the tooltip slides in from */
+		--tooltip-duration: 200ms;
+		--tooltip-easing: cubic-bezier(0.4, 0, 0.2, 1);
+		--tooltip-delay-in: 150ms;
+		--tooltip-delay-out: 0ms;
+
+		/* Alignment — defaults to center, overridden by the alignment utilities */
+		--tooltip-align-bubble-inset: 50% auto;
+		--tooltip-align-bubble-translate: -50%;
+		--tooltip-align-tail-inset: 50% auto;
+		--tooltip-align-tail-translate: -50%;
+
+		/* Bubble */
+		& > .tooltip-content,
+		&[data-tooltip]::before {
+			@apply pointer-events-none absolute z-2 w-max max-w-80 rounded-sm px-2 py-1 text-center opacity-0;
+			background-color: var(--tooltip-bg);
+			color: var(--tooltip-fg);
+			transform: translate(var(--tooltip-enter-x, 0), var(--tooltip-enter-y, 0));
+		}
+
+		&[data-tooltip]::before {
+			@apply text-label-large whitespace-normal;
+			content: attr(data-tooltip);
+		}
+
+		/* Tail */
+		&::after {
+			@apply pointer-events-none absolute z-2 opacity-0 content-[''];
+			background-color: var(--tooltip-bg);
+			transform: translate(var(--tooltip-enter-x, 0), var(--tooltip-enter-y, 0));
+		}
+
+		/* Default placement: above the trigger */
+		--tooltip-enter-x: 0;
+		--tooltip-enter-y: var(--tooltip-travel);
 
 		& > .tooltip-content,
-		&[data-tooltip]:before {
-			@apply pointer-events-none absolute max-w-80 rounded-sm px-2 py-1 text-center text-label-large whitespace-normal text-on-inverse-surface opacity-0;
-			z-index: 2;
-			width: max-content;
-			background-color: var(--tt-bg);
-			transform: translateX(var(--tt-trans, -50%)) translateY(var(--tt-pos, 0.25rem));
-			inset: auto auto var(--tt-off) 50%;
+		&[data-tooltip]::before {
+			top: auto;
+			bottom: calc(100% + var(--tooltip-gap) + var(--tooltip-tail-size));
+			inset-inline: var(--tooltip-align-bubble-inset);
+			translate: var(--tooltip-align-bubble-translate) 0;
 		}
 
-		&[data-tooltip]:before {
-			--tw-content: attr(data-tooltip);
-			content: var(--tw-content);
+		&::after {
+			width: var(--tooltip-tail-width);
+			height: calc(var(--tooltip-tail-size) + var(--tooltip-tail-overlap));
+			top: auto;
+			bottom: calc(100% + var(--tooltip-gap));
+			inset-inline: var(--tooltip-align-tail-inset);
+			translate: var(--tooltip-align-tail-translate) 0;
+			clip-path: polygon(0 0, 100% 0, 50% 100%);
 		}
 
-		&:after {
-			@apply pointer-events-none absolute block h-1 w-2.5 mask-(--mask-tooltip) mask-position-[-1px_0] mask-no-repeat opacity-0 content-[""];
-			background-color: var(--tt-bg);
-			--mask-tooltip: url("data:image/svg+xml,%3Csvg width='10' height='4' viewBox='0 0 8 4' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0.500009 1C3.5 1 3.00001 4 5.00001 4C7 4 6.5 1 9.5 1C10 1 10 0.499897 10 0H0C-1.99338e-08 0.5 0 1 0.500009 1Z' fill='black'/%3E%3C/svg%3E%0A");
-			transform: translateX(var(--tt-trans, -50%)) translateY(var(--tt-pos, 0.25rem));
-			inset: auto auto var(--tt-tail) 50%;
+		& > .tooltip-content,
+		&[data-tooltip]::before,
+		&::after {
+			transition:
+				opacity var(--tooltip-duration) var(--tooltip-easing) var(--tooltip-delay-out),
+				transform var(--tooltip-duration) var(--tooltip-easing) var(--tooltip-delay-out);
 		}
 
-		@media (prefers-reduced-motion: no-preference) {
-			& > .tooltip-content,
-			&[data-tooltip]:before,
-			&:after {
-				transition:
-					opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) 75ms,
-					transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 75ms;
-			}
+		/* Fade in place rather than sliding */
+		@media (prefers-reduced-motion: reduce) {
+			--tooltip-travel: 0rem;
 		}
 	}
 }
@@ -52,259 +113,253 @@
 	}
 }
 
-/* States */
-.tooltip:is([data-tooltip]:not([data-tooltip='']), :has(.tooltip-content:not(:empty))):is(
+/* =============================================================================
+ * AVAILABILITY (l2)
+ * `--tooltip-enabled` is the on/off switch: the open state opens to it instead
+ * of to 1. It is deliberately never declared on `.tooltip` itself — only read
+ * with a fallback — so it stays inheritable: any ancestor can set
+ * `--tooltip-enabled: 0` to silence a whole subtree of tooltips, and a later
+ * layer can switch them back on without fighting the state rules' specificity.
+ * ========================================================================== */
+@utility tooltip-disabled {
+	@layer tooltip.l2 {
+		--tooltip-enabled: 0;
+	}
+}
+
+/* =============================================================================
+ * STATES (l1)
+ * Only reveal a tooltip that actually has something to say.
+ * ========================================================================== */
+.tooltip:is([data-tooltip]:not([data-tooltip='']), :has(> .tooltip-content:not(:empty))):is(
 		.tooltip-open,
 		:hover,
+		:focus-visible,
 		:has(:focus-visible)
 	) {
 	@layer tooltip.l1 {
 		& > .tooltip-content,
-		&[data-tooltip]:before,
-		&:after {
-			@apply opacity-100;
-			--tt-pos: 0rem;
-
-			@media (prefers-reduced-motion: no-preference) {
-				transition:
-					opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s,
-					transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s;
-			}
+		&[data-tooltip]::before,
+		&::after {
+			opacity: var(--tooltip-enabled, 1);
+			--tooltip-enter-x: 0;
+			--tooltip-enter-y: 0;
+			transition-delay: var(--tooltip-delay-in);
 		}
 	}
 }
 
-/* Positions */
+/* =============================================================================
+ * PLACEMENTS (l2)
+ * Offsets, tail geometry, and the direction the tooltip enters from.
+ * ========================================================================== */
 @utility tooltip-top {
 	@layer tooltip.l2 {
+		--tooltip-enter-x: 0;
+		--tooltip-enter-y: var(--tooltip-travel);
+
 		& > .tooltip-content,
-		&[data-tooltip]:before {
-			transform: translateX(var(--tt-trans, -50%)) translateY(var(--tt-pos, 0.25rem));
-			inset: auto auto var(--tt-off) 50%;
+		&[data-tooltip]::before {
+			top: auto;
+			bottom: calc(100% + var(--tooltip-gap) + var(--tooltip-tail-size));
+			inset-inline: var(--tooltip-align-bubble-inset);
+			translate: var(--tooltip-align-bubble-translate) 0;
 		}
 
-		&:after {
-			transform: translateX(var(--tt-trans, -50%)) translateY(var(--tt-pos, 0.25rem));
-			inset: auto auto var(--tt-tail) 50%;
+		&::after {
+			width: var(--tooltip-tail-width);
+			height: calc(var(--tooltip-tail-size) + var(--tooltip-tail-overlap));
+			top: auto;
+			bottom: calc(100% + var(--tooltip-gap));
+			inset-inline: var(--tooltip-align-tail-inset);
+			translate: var(--tooltip-align-tail-translate) 0;
+			clip-path: polygon(0 0, 100% 0, 50% 100%);
 		}
 	}
 }
 
 @utility tooltip-bottom {
 	@layer tooltip.l2 {
+		--tooltip-enter-x: 0;
+		--tooltip-enter-y: calc(-1 * var(--tooltip-travel));
+
 		& > .tooltip-content,
-		&[data-tooltip]:before {
-			transform: translateX(var(--tt-trans, -50%)) translateY(var(--tt-pos, -0.25rem));
-			inset: var(--tt-off) auto auto 50%;
+		&[data-tooltip]::before {
+			top: calc(100% + var(--tooltip-gap) + var(--tooltip-tail-size));
+			bottom: auto;
+			inset-inline: var(--tooltip-align-bubble-inset);
+			translate: var(--tooltip-align-bubble-translate) 0;
 		}
 
-		&:after {
-			transform: translateX(var(--tt-trans, -50%)) translateY(var(--tt-pos, -0.25rem))
-				rotate(180deg);
-			inset: var(--tt-tail) auto auto 50%;
+		&::after {
+			width: var(--tooltip-tail-width);
+			height: calc(var(--tooltip-tail-size) + var(--tooltip-tail-overlap));
+			top: calc(100% + var(--tooltip-gap));
+			bottom: auto;
+			inset-inline: var(--tooltip-align-tail-inset);
+			translate: var(--tooltip-align-tail-translate) 0;
+			clip-path: polygon(50% 0, 100% 100%, 0 100%);
 		}
 	}
 }
 
 @utility tooltip-left {
 	@layer tooltip.l2 {
+		--tooltip-enter-x: var(--tooltip-travel);
+		--tooltip-enter-y: 0;
+
 		& > .tooltip-content,
-		&[data-tooltip]:before {
-			transform: translateX(calc(var(--tt-pos, 0.25rem) - 0.25rem))
-				translateY(var(--tt-trans, -50%));
+		&[data-tooltip]::before {
 			left: auto;
-			right: var(--tt-off);
-			inset-block: var(--tt-inset, 50% auto);
+			right: calc(100% + var(--tooltip-gap) + var(--tooltip-tail-size));
+			inset-block: var(--tooltip-align-bubble-inset);
+			translate: 0 var(--tooltip-align-bubble-translate);
 		}
 
-		&:after {
-			transform: translateX(var(--tt-pos, 0.25rem)) translateY(var(--tt-trans, -50%)) rotate(-90deg);
+		&::after {
+			width: calc(var(--tooltip-tail-size) + var(--tooltip-tail-overlap));
+			height: var(--tooltip-tail-width);
 			left: auto;
-			right: calc(var(--tt-tail) + 1px);
-			inset-block: var(--tt-tail-inset, 50% auto);
+			right: calc(100% + var(--tooltip-gap));
+			inset-block: var(--tooltip-align-tail-inset);
+			translate: 0 var(--tooltip-align-tail-translate);
+			clip-path: polygon(0 0, 100% 50%, 0 100%);
 		}
 	}
 }
 
 @utility tooltip-right {
 	@layer tooltip.l2 {
+		--tooltip-enter-x: calc(-1 * var(--tooltip-travel));
+		--tooltip-enter-y: 0;
+
 		& > .tooltip-content,
-		&[data-tooltip]:before {
-			transform: translateX(calc(var(--tt-pos, -0.25rem) + 0.25rem))
-				translateY(var(--tt-trans, -50%));
-			left: var(--tt-off);
+		&[data-tooltip]::before {
+			left: calc(100% + var(--tooltip-gap) + var(--tooltip-tail-size));
 			right: auto;
-			inset-block: var(--tt-inset, 50% auto);
+			inset-block: var(--tooltip-align-bubble-inset);
+			translate: 0 var(--tooltip-align-bubble-translate);
 		}
 
-		&:after {
-			transform: translateX(var(--tt-pos, -0.25rem)) translateY(var(--tt-trans, -50%)) rotate(90deg);
-			left: calc(var(--tt-tail) + 1px);
+		&::after {
+			width: calc(var(--tooltip-tail-size) + var(--tooltip-tail-overlap));
+			height: var(--tooltip-tail-width);
+			left: calc(100% + var(--tooltip-gap));
 			right: auto;
-			inset-block: var(--tt-tail-inset, 50% auto);
+			inset-block: var(--tooltip-align-tail-inset);
+			translate: 0 var(--tooltip-align-tail-translate);
+			clip-path: polygon(100% 0, 0 50%, 100% 100%);
 		}
 	}
 }
 
-/* Alignments */
+/* =============================================================================
+ * ALIGNMENTS (l2)
+ * Variables only — the placement decides whether they land on the inline or the
+ * block axis, which keeps alignment and placement order-independent.
+ * ========================================================================== */
 @utility tooltip-start {
 	@layer tooltip.l2 {
-		--tt-trans: 0;
-		--tt-inset: 0 auto;
-		--tt-tail-inset: var(--tt-tail-off) auto;
-
-		& > .tooltip-content,
-		&[data-tooltip]:before {
-			left: auto;
-			right: auto;
-			inset-inline: 0 auto;
-		}
-
-		&:after {
-			left: auto;
-			right: auto;
-			inset-inline: var(--tt-tail-off) auto;
-		}
+		--tooltip-align-bubble-inset: 0 auto;
+		--tooltip-align-bubble-translate: 0;
+		--tooltip-align-tail-inset: var(--tooltip-tail-offset) auto;
+		--tooltip-align-tail-translate: -50%;
 	}
 }
 
 @utility tooltip-center {
 	@layer tooltip.l2 {
-		--tt-trans: -50%;
-		--tt-inset: 50% auto;
-		--tt-tail-inset: 50% auto;
-
-		& > .tooltip-content,
-		&[data-tooltip]:before {
-			inset-inline: auto;
-			left: 50%;
-			right: auto;
-		}
-
-		&:after {
-			inset-inline: auto;
-			left: 50%;
-			right: auto;
-		}
+		--tooltip-align-bubble-inset: 50% auto;
+		--tooltip-align-bubble-translate: -50%;
+		--tooltip-align-tail-inset: 50% auto;
+		--tooltip-align-tail-translate: -50%;
 	}
 }
 
 @utility tooltip-end {
 	@layer tooltip.l2 {
-		--tt-trans: 0;
-		--tt-inset: auto 0;
-		--tt-tail-inset: auto var(--tt-tail-off);
-
-		& > .tooltip-content,
-		&[data-tooltip]:before {
-			left: auto;
-			right: auto;
-			inset-inline: auto 0;
-		}
-
-		&:after {
-			left: auto;
-			right: auto;
-			inset-inline: auto var(--tt-tail-off);
-		}
+		--tooltip-align-bubble-inset: auto 0;
+		--tooltip-align-bubble-translate: 0;
+		--tooltip-align-tail-inset: auto var(--tooltip-tail-offset);
+		--tooltip-align-tail-translate: 50%;
 	}
 }
 
-/* Colors */
+/* =============================================================================
+ * COLORS (l2)
+ * One background drives both the bubble and the tail.
+ * ========================================================================== */
 @utility tooltip-surface {
 	@layer tooltip.l2 {
-		--tt-bg: var(--color-surface-container);
-
-		& > .tooltip-content,
-		&[data-tooltip]:before {
-			@apply text-on-surface;
-		}
+		--tooltip-bg: var(--color-surface-container);
+		--tooltip-fg: var(--color-on-surface);
 	}
 }
 @utility tooltip-primary {
 	@layer tooltip.l2 {
-		--tt-bg: var(--color-primary);
-
-		& > .tooltip-content,
-		&[data-tooltip]:before {
-			@apply text-on-primary;
-		}
+		--tooltip-bg: var(--color-primary);
+		--tooltip-fg: var(--color-on-primary);
 	}
 }
-
 @utility tooltip-secondary {
 	@layer tooltip.l2 {
-		--tt-bg: var(--color-secondary);
-
-		& > .tooltip-content,
-		&[data-tooltip]:before {
-			@apply text-on-secondary;
-		}
+		--tooltip-bg: var(--color-secondary);
+		--tooltip-fg: var(--color-on-secondary);
 	}
 }
-
 @utility tooltip-tertiary {
 	@layer tooltip.l2 {
-		--tt-bg: var(--color-tertiary);
-
-		& > .tooltip-content,
-		&[data-tooltip]:before {
-			@apply text-on-tertiary;
-		}
+		--tooltip-bg: var(--color-tertiary);
+		--tooltip-fg: var(--color-on-tertiary);
 	}
 }
-
 @utility tooltip-error {
 	@layer tooltip.l2 {
-		--tt-bg: var(--color-error);
-
-		& > .tooltip-content,
-		&[data-tooltip]:before {
-			@apply text-on-error;
-		}
+		--tooltip-bg: var(--color-error);
+		--tooltip-fg: var(--color-on-error);
 	}
 }
-
 @utility tooltip-success {
 	@layer tooltip.l2 {
-		--tt-bg: var(--color-success);
-
-		& > .tooltip-content,
-		&[data-tooltip]:before {
-			@apply text-on-success;
-		}
+		--tooltip-bg: var(--color-success);
+		--tooltip-fg: var(--color-on-success);
 	}
 }
-
 @utility tooltip-warning {
 	@layer tooltip.l2 {
-		--tt-bg: var(--color-warning);
-
-		& > .tooltip-content,
-		&[data-tooltip]:before {
-			@apply text-on-warning;
-		}
+		--tooltip-bg: var(--color-warning);
+		--tooltip-fg: var(--color-on-warning);
 	}
 }
-
 @utility tooltip-info {
 	@layer tooltip.l2 {
-		--tt-bg: var(--color-info);
-
-		& > .tooltip-content,
-		&[data-tooltip]:before {
-			@apply text-on-info;
-		}
+		--tooltip-bg: var(--color-info);
+		--tooltip-fg: var(--color-on-info);
+	}
+}
+@utility tooltip-alert {
+	@layer tooltip.l2 {
+		--tooltip-bg: var(--color-alert);
+		--tooltip-fg: var(--color-on-alert);
 	}
 }
 
-@utility tooltip-alert {
-	@layer tooltip.l2 {
-		--tt-bg: var(--color-alert);
-
-		& > .tooltip-content,
-		&[data-tooltip]:before {
-			@apply text-on-alert;
-		}
+/* =============================================================================
+ * VARIABLES (l1)
+ * Override spacing/size variables for tooltips.
+ * ========================================================================== */
+@utility tooltip-gap-* {
+	@layer tooltip.l1 {
+		--tooltip-gap: --spacing(--value(number));
+	}
+}
+@utility tooltip-tail-size-* {
+	@layer tooltip.l1 {
+		--tooltip-tail-size: --spacing(--value(number));
+	}
+}
+@utility tooltip-tail-width-* {
+	@layer tooltip.l1 {
+		--tooltip-tail-width: --spacing(--value(number));
 	}
 }

@@ -21,6 +21,8 @@ export type DeclarationScope = 'theme' | 'rule' | 'color-scheme';
 
 export interface CollectedDeclaration {
 	scope: DeclarationScope;
+	/** Source path relative to core/src, so themes can be split out by file. */
+	file: string;
 	selector: string;
 	prop: string;
 	value: string;
@@ -30,6 +32,8 @@ export interface CollectedDeclaration {
 export function collectDeclarations(coreSrc: string): CollectedDeclaration[] {
 	const componentsDir = path.join(coreSrc, 'components');
 	const declarations: CollectedDeclaration[] = [];
+
+	const rel = (full: string): string => path.relative(coreSrc, full).split(path.sep).join('/');
 
 	const visit = (dir: string): void => {
 		for (const entry of fs
@@ -48,6 +52,7 @@ export function collectDeclarations(coreSrc: string): CollectedDeclaration[] {
 					if (!decl.prop.startsWith('--')) return;
 					declarations.push({
 						scope: 'theme',
+						file: rel(full),
 						selector: '@theme',
 						prop: decl.prop,
 						value: decl.value
@@ -65,6 +70,7 @@ export function collectDeclarations(coreSrc: string): CollectedDeclaration[] {
 					if (node.prop.startsWith('--')) {
 						declarations.push({
 							scope: 'rule',
+							file: rel(full),
 							selector: rule.selector,
 							prop: node.prop,
 							value: node.value
@@ -73,6 +79,7 @@ export function collectDeclarations(coreSrc: string): CollectedDeclaration[] {
 						// Not a custom property, but `light-dark()` is inert without it.
 						declarations.push({
 							scope: 'color-scheme',
+							file: rel(full),
 							selector: rule.selector,
 							prop: node.prop,
 							value: node.value

@@ -24,7 +24,8 @@ even be installed. Consumers write:
 @import 'tailwindcss';
 @plugin '@anti049/lunar-ui-plugin' {
 	prefix: lunar-;
-	exclude: badge;   /* or: foundations */
+	exclude: badge;      /* or: foundations */
+	themes: dracula;     /* optional; omit for all */
 }
 ```
 
@@ -55,6 +56,19 @@ standalone (@plugin only, no @import of lunar-ui)
   ok   composite utilities carry both halves (surface = bg + text)
   ok   JS-coupled class keeps its name under a prefix
   ok   registers non-color namespaces too
+
+themes
+  ok   `themes` keeps the requested theme
+  ok   `themes` drops the rest
+  ok   `default` is always kept, since others inherit from it
+  ok   seed generates a full tone scale
+  ok   variant changes the generated palette
+  ok   hand-declared roles beat the generated ones
+  ok   role-only themes need no seed
+  ok   `default: true` also applies at :root
+  ok   rejects unknown theme
+  ok   rejects unknown variant
+  ok   rejects theme with no name
 
 prefix
   ok   renames library classes
@@ -123,6 +137,80 @@ Tokens outside every namespace (`--default-transition-*`, the `--theme-color-*`
 palette) are emitted as plain custom properties via `addBase`, along with
 `color-scheme`, since `light-dark()` is inert without it — 484 declarations
 across 12 selectors.
+
+### Choosing which themes ship
+
+All four shipped palettes are included by default. `themes` narrows that:
+
+```css
+@plugin '@anti049/lunar-ui-plugin' {
+	themes: dracula, gaziter;
+}
+```
+
+`default` is always added regardless. It sits at `:where(:root)` with zero
+specificity and supplies the tone steps every other theme falls back to for
+roles it does not set, so dropping it would leave the others with unresolved
+colours. Naming a theme that does not exist is an error listing the ones that do.
+
+### Custom themes
+
+Tailwind hands option bodies over as flat scalars — no nested objects — so each
+custom theme is its own `@plugin` call against the `/theme` entry point. Two
+ways to supply colours, and they compose.
+
+**From a seed**, generating the full 10-palette × 30-tone scale the way `default`
+and `gaziter` are built:
+
+```css
+@plugin '@anti049/lunar-ui-plugin/theme' {
+	name: brand;
+	seed: #b5179e;
+	variant: vibrant;   /* optional */
+	contrast: 0.3;      /* optional, -1 to 1 */
+	default: true;      /* optional, also apply at :root */
+	success: #2e7d32;   /* optional status-palette seeds */
+}
+```
+
+Variants: `vibrant` (default), `tonalspot`, `content`, `expressive`, `fidelity`,
+`fruitsalad`, `monochrome`, `neutral`, `rainbow`. Matching ignores case, spaces
+and dashes, so `tonal spot` and `tonal-spot` both work.
+
+`vibrant` is the default because it lands closest to the shipped themes — for
+the default theme's `#0956AA` seed it produces `#005db9` against the committed
+`#0058ca`. **Near, not identical**: the originals came from a different
+generator, so a regenerated theme will not be byte-for-byte equal to the one
+in `packages/core`.
+
+Material's schemes only cover primary, secondary, tertiary, neutral,
+neutral-variant and error. lunar-ui's four status palettes get their own seeds,
+defaulting to the shipped default theme's own tone-40 values so an unconfigured
+generated theme keeps lunar-ui's status colours.
+
+**By hand**, declaring semantic roles the way `catppuccin` and `dracula` are
+authored:
+
+```css
+@plugin '@anti049/lunar-ui-plugin/theme' {
+	name: nightfall;
+	color-scheme: dark;
+	--theme-color-primary: #8be9fd;
+	--theme-color-on-primary: #10121b;
+	--theme-color-surface: #10121b;
+	--theme-color-on-surface: #e6e8f0;
+}
+```
+
+Both forms may be combined — generate from a seed, then override individual
+roles. **Hand-declared values always win.** Anything a custom theme leaves unset
+falls back to the default theme, so a partial theme is valid.
+
+Generation runs in the consumer's build, which is why
+`@material/material-color-utilities` is a real dependency of this package. Note
+it ships broken ESM (extensionless relative imports that Node's resolver
+rejects); it works here because Tailwind bundles plugins before loading them.
+Verified under both the Tailwind CLI and `@tailwindcss/vite`.
 
 ### Theme switching
 

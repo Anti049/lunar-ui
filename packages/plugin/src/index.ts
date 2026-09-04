@@ -7,6 +7,7 @@ import properties from './generated/properties.js';
 import registry from './generated/registry.js';
 import theme from './generated/theme.js';
 import base from './generated/base.js';
+import themes from './generated/themes.js';
 import { addPrefix } from './functions/addPrefix.js';
 import type { BundleRegistrar, PluginOptions, StyleObject } from './types.js';
 
@@ -58,10 +59,33 @@ const lunarUi: PluginWithOptions<PluginOptions> = plugin.withOptions(
 			return true;
 		};
 
+		/*
+			Which theme palettes to ship. `default` is always included: it sits at
+			`:where(:root)` with zero specificity and supplies the tone steps every
+			other theme falls back to for roles it does not set itself, so dropping
+			it would leave the others with unresolved colours.
+		*/
+		const requested = options.themes === undefined ? null : ([] as string[]).concat(options.themes);
+		const unknown = requested?.filter((name) => !(name in themes)) ?? [];
+		if (unknown.length) {
+			throw new Error(
+				`lunar-ui: unknown theme${unknown.length > 1 ? 's' : ''} ${unknown.join(', ')}. ` +
+					`Shipped themes: ${Object.keys(themes).join(', ')}. ` +
+					`Define your own with @plugin '@anti049/lunar-ui-plugin/theme'.`
+			);
+		}
+		const selectedThemes =
+			requested === null ? Object.keys(themes) : [...new Set(['default', ...requested])];
+
 		return (api: PluginAPI) => {
 			// Design tokens, plus the @property registrations backing Tailwind's
 			// --tw-* machinery. Both must be unconditional, hence addBase.
 			api.addBase(base);
+			for (const name of selectedThemes) {
+				for (const [selector, decls] of Object.entries(themes[name] ?? {})) {
+					api.addBase({ [selector]: decls });
+				}
+			}
 			api.addBase(asCssInJs(addPrefix(properties, prefix, registry)));
 
 			for (const [name, selector] of Object.entries(variants)) {

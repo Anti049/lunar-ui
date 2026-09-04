@@ -371,22 +371,35 @@ const danglingHard = [...referencedVars]
    gaziter). The default theme sits at :where(:root), zero specificity, so it
    always underlies whatever a [data-theme] selector does not override. */
 const base_ = (await import('../src/generated/base.js')).default;
+const themeRules = (await import('../src/generated/themes.js')).default;
 const themeExtendForTest = (await import('../src/generated/theme.js')).default;
+
+/*
+	Theme palettes live in generated/themes.ts, keyed by theme id; the mode layer
+	that maps tone steps onto semantic roles stays in generated/base.ts. Flatten
+	both so resolvability is checked against what a consumer actually receives.
+*/
+const allThemeSelectors: Record<string, Record<string, string>> = { ...base_ };
+for (const perTheme of Object.values(themeRules)) {
+	for (const [selector, decls] of Object.entries(perTheme)) {
+		allThemeSelectors[selector] = { ...(allThemeSelectors[selector] ?? {}), ...decls };
+	}
+}
 const componentObjects = COMPONENTS.map((c) =>
 	fs.readFileSync(path.join(pkgRoot, 'src/generated/components', c, 'object.ts'), 'utf8')
 ).join('');
 const semanticTokens = new Set(
 	[...componentObjects.matchAll(/var\(\s*(--theme-color-[-\w]+)/g)].map((m) => m[1])
 );
-const modeSelector = Object.keys(base_).find(
+const modeSelector = Object.keys(allThemeSelectors).find(
 	(s) => s.includes('[data-theme]') && s.includes(':root')
 );
-const modeLayer = modeSelector ? (base_[modeSelector] ?? {}) : {};
-const defaultSelector = Object.keys(base_).find((s) => s.includes(':where(:root)'));
-const defaultTokens = new Set(Object.keys(defaultSelector ? (base_[defaultSelector] ?? {}) : {}));
+const modeLayer = modeSelector ? (allThemeSelectors[modeSelector] ?? {}) : {};
+const defaultSelector = Object.keys(allThemeSelectors).find((s) => s.includes(':where(:root)'));
+const defaultTokens = new Set(Object.keys(defaultSelector ? (allThemeSelectors[defaultSelector] ?? {}) : {}));
 
 const unresolvableThemes: string[] = [];
-for (const [selector, decls] of Object.entries(base_)) {
+for (const [selector, decls] of Object.entries(allThemeSelectors)) {
 	if (selector === modeSelector || !selector.includes('data-theme')) continue;
 	const defines = new Set([...Object.keys(decls), ...defaultTokens]);
 	const unresolved = [...semanticTokens].filter((token) => {
@@ -400,7 +413,7 @@ for (const [selector, decls] of Object.entries(base_)) {
 	if (unresolved.length) unresolvableThemes.push(selector.split(',')[0] + ' (' + unresolved.length + ')');
 }
 
-const themeSelectorCount = Object.keys(base_).filter((s) => s.includes('data-theme')).length;
+const themeSelectorCount = Object.keys(allThemeSelectors).filter((s) => s.includes('data-theme')).length;
 
 const standaloneRules = rulesBySelector(standalone, owns);
 const standaloneChecks = [
@@ -454,6 +467,99 @@ console.log('\nprefix');
 for (const [label, ok] of prefixChecks) {
 	console.log('  ' + (ok ? 'ok  ' : 'FAIL') + ' ' + label);
 	if (!ok) failures.push('prefix: ' + label);
+}
+
+// 6. Theme selection and custom themes.
+const themePluginPath = rel(path.join(pkgRoot, 'dist/theme.js'));
+const themesOf = (css: string): Set<string> =>
+	new Set([...css.matchAll(/\[data-theme='([^']+)'\]/g)].map((m) => m[1]));
+
+/** Compiles and returns the lunar-ui error message, or null if it succeeded. */
+function compileExpectingError(input: string, label: string): string | null {
+	try {
+		compile(input, label);
+		return null;
+	} catch (error) {
+		return /lunar-ui: [^\n│]*/.exec(String((error as Error).message))?.[0]?.trim() ?? 'unknown error';
+	}
+}
+
+const selected = compile(
+	["@import 'tailwindcss' source(none);", `@plugin '${pluginPath}' { themes: dracula; }`].join('\n'),
+	'themes-selected'
+);
+const selectedThemes = themesOf(selected);
+
+const generated = compile(
+	[
+		"@import 'tailwindcss' source(none);",
+		`@plugin '${pluginPath}' { themes: dracula; }`,
+		`@plugin '${themePluginPath}' {`,
+		'\tname: brand;',
+		'\tseed: #0956AA;',
+		'\tvariant: monochrome;',
+		'\tdefault: true;',
+		"\t--theme-color-primary-40: #ff00ff;",
+		'}',
+		`@plugin '${themePluginPath}' {`,
+		'\tname: nightfall;',
+		'\t--theme-color-primary: #8be9fd;',
+		'\tcolor-scheme: dark;',
+		'}'
+	].join('\n'),
+	'themes-custom'
+);
+const brandRule = /\[data-theme='brand'\]\s*\{([^}]*)\}/.exec(generated)?.[1] ?? '';
+
+const themeChecks: [string, boolean][] = [
+	['`themes` keeps the requested theme', selectedThemes.has('dracula')],
+	['`themes` drops the rest', !selectedThemes.has('catppuccin-mocha') && !selectedThemes.has('gaziter')],
+	['`default` is always kept, since others inherit from it', selectedThemes.has('default')],
+	['seed generates a full tone scale', (brandRule.match(/--theme-color-primary-\d+:/g) ?? []).length === 30],
+	['variant changes the generated palette', /--theme-color-secondary-40:\s*#5e5e5e/.test(brandRule)],
+	['hand-declared roles beat the generated ones', /--theme-color-primary-40:\s*#ff00ff/.test(brandRule)],
+	['role-only themes need no seed', themesOf(generated).has('nightfall')],
+	['`default: true` also applies at :root', /:root\s*\{[^}]*--theme-color-primary-40:\s*#ff00ff/.test(generated)]
+];
+
+const themeErrors: [string, string | null][] = [
+	[
+		'unknown theme',
+		compileExpectingError(
+			["@import 'tailwindcss' source(none);", `@plugin '${pluginPath}' { themes: nope; }`].join('\n'),
+			'themes-err-unknown'
+		)
+	],
+	[
+		'unknown variant',
+		compileExpectingError(
+			[
+				"@import 'tailwindcss' source(none);",
+				`@plugin '${themePluginPath}' { name: x; seed: #0956AA; variant: sparkly; }`
+			].join('\n'),
+			'themes-err-variant'
+		)
+	],
+	[
+		'theme with no name',
+		compileExpectingError(
+			["@import 'tailwindcss' source(none);", `@plugin '${themePluginPath}' { seed: #0956AA; }`].join(
+				'\n'
+			),
+			'themes-err-name'
+		)
+	]
+];
+
+console.log('\nthemes');
+for (const [label, ok] of themeChecks) {
+	console.log('  ' + (ok ? 'ok  ' : 'FAIL') + ' ' + label);
+	if (!ok) failures.push('themes: ' + label);
+}
+for (const [label, message] of themeErrors) {
+	const ok = message !== null;
+	console.log('  ' + (ok ? 'ok  ' : 'FAIL') + ' rejects ' + label);
+	if (!ok) failures.push('themes: ' + label + ' was not rejected');
 }
 
 if (!process.env.KEEP_TMP) fs.rmSync(tmpDir, { recursive: true, force: true });

@@ -261,16 +261,46 @@ for (const name of BUNDLES) {
 	);
 }
 
+/*
+	Theme palettes are split out from the rest of the base layer so consumers can
+	choose which ones ship. A theme is identified by its source directory when it
+	has flavours (`catppuccin/mocha.css` and its three siblings are all
+	`catppuccin`), otherwise by file name.
+*/
+const themeIdOf = (file: string): string | null => {
+	if (!file.startsWith('themes/')) return null;
+	const rest = file.slice('themes/'.length);
+	const slash = rest.indexOf('/');
+	return slash === -1 ? rest.replace(/\.css$/, '') : rest.slice(0, slash);
+};
+
 const baseRules: Record<string, Record<string, string>> = {};
-const addBaseDecl = (selector: string, prop: string, value: string): void => {
-	baseRules[selector] ??= {};
-	baseRules[selector][prop] = value;
+const themeRules: Record<string, Record<string, Record<string, string>>> = {};
+
+const addTo = (
+	target: Record<string, Record<string, string>>,
+	selector: string,
+	prop: string,
+	value: string
+): void => {
+	target[selector] ??= {};
+	target[selector][prop] = value;
+};
+
+const addDecl = (file: string, selector: string, prop: string, value: string): void => {
+	const themeId = themeIdOf(file);
+	if (themeId === null) {
+		addTo(baseRules, selector, prop, value);
+		return;
+	}
+	themeRules[themeId] ??= {};
+	addTo(themeRules[themeId], selector, prop, value);
 };
 
 for (const decl of declarations) {
 	if (decl.scope === 'color-scheme') {
 		// light-dark() is inert without it, so always carry these.
-		addBaseDecl(decl.selector, decl.prop, decl.value);
+		addDecl(decl.file, decl.selector, decl.prop, decl.value);
 		continue;
 	}
 	if (decl.scope === 'theme') {
@@ -278,24 +308,26 @@ for (const decl of declarations) {
 		// Anything unclaimed (--default-transition-*, say) still needs carrying,
 		// but only if the bundles actually depend on it.
 		if (claimed.has(decl.prop) || !needed.has(decl.prop)) continue;
-		addBaseDecl(':root', decl.prop, decl.value);
+		addDecl(decl.file, ':root', decl.prop, decl.value);
 		continue;
 	}
 	if (!needed.has(decl.prop)) continue;
-	addBaseDecl(decl.selector, decl.prop, decl.value);
+	addDecl(decl.file, decl.selector, decl.prop, decl.value);
 }
 
 /* Base declarations can themselves reach into namespaced tokens -- e.g.
    `--default-transition-duration: var(--duration-short-4)` -- so they need the
    same fallback treatment as the bundle CSS. */
 const resolvedBaseRules = inlineThemeFallbacks(baseRules, themeValues);
+const resolvedThemeRules = inlineThemeFallbacks(themeRules, themeValues);
 
 const baseDeclCount = Object.values(baseRules).reduce((n, r) => n + Object.keys(r).length, 0);
 const themeEntryCount = Object.values(themeExtend).reduce((n, g) => n + Object.keys(g).length, 0);
 console.log(
 	`${needed.size} in closure -> ${themeEntryCount} theme entries across ` +
 		`${Object.keys(themeExtend).length} namespaces (${Object.keys(themeExtend).join(', ')}), ` +
-		`${baseDeclCount} base declarations across ${Object.keys(baseRules).length} selectors`
+		`${baseDeclCount} base declarations across ${Object.keys(baseRules).length} selectors, ` +
+		`${Object.keys(themeRules).length} themes (${Object.keys(themeRules).join(", ")})`
 );
 
 writeGenerated('registry.ts', registry, 'Registry', 'Registry');
@@ -303,6 +335,7 @@ writeGenerated('variants.ts', CUSTOM_VARIANTS, 'Record<string, string>');
 writeGenerated('properties.ts', properties satisfies StyleObject, 'StyleObject', 'StyleObject');
 writeGenerated('theme.ts', themeExtend, 'ThemeExtend', 'ThemeExtend');
 writeGenerated('base.ts', resolvedBaseRules, 'Record<string, Record<string, string>>');
+writeGenerated('themes.ts', resolvedThemeRules, 'ThemeRules', 'ThemeRules');
 fs.writeFileSync(
 	path.join(generatedDir, 'imports.ts'),
 	BANNER +

@@ -23,6 +23,9 @@ export type StyleObject = {
 export type ThemeEntry = string | [string, Record<string, string>];
 export type ThemeExtend = Record<string, Record<string, ThemeEntry>>;
 
+/** Shipped theme palettes, keyed by theme id then by selector. */
+export type ThemeRules = Record<string, Record<string, Record<string, string>>>;
+
 /** Names lunar-ui owns, used to decide what a `prefix` may rename. */
 export interface Registry {
 	classes: string[];
@@ -44,6 +47,11 @@ export interface PluginOptions {
 	include?: string | string[];
 	/** Bundles to skip. Ignored when `include` is given. */
 	exclude?: string | string[];
+	/**
+	 * Shipped theme palettes to include. Omit for all. The `default` theme is
+	 * always added: other themes inherit from it for roles they do not set.
+	 */
+	themes?: string | string[];
 }
 
 /** Registers one bundle's rules. Generated per bundle. */

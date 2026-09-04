@@ -52,6 +52,13 @@ export interface PluginOptions {
 	 * always added: other themes inherit from it for roles they do not set.
 	 */
 	themes?: string | string[];
+	/**
+	 * Shape tokens, set as CSS custom properties:
+	 * `--radius-selector`, `--radius-field`, `--radius-box`, `--size-selector`,
+	 * `--size-field`, `--border-width`, `--animation-duration`,
+	 * `--animation-easing`. Anything else beginning `--` is rejected.
+	 */
+	[token: `--${string}`]: string | number | undefined;
 }
 
 /** Registers one bundle's rules. Generated per bundle. */

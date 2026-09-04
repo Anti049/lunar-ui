@@ -54,6 +54,32 @@ const FOUNDATIONS = 'foundations';
 /* Hand-ported: @custom-variant has no automated CSS -> JS path. */
 const CUSTOM_VARIANTS: Record<string, string> = { selected: '&:where(.selected)' };
 
+/*
+	Shape tokens: the knobs that decide how lunar-ui feels rather than what
+	colour it is. They are emitted at :root so they always resolve, and a
+	consumer can override any of them on the plugin (globally) or on a single
+	theme.
+
+	Defaults point at lunar-ui's existing scales rather than inventing numbers,
+	so the knobs start out consistent with the rest of the system. Values go
+	through the same var() fallback inlining as everything else, so they still
+	resolve in a standalone build where the referenced token was never emitted.
+*/
+const SHAPE_TOKENS: Record<string, string> = {
+	// Corner radii, smallest to largest surface.
+	'--radius-selector': 'var(--radius-sm)',
+	'--radius-field': 'var(--radius-sm)',
+	'--radius-box': 'var(--radius-lg)',
+	// Base sizing units; components multiply these.
+	'--size-selector': 'var(--spacing)',
+	'--size-field': 'var(--spacing)',
+	// Border thickness for outlined variants.
+	'--border-width': '1px',
+	// Motion, matching the standard transition lunar-ui already uses.
+	'--animation-duration': 'var(--duration-short-4)',
+	'--animation-easing': 'var(--ease-standard)'
+};
+
 const cliEntry = path.join(
 	path.dirname(require.resolve('@tailwindcss/cli/package.json')),
 	'dist/index.mjs'
@@ -354,6 +380,8 @@ for (const name of BUNDLES) {
 	for (const v of referencedVariables(JSON.stringify(buckets[name]))) seeds.add('--' + v);
 }
 for (const v of referencedVariables(JSON.stringify(properties))) seeds.add('--' + v);
+// Shape-token defaults reference theme tokens, which have to travel with them.
+for (const v of referencedVariables(Object.values(SHAPE_TOKENS).join(' '))) seeds.add('--' + v);
 const needed = resolveClosure(seeds, declarations);
 
 for (const name of BUNDLES) {
@@ -419,6 +447,9 @@ for (const decl of declarations) {
 	addDecl(decl.file, decl.selector, decl.prop, decl.value);
 }
 
+// Shape tokens sit alongside the rest of the base layer, at :root.
+for (const [prop, value] of Object.entries(SHAPE_TOKENS)) addTo(baseRules, ':root', prop, value);
+
 /* Base declarations can themselves reach into namespaced tokens -- e.g.
    `--default-transition-duration: var(--duration-short-4)` -- so they need the
    same fallback treatment as the bundle CSS. */
@@ -439,6 +470,7 @@ writeGenerated('variants.ts', CUSTOM_VARIANTS, 'Record<string, string>');
 writeGenerated('properties.ts', properties satisfies StyleObject, 'StyleObject', 'StyleObject');
 writeGenerated('theme.ts', themeExtend, 'ThemeExtend', 'ThemeExtend');
 writeGenerated('base.ts', resolvedBaseRules, 'Record<string, Record<string, string>>');
+writeGenerated('shape.ts', Object.keys(SHAPE_TOKENS), 'string[]');
 writeGenerated('themes.ts', resolvedThemeRules, 'ThemeRules', 'ThemeRules');
 /*
 	A keyed record rather than named re-exports: bundle names are file names, and

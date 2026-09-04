@@ -7,6 +7,7 @@ import properties from './generated/properties.js';
 import registry from './generated/registry.js';
 import theme from './generated/theme.js';
 import base from './generated/base.js';
+import shapeTokens from './generated/shape.js';
 import themes from './generated/themes.js';
 import { addPrefix } from './functions/addPrefix.js';
 import type { BundleRegistrar, PluginOptions, StyleObject } from './types.js';
@@ -77,10 +78,36 @@ const lunarUi: PluginWithOptions<PluginOptions> = plugin.withOptions(
 		const selectedThemes =
 			requested === null ? Object.keys(themes) : [...new Set(['default', ...requested])];
 
+		/*
+			Shape tokens given on the plugin override the defaults globally. Only
+			the known names are accepted: a typo would otherwise define a variable
+			nothing reads, and silently change nothing.
+		*/
+		const shapeOverrides: Record<string, string> = {};
+		const unknownTokens: string[] = [];
+		for (const [key, value] of Object.entries(options)) {
+			if (!key.startsWith('--')) continue;
+			if (!shapeTokens.includes(key)) {
+				unknownTokens.push(key);
+				continue;
+			}
+			if (typeof value === 'string' || typeof value === 'number') {
+				shapeOverrides[key] = String(value);
+			}
+		}
+		if (unknownTokens.length) {
+			throw new Error(
+				`lunar-ui: unknown token${unknownTokens.length > 1 ? 's' : ''} ` +
+					`${unknownTokens.join(', ')}. Settable here: ${shapeTokens.join(', ')}. ` +
+					`Colour roles belong on a theme, via @plugin '@anti049/lunar-ui-plugin/theme'.`
+			);
+		}
+
 		return (api: PluginAPI) => {
 			// Design tokens, plus the @property registrations backing Tailwind's
 			// --tw-* machinery. Both must be unconditional, hence addBase.
 			api.addBase(base);
+			if (Object.keys(shapeOverrides).length) api.addBase({ ':root': shapeOverrides });
 			for (const name of selectedThemes) {
 				for (const [selector, decls] of Object.entries(themes[name] ?? {})) {
 					api.addBase({ [selector]: decls });

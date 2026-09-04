@@ -123,6 +123,52 @@ palette) are emitted as plain custom properties via `addBase`, along with
 `color-scheme`, since `light-dark()` is inert without it — 484 declarations
 across 12 selectors.
 
+### Shape tokens
+
+The knobs that decide how lunar-ui *feels* rather than what colour it is. All
+eight are emitted at `:root` with defaults, so they always resolve:
+
+| token | default | |
+| --- | --- | --- |
+| `--radius-selector` | `var(--radius-sm)` | corner radii, smallest to largest |
+| `--radius-field` | `var(--radius-sm)` | |
+| `--radius-box` | `var(--radius-lg)` | |
+| `--size-selector` | `var(--spacing)` | base sizing units components multiply |
+| `--size-field` | `var(--spacing)` | |
+| `--border-width` | `1px` | border thickness for outlined variants |
+| `--animation-duration` | `var(--duration-short-4)` | matches lunar-ui's standard transition |
+| `--animation-easing` | `var(--ease-standard)` | |
+
+Defaults point at lunar-ui's existing scales rather than inventing numbers, and
+go through the same `var()` fallback inlining as everything else — so
+`--animation-easing` ships as `var(--ease-standard, cubic-bezier(0.2, 0, 0, 1))`
+and still resolves in a standalone build.
+
+Override globally on the plugin:
+
+```css
+@plugin '@anti049/lunar-ui-plugin' {
+	--radius-box: 1.5rem;
+	--border-width: 2px;
+}
+```
+
+or per theme, where they sit alongside the colour roles:
+
+```css
+@plugin '@anti049/lunar-ui-plugin/theme' {
+	name: sharp;
+	seed: #0956AA;
+	--radius-selector: 0;
+	--radius-field: 0;
+	--radius-box: 0;
+}
+```
+
+Only these eight names are accepted on the main plugin — a misspelling would
+otherwise define a variable nothing reads and silently change nothing. The error
+lists the valid names and points colour roles at the theme entry point.
+
 ### Choosing which themes ship
 
 All four shipped palettes are included by default. `themes` narrows that:

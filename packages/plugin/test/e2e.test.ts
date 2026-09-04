@@ -625,7 +625,37 @@ const unharmonized = compile(
 	'themes-unharmonized'
 );
 
+/* Shape tokens: defaults at :root, overridable globally or per theme. */
+const shaped = compile(
+	[
+		"@import 'tailwindcss' source(none);",
+		`@plugin '${pluginPath}' { --radius-box: 1.5rem; --border-width: 2px; }`,
+		`@plugin '${themePluginPath}' { name: sharp; seed: #0956AA; --radius-box: 0; }`
+	].join('\n'),
+	'shape-tokens'
+);
+const sharpRule = /\[data-theme='sharp'\]\s*\{([^}]*)\}/.exec(shaped)?.[1] ?? '';
+const shapeDefaults = compile(
+	["@import 'tailwindcss' source(none);", `@plugin '${pluginPath}';`].join('\n'),
+	'shape-defaults'
+);
+
 const themeChecks: [string, boolean][] = [
+	[
+		'shape tokens have defaults at :root',
+		['--radius-selector', '--radius-field', '--radius-box', '--size-selector', '--size-field',
+			'--border-width', '--animation-duration', '--animation-easing'
+		].every((token) => shapeDefaults.includes(token + ':'))
+	],
+	[
+		'shape defaults resolve standalone (fallbacks inlined)',
+		/--animation-easing:\s*var\(--ease-standard,\s*[^)]+\)/.test(shapeDefaults)
+	],
+	[
+		'shape tokens are overridable on the plugin',
+		/--radius-box:\s*1\.5rem/.test(shaped) && /--border-width:\s*2px/.test(shaped)
+	],
+	['shape tokens are overridable per theme', /--radius-box:\s*0/.test(sharpRule)],
 	[
 		'status palettes harmonize toward the seed',
 		statusOf(harmonizedBlue, 'success') !== statusOf(unharmonized, 'success')
@@ -682,6 +712,26 @@ const themeErrors: [string, string | null][] = [
 				`@plugin '${themePluginPath}' { name: x; seed: #0956AA; variant: sparkly; }`
 			].join('\n'),
 			'themes-err-variant'
+		)
+	],
+	[
+		'a misspelled shape token',
+		compileExpectingError(
+			[
+				"@import 'tailwindcss' source(none);",
+				`@plugin '${pluginPath}' { --radius-feild: 0; }`
+			].join('\n'),
+			'shape-err-typo'
+		)
+	],
+	[
+		'a colour role set on the wrong plugin',
+		compileExpectingError(
+			[
+				"@import 'tailwindcss' source(none);",
+				`@plugin '${pluginPath}' { --theme-color-primary: red; }`
+			].join('\n'),
+			'shape-err-misplaced'
 		)
 	],
 	[

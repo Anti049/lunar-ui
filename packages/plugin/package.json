@@ -1,6 +1,6 @@
 {
 	"name": "@anti049/lunar-ui-plugin",
-	"version": "0.7.0",
+	"version": "0.8.0",
 	"private": true,
 	"description": "Proof-of-concept: lunar-ui component CSS compiled to a Tailwind JS plugin, DaisyUI-style. Badge and button only.",
 	"type": "module",

@@ -9,6 +9,7 @@ import {
 	extractRootVariables
 } from './extract-classes.js';
 import { partition } from './partition.js';
+import { collectDeclarations, resolveClosure } from './collect-tokens.js';
 
 const require = createRequire(import.meta.url);
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -159,6 +160,47 @@ for (const name of COMPONENTS) {
 
 const registry = { classes: allClasses, variables: [...localVariables].sort() };
 
+/* ---- Standalone tokens -------------------------------------------------- *
+   Carry the design tokens the components depend on, so a consumer needs only
+   `@plugin` and no CSS import. Colors go through theme.extend so Tailwind also
+   generates `bg-primary` and friends; the rest is emitted as plain custom
+   properties via addBase, which is enough for the components to render. */
+process.stdout.write('resolving tokens ... ');
+const declarations = collectDeclarations(coreSrc);
+const componentSeeds = new Set();
+for (const name of COMPONENTS) {
+	for (const v of referencedVariables(JSON.stringify(buckets[name]))) componentSeeds.add('--' + v);
+}
+for (const v of referencedVariables(JSON.stringify(properties))) componentSeeds.add('--' + v);
+const needed = resolveClosure(componentSeeds, declarations);
+
+const themeColors = {};
+const baseRules = {};
+const addBaseDecl = (selector, prop, value) => {
+	baseRules[selector] ??= {};
+	baseRules[selector][prop] = value;
+};
+
+for (const decl of declarations) {
+	if (decl.scope === 'color-scheme') {
+		// light-dark() is inert without it, so always carry these.
+		addBaseDecl(decl.selector, decl.prop, decl.value);
+		continue;
+	}
+	if (!needed.has(decl.prop)) continue;
+	if (decl.scope === 'theme' && decl.prop.startsWith('--color-')) {
+		themeColors[decl.prop.slice('--color-'.length)] = decl.value;
+		continue;
+	}
+	addBaseDecl(decl.scope === 'theme' ? ':root' : decl.selector, decl.prop, decl.value);
+}
+
+const baseDeclCount = Object.values(baseRules).reduce((n, r) => n + Object.keys(r).length, 0);
+console.log(
+	`${needed.size} in closure -> ${Object.keys(themeColors).length} theme colors, ` +
+		`${baseDeclCount} base declarations across ${Object.keys(baseRules).length} selectors`
+);
+
 fs.mkdirSync(path.join(distDir, 'functions'), { recursive: true });
 for (const f of fs.readdirSync(path.join(pkgRoot, 'src/functions'))) {
 	fs.copyFileSync(path.join(pkgRoot, 'src/functions', f), path.join(distDir, 'functions', f));
@@ -168,6 +210,8 @@ const write = (file, value) =>
 write('registry.js', registry);
 write('variants.js', CUSTOM_VARIANTS);
 write('properties.js', properties);
+write('theme.js', { colors: themeColors });
+write('base.js', baseRules);
 fs.writeFileSync(
 	path.join(distDir, 'imports.js'),
 	COMPONENTS.map((c) => `export { default as ${c} } from './components/${c}/index.js';`).join('\n') +

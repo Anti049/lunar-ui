@@ -149,6 +149,14 @@ const prefixed = compile(
 	'prefixed'
 );
 
+/* No CSS import at all -- the plugin must carry its own tokens. */
+const standalone = compile(
+	["@import 'tailwindcss' source(none);", "@plugin '" + pluginPath + "';", ...sourceLines].join(
+		'\n'
+	),
+	'standalone'
+);
+
 const owns = (selector) => COMPONENTS.some((c) => selector.includes('.' + c));
 const ownsPrefixed = (selector) => COMPONENTS.some((c) => selector.includes('.lunar-' + c));
 
@@ -293,6 +301,42 @@ else {
 	console.log(layerMoves.slice(0, 4).join('\n'));
 	if (layerMoves.length > 4) console.log('  ... and ' + (layerMoves.length - 4) + ' more');
 }
+
+// 5. Standalone: tokens must resolve with no CSS import in play.
+const declaredVars = new Set([...standalone.matchAll(/(--[-\w]+)\s*:/g)].map((m) => m[1]));
+const referencedVars = new Map();
+for (const m of standalone.matchAll(/var\(\s*(--[-\w]+)\s*([,)])/g)) {
+	const [, name, next] = m;
+	if (!referencedVars.has(name)) referencedVars.set(name, false);
+	if (next === ',') referencedVars.set(name, true);
+}
+// Tailwind's own preflight internals are always referenced with a fallback and
+// never declared; a hard reference to something undefined is a real break.
+const danglingHard = [...referencedVars]
+	.filter(([name, hasFallback]) => !hasFallback && !declaredVars.has(name))
+	.map(([name]) => name);
+
+const standaloneRules = rulesBySelector(standalone, owns);
+const standaloneChecks = [
+	[
+		'emits the same component rules as the plugin-with-context build',
+		[...cand.keys()].every((selector) => standaloneRules.has(selector))
+	],
+	['no var() reference left dangling', danglingHard.length === 0],
+	['carries the theme token chain', standalone.includes('--theme-color-primary-40:')],
+	['carries color-scheme for light-dark()', standalone.includes('color-scheme')],
+	['registers theme colors as utilities', /\.bg-primary\b|--color-primary\s*:/.test(standalone)]
+];
+
+console.log('\nstandalone (@plugin only, no @import of lunar-ui)');
+console.log(
+	'  selectors: ' + standaloneRules.size + ' | variables declared: ' + declaredVars.size
+);
+for (const [label, ok] of standaloneChecks) {
+	console.log('  ' + (ok ? 'ok  ' : 'FAIL') + ' ' + label);
+	if (!ok) failures.push('standalone: ' + label);
+}
+if (danglingHard.length) for (const v of danglingHard.slice(0, 10)) console.log('    dangling: ' + v);
 
 console.log('\nprefix');
 for (const [label, ok] of prefixChecks) {

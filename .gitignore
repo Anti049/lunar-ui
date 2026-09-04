@@ -7,6 +7,9 @@ node_modules
 .wrangler
 .svelte-kit
 apps/*/build
+
+# Packed tarballs
+*.tgz
 dist
 
 # OS

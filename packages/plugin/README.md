@@ -9,7 +9,8 @@ bun run --filter '@anti049/lunar-ui-plugin' build   # compile CSS -> JS
 bun run --filter '@anti049/lunar-ui-plugin' test    # compare against the CSS-first build
 ```
 
-Consumers would write:
+It is **standalone** — no lunar-ui CSS import, and `@anti049/lunar-ui` need not
+even be installed. Consumers write:
 
 ```css
 @import 'tailwindcss';
@@ -34,6 +35,13 @@ parity
   benign (regrouped superset):   6
   real declaration conflicts:    0
 
+standalone (@plugin only, no @import of lunar-ui)
+  ok   emits the same component rules as the plugin-with-context build
+  ok   no var() reference left dangling
+  ok   carries the theme token chain
+  ok   carries color-scheme for light-dark()
+  ok   registers theme colors as utilities
+
 prefix
   ok   renames library classes
   ok   renames component-local vars
@@ -41,6 +49,11 @@ prefix
   ok   leaves consumer state hooks alone
   ok   no unprefixed library class survives
 ```
+
+"No var() reference left dangling" is the load-bearing standalone assertion: it
+collects every `var(--x)` used without a fallback and fails if nothing declares
+`--x`. Verified against a real external SvelteKit app too — 187 declared, 164
+referenced, 0 dangling.
 
 The benign buckets are real differences that don't change rendering, and the
 test classifies rather than hides them:
@@ -54,6 +67,32 @@ test classifies rather than hides them:
 - **redundant wrappers** — `:is(:is(x), y)` and a trailing `:where(.selected)`
   on rules already carrying `.selected`. `:where()` adds no specificity and
   `:is()` takes its most specific argument, so matching is unchanged.
+
+## Standalone tokens
+
+The components reference `--color-primary`, which resolves to
+`--theme-color-primary`, which resolves to `--theme-color-primary-40`, which is
+finally a hex literal. Carrying that means a transitive closure, not a filter —
+`build/collect-tokens.js` walks it from the compiled component output.
+
+Tokens are read from **source**, not from a compile: `@theme` values are emitted
+on demand, so compiling the context in isolation would only reveal whichever
+tokens something happened to use.
+
+The closure splits two ways:
+
+- `--color-*` from `@theme` → `theme.extend.colors`, so Tailwind also generates
+  `bg-primary`, `text-on-surface` and friends for the consumer.
+- everything else → plain custom properties via `addBase`, which is all the
+  components need in order to render. `color-scheme` declarations come along
+  unconditionally, since `light-dark()` is inert without them.
+
+For badge and button that works out to 176 variables in the closure → 38 theme
+colors and 424 base declarations across 12 selectors.
+
+Theme values are deliberately **not** prefixed. They occupy shared Tailwind
+namespaces, so `--color-primary` stays `--color-primary` whatever `prefix` is
+set to; only lunar-ui's own component classes and locals get renamed.
 
 ## Known divergence: cascade position
 
@@ -123,10 +162,16 @@ denylist — see `STATE_HOOKS` in `build/extract-classes.js`.
 
 This POC covers 2 of ~130 components. Beyond scaling that up:
 
-- **`@theme` → `theme.extend`.** Untouched here; the test supplies tokens by
-  importing the context CSS. A real plugin must translate 7 `@theme` blocks,
-  mapping CSS namespaces (`--color-*`, `--text-*`, `--breakpoint-*`) onto JS
-  theme keys. `@theme inline` works out as `theme.extend.colors.x = 'var(--…)'`.
+- **Non-color theme namespaces.** Only `--color-*` is registered as a Tailwind
+  theme key. `--text-*`, `--radius-*`, `--ease-*` and the rest ship as plain
+  custom properties, which is enough for the components to render but means a
+  consumer gets no `text-caption-small-emphasized` utility of their own. Mapping
+  those onto JS theme keys (`fontSize`, `borderRadius`,
+  `transitionTimingFunction`, …) is a per-namespace translation table.
+- **Theme switching.** Only the tokens badge and button actually reach are
+  carried, so alternate themes (catppuccin, dracula) come along only where they
+  intersect that closure. Shipping a theme the components don't fully touch
+  needs its own seed set.
 - **`@custom-variant` → `addVariant`.** Hand-ported here; `CUSTOM_VARIANTS` in
   `build/build.js` carries the one `button.css` defines.
 - **Functional utilities.** `@utility name-*` can't be safelisted by name and is

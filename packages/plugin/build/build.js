@@ -9,7 +9,12 @@ import {
 	extractRootVariables
 } from './extract-classes.js';
 import { partition } from './partition.js';
-import { collectDeclarations, resolveClosure } from './collect-tokens.js';
+import {
+	collectDeclarations,
+	resolveClosure,
+	buildThemeExtend,
+	inlineThemeFallbacks
+} from './collect-tokens.js';
 
 const require = createRequire(import.meta.url);
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -149,6 +154,39 @@ for (const name of COMPONENTS) {
 	}
 }
 
+const registry = { classes: allClasses, variables: [...localVariables].sort() };
+
+/* ---- Standalone tokens -------------------------------------------------- *
+   Carry the design tokens the components depend on, so a consumer needs only
+   `@plugin` and no CSS import.
+
+   Every @theme value lunar-ui defines is registered through theme.extend --
+   not just the ones badge and button reach -- so consumers get the real
+   utilities (`text-body-medium`, `duration-medium-2`). Registration alone is
+   not enough for the components themselves, though: a theme entry only
+   materialises as CSS when a *utility* uses it, and compiled component CSS
+   references it straight from var(). So those references get the default
+   inlined as a var() fallback. Tokens outside any namespace are emitted as
+   plain custom properties. */
+process.stdout.write('resolving tokens ... ');
+const declarations = collectDeclarations(coreSrc);
+const { extend: themeExtend, claimed } = buildThemeExtend(declarations);
+
+const themeValues = new Map(
+	declarations.filter((d) => d.scope === 'theme' && claimed.has(d.prop)).map((d) => [d.prop, d.value])
+);
+for (const name of COMPONENTS) {
+	buckets[name].utilities = inlineThemeFallbacks(buckets[name].utilities, themeValues);
+	buckets[name].standalone = inlineThemeFallbacks(buckets[name].standalone, themeValues);
+}
+
+const componentSeeds = new Set();
+for (const name of COMPONENTS) {
+	for (const v of referencedVariables(JSON.stringify(buckets[name]))) componentSeeds.add('--' + v);
+}
+for (const v of referencedVariables(JSON.stringify(properties))) componentSeeds.add('--' + v);
+const needed = resolveClosure(componentSeeds, declarations);
+
 for (const name of COMPONENTS) {
 	emitComponent(name, buckets[name]);
 	console.log(
@@ -158,23 +196,6 @@ for (const name of COMPONENTS) {
 	);
 }
 
-const registry = { classes: allClasses, variables: [...localVariables].sort() };
-
-/* ---- Standalone tokens -------------------------------------------------- *
-   Carry the design tokens the components depend on, so a consumer needs only
-   `@plugin` and no CSS import. Colors go through theme.extend so Tailwind also
-   generates `bg-primary` and friends; the rest is emitted as plain custom
-   properties via addBase, which is enough for the components to render. */
-process.stdout.write('resolving tokens ... ');
-const declarations = collectDeclarations(coreSrc);
-const componentSeeds = new Set();
-for (const name of COMPONENTS) {
-	for (const v of referencedVariables(JSON.stringify(buckets[name]))) componentSeeds.add('--' + v);
-}
-for (const v of referencedVariables(JSON.stringify(properties))) componentSeeds.add('--' + v);
-const needed = resolveClosure(componentSeeds, declarations);
-
-const themeColors = {};
 const baseRules = {};
 const addBaseDecl = (selector, prop, value) => {
 	baseRules[selector] ??= {};
@@ -187,17 +208,28 @@ for (const decl of declarations) {
 		addBaseDecl(decl.selector, decl.prop, decl.value);
 		continue;
 	}
-	if (!needed.has(decl.prop)) continue;
-	if (decl.scope === 'theme' && decl.prop.startsWith('--color-')) {
-		themeColors[decl.prop.slice('--color-'.length)] = decl.value;
+	if (decl.scope === 'theme') {
+		// Claimed by a theme namespace; Tailwind will emit it when used.
+		// Anything unclaimed (--default-transition-*, say) still needs carrying,
+		// but only if the components actually depend on it.
+		if (claimed.has(decl.prop) || !needed.has(decl.prop)) continue;
+		addBaseDecl(':root', decl.prop, decl.value);
 		continue;
 	}
-	addBaseDecl(decl.scope === 'theme' ? ':root' : decl.selector, decl.prop, decl.value);
+	if (!needed.has(decl.prop)) continue;
+	addBaseDecl(decl.selector, decl.prop, decl.value);
 }
 
+/* Base declarations can themselves reach into namespaced tokens -- e.g.
+   `--default-transition-duration: var(--duration-short-4)` -- so they need the
+   same fallback treatment as the component CSS. */
+const resolvedBaseRules = inlineThemeFallbacks(baseRules, themeValues);
+
 const baseDeclCount = Object.values(baseRules).reduce((n, r) => n + Object.keys(r).length, 0);
+const themeEntryCount = Object.values(themeExtend).reduce((n, g) => n + Object.keys(g).length, 0);
 console.log(
-	`${needed.size} in closure -> ${Object.keys(themeColors).length} theme colors, ` +
+	`${needed.size} in closure -> ${themeEntryCount} theme entries across ` +
+		`${Object.keys(themeExtend).length} namespaces (${Object.keys(themeExtend).join(', ')}), ` +
 		`${baseDeclCount} base declarations across ${Object.keys(baseRules).length} selectors`
 );
 
@@ -210,8 +242,8 @@ const write = (file, value) =>
 write('registry.js', registry);
 write('variants.js', CUSTOM_VARIANTS);
 write('properties.js', properties);
-write('theme.js', { colors: themeColors });
-write('base.js', baseRules);
+write('theme.js', themeExtend);
+write('base.js', resolvedBaseRules);
 fs.writeFileSync(
 	path.join(distDir, 'imports.js'),
 	COMPONENTS.map((c) => `export { default as ${c} } from './components/${c}/index.js';`).join('\n') +

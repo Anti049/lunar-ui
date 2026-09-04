@@ -31,6 +31,7 @@ parity
   present in both:        85
   missing from plugin:    0
   extra in plugin:        0 (+7 redundant :is()/:where() wrappers, same matches)
+  benign (inlined var fallback):  35
   benign (var fallback folding): 1
   benign (regrouped superset):   6
   real declaration conflicts:    0
@@ -41,6 +42,8 @@ standalone (@plugin only, no @import of lunar-ui)
   ok   carries the theme token chain
   ok   carries color-scheme for light-dark()
   ok   registers theme colors as utilities
+  ok   every shipped theme resolves (9 selectors)
+  ok   registers non-color namespaces too
 
 prefix
   ok   renames library classes
@@ -52,8 +55,9 @@ prefix
 
 "No var() reference left dangling" is the load-bearing standalone assertion: it
 collects every `var(--x)` used without a fallback and fails if nothing declares
-`--x`. Verified against a real external SvelteKit app too — 187 declared, 164
-referenced, 0 dangling.
+`--x`. Verified against a real external SvelteKit app too, with the CSS package not
+installed at all — 194 declared, 156 referenced, 0 dangling, and lunar-ui
+utilities (text-display-small, bg-primary) generated from the plugin theme.
 
 The benign buckets are real differences that don't change rendering, and the
 test classifies rather than hides them:
@@ -79,16 +83,48 @@ Tokens are read from **source**, not from a compile: `@theme` values are emitted
 on demand, so compiling the context in isolation would only reveal whichever
 tokens something happened to use.
 
-The closure splits two ways:
+Every `@theme` value lunar-ui defines is registered through `theme.extend` —
+not merely the ones badge and button reach — across all the namespaces it uses,
+mapped onto the JS theme keys a plugin config accepts:
 
-- `--color-*` from `@theme` → `theme.extend.colors`, so Tailwind also generates
-  `bg-primary`, `text-on-surface` and friends for the consumer.
-- everything else → plain custom properties via `addBase`, which is all the
-  components need in order to render. `color-scheme` declarations come along
-  unconditionally, since `light-dark()` is inert without them.
+| CSS namespace | JS theme key | | CSS namespace | JS theme key |
+| --- | --- | --- | --- | --- |
+| `--color-*` | `colors` | | `--ease-*` | `transitionTimingFunction` |
+| `--text-*` | `fontSize` | | `--duration-*` | `transitionDuration` |
+| `--font-*` | `fontFamily` | | `--opacity-*` | `opacity` |
+| `--breakpoint-*` | `screens` | | `--animation-*` | `animation` |
 
-For badge and button that works out to 176 variables in the closure → 38 theme
-colors and 424 base declarations across 12 selectors.
+So consumers get real utilities — `text-display-small`, `duration-medium-2`,
+`bg-primary` — not just bare custom properties. `--text-x--line-height` and its
+siblings fold back into the `fontSize` tuple form Tailwind expects. For badge
+and button that is 418 theme entries across 8 namespaces.
+
+Registration alone is not enough for the components themselves, though: **a
+theme entry only materialises as CSS when a utility uses it**, and compiled
+component CSS references it straight from `var()`, which Tailwind does not
+track. Re-emitting those tokens through `addBase` would land them in
+`@layer base` and shadow any override a consumer makes in their own `@theme`.
+So the default is inlined as a `var()` fallback instead —
+`var(--ease-standard, cubic-bezier(0.2, 0, 0, 1))`. An override still wins when
+present; the components still render when it is not.
+
+Tokens outside every namespace (`--default-transition-*`, the `--theme-color-*`
+palette) are emitted as plain custom properties via `addBase`, along with
+`color-scheme`, since `light-dark()` is inert without it — 422 declarations
+across 12 selectors.
+
+### Theme switching
+
+All nine theme selectors ship, and every semantic token the components read
+resolves under each. The two theme families define tokens at different levels
+and both work:
+
+- **default, gaziter** declare tone steps (`--theme-color-primary-40`), which
+  the mode layer maps to semantics via `light-dark()`.
+- **catppuccin, dracula** override the semantics (`--theme-color-primary`)
+  directly, and inherit anything they do not set from the default theme, which
+  sits at `:where(:root)` — zero specificity, so it always underlies whatever a
+  `[data-theme]` selector sets.
 
 Theme values are deliberately **not** prefixed. They occupy shared Tailwind
 namespaces, so `--color-primary` stays `--color-primary` whatever `prefix` is
@@ -162,18 +198,13 @@ denylist — see `STATE_HOOKS` in `build/extract-classes.js`.
 
 This POC covers 2 of ~130 components. Beyond scaling that up:
 
-- **Non-color theme namespaces.** Only `--color-*` is registered as a Tailwind
-  theme key. `--text-*`, `--radius-*`, `--ease-*` and the rest ship as plain
-  custom properties, which is enough for the components to render but means a
-  consumer gets no `text-caption-small-emphasized` utility of their own. Mapping
-  those onto JS theme keys (`fontSize`, `borderRadius`,
-  `transitionTimingFunction`, …) is a per-namespace translation table.
-- **Theme switching.** Only the tokens badge and button actually reach are
-  carried, so alternate themes (catppuccin, dracula) come along only where they
-  intersect that closure. Shipping a theme the components don't fully touch
-  needs its own seed set.
 - **`@custom-variant` → `addVariant`.** Hand-ported here; `CUSTOM_VARIANTS` in
-  `build/build.js` carries the one `button.css` defines.
+  `build/build.js` carries the one `button.css` defines. Automating it means
+  translating `@slot` nesting into a variant selector.
+- **Namespace table upkeep.** `THEME_NAMESPACES` in `build/collect-tokens.js`
+  is hand-maintained. A namespace Tailwind adds, or one lunar-ui invents that
+  isn't in the table, silently falls through to a plain custom property — the
+  components still render, but consumers get no utility for it.
 - **Functional utilities.** `@utility name-*` can't be safelisted by name and is
   skipped with a warning. Neither badge nor button uses one; other components do.
 - **Usage gating.** Plain-selector rules are unconditional today but become

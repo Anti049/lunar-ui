@@ -219,21 +219,57 @@ function foldsToSame(baseDecls, candDecls) {
 	return true;
 }
 
+/* The plugin inlines each theme default as a var() fallback so standalone
+   builds resolve. `var(--x)` and `var(--x, <default>)` compute the same thing
+   whenever --x is defined, and the fallback only matters when it is not. */
+/* Fallbacks nest -- `var(--a, var(--b, var(--c)))` -- so this walks balanced
+   parens rather than pattern-matching, reducing every var() to just its name. */
+function stripFallbacks(value) {
+	let out = '';
+	for (let i = 0; i < value.length; i++) {
+		if (!value.startsWith('var(', i)) {
+			out += value[i];
+			continue;
+		}
+		let depth = 0;
+		let end = i;
+		for (; end < value.length; end++) {
+			if (value[end] === '(') depth++;
+			else if (value[end] === ')' && --depth === 0) break;
+		}
+		const inner = value.slice(i + 4, end);
+		out += 'var(' + (/^\s*(--[-\w]+)/.exec(inner)?.[1] ?? inner.trim()) + ')';
+		i = end;
+	}
+	return out;
+}
+const sameIgnoringFallbacks = (a, b) =>
+	JSON.stringify(a.map(stripFallbacks).sort()) === JSON.stringify(b.map(stripFallbacks).sort());
+
 let realMismatches = 0;
 let foldedCount = 0;
 let supersetCount = 0;
+let fallbackCount = 0;
 for (const [selector, decls] of base) {
 	const other = cand.get(selector);
 	if (!other || JSON.stringify(decls) === JSON.stringify(other)) continue;
 
-	const onlyBase = decls.filter((d) => !other.includes(d));
-	const onlyCand = other.filter((d) => !decls.includes(d));
+	// Normalize fallbacks away first, so a selector that differs by both an
+	// inlined fallback and a regrouping is still recognised as benign.
+	const normBase = [...new Set(decls.map(stripFallbacks))].sort();
+	const normCand = [...new Set(other.map(stripFallbacks))].sort();
+	const onlyBase = normBase.filter((d) => !normCand.includes(d));
+	const onlyCand = normCand.filter((d) => !normBase.includes(d));
 
+	if (!onlyBase.length && !onlyCand.length) {
+		fallbackCount++;
+		continue;
+	}
 	if (!onlyBase.length) {
 		supersetCount++;
 		continue;
 	}
-	if (foldsToSame(decls, other)) {
+	if (foldsToSame(normBase, normCand)) {
 		foldedCount++;
 		continue;
 	}
@@ -287,6 +323,7 @@ console.log('  present in both:        ' + [...base.keys()].filter((k) => cand.h
 console.log('  missing from plugin:    ' + missing.length);
 console.log('  extra in plugin:        ' + extra.length +
   (extraRedundant ? ' (+' + extraRedundant + ' redundant :is()/:where() wrappers, same matches)' : ''));
+console.log('  benign (inlined var fallback):  ' + fallbackCount);
 console.log('  benign (var fallback folding): ' + foldedCount);
 console.log('  benign (regrouped superset):   ' + supersetCount);
 console.log('  real declaration conflicts:    ' + realMismatches);
@@ -316,6 +353,43 @@ const danglingHard = [...referencedVars]
 	.filter(([name, hasFallback]) => !hasFallback && !declaredVars.has(name))
 	.map(([name]) => name);
 
+/* Theme switching: every semantic token the components read must resolve under
+   each shipped theme -- either the theme sets it directly (catppuccin, dracula)
+   or the mode layer derives it from tone steps the theme sets (default,
+   gaziter). The default theme sits at :where(:root), zero specificity, so it
+   always underlies whatever a [data-theme] selector does not override. */
+const base_ = (await import('../dist/base.js')).default;
+const themeExtendForTest = (await import('../dist/theme.js')).default;
+const componentObjects = COMPONENTS.map((c) =>
+	fs.readFileSync(path.join(pkgRoot, 'dist/components', c, 'object.js'), 'utf8')
+).join('');
+const semanticTokens = new Set(
+	[...componentObjects.matchAll(/var\(\s*(--theme-color-[-\w]+)/g)].map((m) => m[1])
+);
+const modeSelector = Object.keys(base_).find(
+	(s) => s.includes('[data-theme]') && s.includes(':root')
+);
+const modeLayer = base_[modeSelector] ?? {};
+const defaultSelector = Object.keys(base_).find((s) => s.includes(':where(:root)'));
+const defaultTokens = new Set(Object.keys(base_[defaultSelector] ?? {}));
+
+const unresolvableThemes = [];
+for (const [selector, decls] of Object.entries(base_)) {
+	if (selector === modeSelector || !selector.includes('data-theme')) continue;
+	const defines = new Set([...Object.keys(decls), ...defaultTokens]);
+	const unresolved = [...semanticTokens].filter((token) => {
+		if (defines.has(token)) return false;
+		const derived = modeLayer[token];
+		if (!derived) return true;
+		return ![...derived.matchAll(/var\(\s*(--[-\w]+)/g)]
+			.map((m) => m[1])
+			.every((tone) => defines.has(tone));
+	});
+	if (unresolved.length) unresolvableThemes.push(selector.split(',')[0] + ' (' + unresolved.length + ')');
+}
+
+const themeSelectorCount = Object.keys(base_).filter((s) => s.includes('data-theme')).length;
+
 const standaloneRules = rulesBySelector(standalone, owns);
 const standaloneChecks = [
 	[
@@ -325,7 +399,17 @@ const standaloneChecks = [
 	['no var() reference left dangling', danglingHard.length === 0],
 	['carries the theme token chain', standalone.includes('--theme-color-primary-40:')],
 	['carries color-scheme for light-dark()', standalone.includes('color-scheme')],
-	['registers theme colors as utilities', /\.bg-primary\b|--color-primary\s*:/.test(standalone)]
+	['registers theme colors as utilities', /\.bg-primary\b|--color-primary\s*:/.test(standalone)],
+	[
+		'every shipped theme resolves (' + themeSelectorCount + ' selectors)',
+		unresolvableThemes.length === 0
+	],
+	[
+		'registers non-color namespaces too',
+		['fontSize', 'transitionDuration', 'transitionTimingFunction', 'screens'].every(
+			(key) => key in themeExtendForTest
+		)
+	]
 ];
 
 console.log('\nstandalone (@plugin only, no @import of lunar-ui)');
@@ -337,6 +421,7 @@ for (const [label, ok] of standaloneChecks) {
 	if (!ok) failures.push('standalone: ' + label);
 }
 if (danglingHard.length) for (const v of danglingHard.slice(0, 10)) console.log('    dangling: ' + v);
+if (unresolvableThemes.length) for (const t of unresolvableThemes) console.log('    unresolved: ' + t);
 
 console.log('\nprefix');
 for (const [label, ok] of prefixChecks) {

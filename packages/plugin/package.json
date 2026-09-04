@@ -1,13 +1,14 @@
 {
 	"name": "@anti049/lunar-ui-plugin",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"private": true,
 	"description": "Proof-of-concept: lunar-ui component CSS compiled to a Tailwind JS plugin, DaisyUI-style. Badge and button only.",
 	"type": "module",
 	"scripts": {
 		"build": "node build/build.js",
 		"test": "node test/e2e.test.js",
-		"check": "node build/build.js && node test/e2e.test.js"
+		"check": "node build/build.js && node test/e2e.test.js",
+		"package": "bun run build; mkdir -p ../../build; npm pack --pack-destination ../../build"
 	},
 	"files": [
 		"dist",

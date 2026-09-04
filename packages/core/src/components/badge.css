@@ -12,6 +12,16 @@
 @utility badge {
 	@layer badge.l3 {
 		@apply pointer-events-none flex h-fit min-h-4 w-fit min-w-4 items-center justify-center gap-2 rounded-sm px-1 py-0.5 align-middle;
+		/*
+		 * `relative` gives the badge-animate-alert halo a containing block.
+		 * Without it that ::after is absolutely positioned against the initial
+		 * containing block, so the pulse covers the whole viewport.
+		 *
+		 * `isolate` keeps the halo in the badge's own stacking context. The halo
+		 * is -z-10, so without a stacking context here it paints behind whatever
+		 * ancestor background sits above it and disappears.
+		 */
+		@apply relative isolate;
 		@apply badge-filled badge-surface;
 	}
 }

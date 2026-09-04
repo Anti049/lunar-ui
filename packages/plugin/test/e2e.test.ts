@@ -28,17 +28,17 @@ const cliEntry = path.join(
 	path.dirname(require.resolve('@tailwindcss/cli/package.json')),
 	'dist/index.mjs'
 );
-const toPosix = (p) => p.split(path.sep).join('/');
-const rel = (target) => toPosix(path.relative(tmpDir, target));
+const toPosix = (p: string): string => p.split(path.sep).join('/');
+const rel = (target: string): string => toPosix(path.relative(tmpDir, target));
 
-function compile(input, label) {
+function compile(input: string, label: string): string {
 	const inFile = path.join(tmpDir, label + '.in.css');
 	const outFile = path.join(tmpDir, label + '.out.css');
 	fs.writeFileSync(inFile, input);
 	try {
 		execFileSync(process.execPath, [cliEntry, '-i', inFile, '-o', outFile], { stdio: 'pipe' });
 	} catch (error) {
-		const detail = (error.stderr?.toString() || '').replace(/\x1b\[[0-9;]*m/g, '').trim();
+		const detail = ((error as { stderr?: Buffer }).stderr?.toString() || '').replace(/\x1b\[[0-9;]*m/g, '').trim();
 		throw new Error('tailwind failed on ' + label + ':\n' + detail);
 	}
 	return fs.readFileSync(outFile, 'utf8');
@@ -47,7 +47,7 @@ function compile(input, label) {
 /* Splits a selector list on top-level commas only, so `:is(a, b)` stays intact.
    Tailwind regroups selector lists when it re-emits plugin output, so comparing
    raw selector strings would report differences that are purely cosmetic. */
-function splitSelectors(selector) {
+function splitSelectors(selector: string): string[] {
 	const parts = [];
 	let depth = 0;
 	let current = '';
@@ -68,7 +68,7 @@ function splitSelectors(selector) {
 /* Tailwind reformats whitespace inside selectors when it re-emits plugin
    output (`:has( > svg)` vs `:has(> svg)`). Normalize so those don't read as
    different selectors. */
-function normalizeSelector(selector) {
+function normalizeSelector(selector: string): string {
 	return selector
 		.replace(/\s+/g, ' ')
 		.replace(/\s*([(),>+~])\s*/g, '$1')
@@ -77,11 +77,11 @@ function normalizeSelector(selector) {
 
 /* selector -> sorted "prop: value" list, independent of layer nesting and of
    how selector lists happen to be grouped. */
-function rulesBySelector(css, keep) {
+function rulesBySelector(css: string, keep: (selector: string) => boolean): Map<string, string[]> {
 	const root = postcss.parse(css);
-	const out = new Map();
+	const out = new Map<string, string[]>();
 	root.walkRules((rule) => {
-		const decls = [];
+		const decls: string[] = [];
 		rule.each((node) => {
 			if (node.type === 'decl') decls.push(node.prop + ': ' + node.value);
 		});
@@ -96,11 +96,11 @@ function rulesBySelector(css, keep) {
 }
 
 /* layer path a selector's rules sit under, e.g. "utilities > badge.l3" */
-function layerPaths(css, keep) {
+function layerPaths(css: string, keep: (selector: string) => boolean): Map<string, Set<string>> {
 	const root = postcss.parse(css);
-	const out = new Map();
+	const out = new Map<string, Set<string>>();
 	root.walkRules((rule) => {
-		const layers = [];
+		const layers: string[] = [];
 		for (let p = rule.parent; p && p.type !== 'root'; p = p.parent) {
 			if (p.type === 'atrule' && p.name === 'layer') layers.unshift(p.params);
 		}
@@ -169,10 +169,10 @@ const standalone = compile(
 /* Match on whole class tokens, not substrings: foundations own generic names
    like `.error` and `.surface`, and `.button` must not claim `.button-text`
    by accident. */
-const classesIn = (selector) =>
+const classesIn = (selector: string): string[] =>
 	[...selector.matchAll(/\.(-?[_a-zA-Z][\w-]*)/g)].map((m) => m[1]);
-const owns = (selector) => classesIn(selector).some((c) => ownedClasses.has(c));
-const ownsPrefixed = (selector) =>
+const owns = (selector: string): boolean => classesIn(selector).some((c) => ownedClasses.has(c));
+const ownsPrefixed = (selector: string): boolean =>
 	classesIn(selector).some((c) => c.startsWith('lunar-') && ownedClasses.has(c.slice(6)));
 
 const base = rulesBySelector(baseline, owns);
@@ -188,7 +188,7 @@ const notes = [];
 // whose selector already carries `.selected`. Neither changes what matches --
 // `:where()` contributes no specificity and `:is()` takes its most specific
 // argument -- so collapse them before deciding a selector is genuinely new.
-const collapseRedundant = (selector) => {
+const collapseRedundant = (selector: string): string => {
 	let out = selector;
 	let previous;
 	do {
@@ -197,7 +197,7 @@ const collapseRedundant = (selector) => {
 	} while (out !== previous);
 	return out;
 };
-const withoutWhere = (selector) => collapseRedundant(selector.replace(/:where\([^()]*\)/g, ''));
+const withoutWhere = (selector: string): string => collapseRedundant(selector.replace(/:where\([^()]*\)/g, ''));
 
 const baseCollapsed = new Set([...base.keys()].map(withoutWhere));
 const missing = [...base.keys()].filter((k) => !cand.has(k));
@@ -216,12 +216,12 @@ if (extra.length) failures.push(extra.length + ' selectors only in plugin output
 //     authored. Same computed value, since --tw-x is set in the same rule.
 //   superset - selector-list regrouping means a plugin rule can legitimately
 //     carry declarations the CSS-first build reached through a different group.
-const splitDecl = (d) => {
+const splitDecl = (d: string): [string, string] => {
 	const at = d.indexOf(': ');
 	return [d.slice(0, at), d.slice(at + 2)];
 };
 
-function foldsToSame(baseDecls, candDecls) {
+function foldsToSame(baseDecls: string[], candDecls: string[]): boolean {
 	const declared = new Map(baseDecls.concat(candDecls).map(splitDecl));
 	for (const d of baseDecls) {
 		if (candDecls.includes(d)) continue;
@@ -239,7 +239,7 @@ function foldsToSame(baseDecls, candDecls) {
    whenever --x is defined, and the fallback only matters when it is not. */
 /* Fallbacks nest -- `var(--a, var(--b, var(--c)))` -- so this walks balanced
    parens rather than pattern-matching, reducing every var() to just its name. */
-function stripFallbacks(value) {
+function stripFallbacks(value: string): string {
 	let out = '';
 	for (let i = 0; i < value.length; i++) {
 		if (!value.startsWith('var(', i)) {
@@ -258,9 +258,6 @@ function stripFallbacks(value) {
 	}
 	return out;
 }
-const sameIgnoringFallbacks = (a, b) =>
-	JSON.stringify(a.map(stripFallbacks).sort()) === JSON.stringify(b.map(stripFallbacks).sort());
-
 let realMismatches = 0;
 let foldedCount = 0;
 let supersetCount = 0;
@@ -373,10 +370,10 @@ const danglingHard = [...referencedVars]
    or the mode layer derives it from tone steps the theme sets (default,
    gaziter). The default theme sits at :where(:root), zero specificity, so it
    always underlies whatever a [data-theme] selector does not override. */
-const base_ = (await import('../dist/base.js')).default;
-const themeExtendForTest = (await import('../dist/theme.js')).default;
+const base_ = (await import('../src/generated/base.js')).default;
+const themeExtendForTest = (await import('../src/generated/theme.js')).default;
 const componentObjects = COMPONENTS.map((c) =>
-	fs.readFileSync(path.join(pkgRoot, 'dist/components', c, 'object.js'), 'utf8')
+	fs.readFileSync(path.join(pkgRoot, 'src/generated/components', c, 'object.ts'), 'utf8')
 ).join('');
 const semanticTokens = new Set(
 	[...componentObjects.matchAll(/var\(\s*(--theme-color-[-\w]+)/g)].map((m) => m[1])
@@ -384,11 +381,11 @@ const semanticTokens = new Set(
 const modeSelector = Object.keys(base_).find(
 	(s) => s.includes('[data-theme]') && s.includes(':root')
 );
-const modeLayer = base_[modeSelector] ?? {};
+const modeLayer = modeSelector ? (base_[modeSelector] ?? {}) : {};
 const defaultSelector = Object.keys(base_).find((s) => s.includes(':where(:root)'));
-const defaultTokens = new Set(Object.keys(base_[defaultSelector] ?? {}));
+const defaultTokens = new Set(Object.keys(defaultSelector ? (base_[defaultSelector] ?? {}) : {}));
 
-const unresolvableThemes = [];
+const unresolvableThemes: string[] = [];
 for (const [selector, decls] of Object.entries(base_)) {
 	if (selector === modeSelector || !selector.includes('data-theme')) continue;
 	const defines = new Set([...Object.keys(decls), ...defaultTokens]);

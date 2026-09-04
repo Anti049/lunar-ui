@@ -22,7 +22,7 @@ const STATE_HOOKS = new Set([
 	creates elements with `class="lunar-ripple"`. Prefixing the CSS would leave
 	the action pointing at a class that no longer exists, so these ship as-is.
 */
-export const JS_COUPLED = new Set(['lunar-ripple']);
+export const JS_COUPLED: ReadonlySet<string> = new Set(['lunar-ripple']);
 
 /**
  * Class names a stylesheet defines.
@@ -36,9 +36,9 @@ export const JS_COUPLED = new Set(['lunar-ripple']);
  * Tailwind emits an `@utility` only when something references it, so this list
  * is fed back to the compile as a safelist.
  */
-export function extractClasses(css, namespace) {
+export function extractClasses(css: string, namespace: string | null): string[] {
 	const root = postcss.parse(css);
-	const classes = new Set();
+	const classes = new Set<string>();
 
 	root.walkAtRules('utility', (rule) => {
 		const name = rule.params.trim();
@@ -50,7 +50,9 @@ export function extractClasses(css, namespace) {
 	});
 
 	root.walkRules((rule) => {
-		if (rule.parent?.type === 'atrule' && rule.parent.name === 'utility') return;
+		if (rule.parent?.type === 'atrule' && (rule.parent as postcss.AtRule).name === 'utility') {
+			return;
+		}
 		for (const match of rule.selector.matchAll(CLASS_IN_SELECTOR)) {
 			const name = match[1];
 			if (STATE_HOOKS.has(name)) continue;
@@ -63,9 +65,9 @@ export function extractClasses(css, namespace) {
 }
 
 /** Custom property names declared inside `@theme` blocks. */
-export function extractThemeVariables(css) {
+export function extractThemeVariables(css: string): Set<string> {
 	const root = postcss.parse(css);
-	const variables = new Set();
+	const variables = new Set<string>();
 	root.walkAtRules('theme', (atRule) => {
 		atRule.walkDecls((decl) => {
 			if (decl.prop.startsWith('--')) variables.add(decl.prop.slice(2));
@@ -74,10 +76,10 @@ export function extractThemeVariables(css) {
 	return variables;
 }
 
-/** Custom property names declared at the top level of a stylesheet (e.g. Tailwind's theme.css). */
-export function extractRootVariables(css) {
+/** Custom property names declared anywhere in a stylesheet (e.g. Tailwind's theme.css). */
+export function extractRootVariables(css: string): Set<string> {
 	const root = postcss.parse(css);
-	const variables = new Set();
+	const variables = new Set<string>();
 	root.walkDecls((decl) => {
 		if (decl.prop.startsWith('--')) variables.add(decl.prop.slice(2));
 	});

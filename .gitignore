@@ -12,6 +12,10 @@ apps/*/build
 *.tgz
 dist
 
+# Generated plugin data + scratch compiles
+packages/plugin/src/generated/
+.tmp/
+
 # OS
 .DS_Store
 Thumbs.db

@@ -13,8 +13,8 @@ Three bundles ship, each excludable by name:
 - **`badge`**, **`button`** — the two components.
 
 ```sh
-bun run --filter '@anti049/lunar-ui-plugin' build   # compile CSS -> JS
-bun run --filter '@anti049/lunar-ui-plugin' test    # compare against the CSS-first build
+bun run --filter '@anti049/lunar-ui-plugin' build   # CSS -> generated TS -> dist
+bun run --filter '@anti049/lunar-ui-plugin' check   # build + typecheck + compare vs CSS-first
 ```
 
 It is **standalone** — no lunar-ui CSS import, and `@anti049/lunar-ui` need not
@@ -30,7 +30,7 @@ even be installed. Consumers write:
 
 ## Result
 
-The port is faithful. `test/e2e.test.js` compiles all three bundles twice from
+The port is faithful. `test/e2e.test.ts` compiles all three bundles twice from
 the same source — once through `@import` (today's path), once through
 `@plugin` — and compares them:
 
@@ -88,7 +88,7 @@ test classifies rather than hides them:
 The components reference `--color-primary`, which resolves to
 `--theme-color-primary`, which resolves to `--theme-color-primary-40`, which is
 finally a hex literal. Carrying that means a transitive closure, not a filter —
-`build/collect-tokens.js` walks it from the compiled component output.
+`build/collect-tokens.ts` walks it from the compiled component output.
 
 Tokens are read from **source**, not from a compile: `@theme` values are emitted
 on demand, so compiling the context in isolation would only reveal whichever
@@ -171,12 +171,26 @@ ordering declaration appears to have no effect on either path.
 
 ## How the build works
 
-`build/build.js`:
+Everything is TypeScript. `build/*.ts` runs directly under bun — no compile
+step — and writes `src/generated/*.ts`; `tsc` then compiles the hand-written
+runtime and the generated data together into `dist/` as JS plus `.d.ts`.
+
+Generating `.ts` rather than `.js` is what makes the runtime type-safe: the
+hand-written `src/index.ts` imports `./generated/registry.js`, `theme.js` and
+the rest, so `tsc` checks it against the real shape of what the build produced
+rather than against `any`.
+
+```sh
+bun build/build.ts              # CSS -> src/generated/*.ts
+tsc -p tsconfig.build.json      # src/**/*.ts -> dist (JS + .d.ts)
+```
+
+`build/build.ts`:
 
 1. **Enumerate** every class each bundle defines — `@utility` blocks plus plain
    selectors in the bundle's own namespace. Foundations are not namespaced, so
    they pass `namespace: null` and accept any non-state-hook class
-   (`build/extract-classes.js`).
+   (`build/extract-classes.ts`).
 2. **Compile once** with `src/context.css` (theme, tokens, foundations) plus the
    component files, feeding the class list back as `@source inline(…)`.
    `@utility` output is emitted on demand, so without that safelist the compile
@@ -184,15 +198,16 @@ ordering declaration appears to have no effect on either path.
 3. **Partition** the output by lunar-ui's naming discipline — `@layer <name>.l<n>`
    and `<name>-*` keyframes attribute to a component. Foundations carry no layer
    marker (`@utility surface` lands as a bare `.surface`), so they are attributed
-   by class name. Everything else is context and dropped (`build/partition.js`).
+   by class name. Everything else is context and dropped (`build/partition.ts`).
 4. **Serialize** to JS objects with postcss-js, into two buckets per component:
    `utilities` (from `@utility`) and `standalone` (from plain selectors).
-5. **Emit** `dist/components/<name>/{object,index}.js`, plus a `registry.js` of
-   owned names and a `properties.js` of `@property` registrations.
+5. **Emit** `src/generated/components/<name>/{object,index}.ts`, plus a
+   `registry.ts` of owned names, `theme.ts`, `base.ts` and a `properties.ts` of
+   `@property` registrations.
 
-At runtime, `functions/nestCssLayers.js` inverts `{'@layer x': {'.a': …}}` into
+At runtime, `functions/nestCssLayers.ts` inverts `{'@layer x': {'.a': …}}` into
 `{'.a': {'@layer x': …}}`, because `addUtilities` rejects an at-rule as a
-top-level key. `functions/addPrefix.js` then renames what the registry says
+top-level key. `functions/addPrefix.ts` then renames what the registry says
 lunar-ui owns.
 
 ## Where this differs from DaisyUI
@@ -206,7 +221,7 @@ construction rather than by remembering to exclude them.
 That inversion removes most of the prefixer's risk, but not all: generic state
 hooks (`.disabled`, `.selected`, `.active`, …) appear in lunar-ui's own
 selectors while belonging to consumer markup, so they still need an explicit
-denylist — see `STATE_HOOKS` in `build/extract-classes.js`.
+denylist — see `STATE_HOOKS` in `build/extract-classes.ts`.
 
 ## What a real port would still need
 
@@ -214,13 +229,17 @@ This POC covers the foundations layer and 2 of ~130 components. Beyond scaling
 that up:
 
 - **`@custom-variant` → `addVariant`.** Hand-ported here; `CUSTOM_VARIANTS` in
-  `build/build.js` carries the one `button.css` defines. Automating it means
+  `build/build.ts` carries the one `button.css` defines. Automating it means
   translating `@slot` nesting into a variant selector.
-- **Namespace table upkeep.** `THEME_NAMESPACES` in `build/collect-tokens.js`
+- **Namespace table upkeep.** `THEME_NAMESPACES` in `build/collect-tokens.ts`
   is hand-maintained. A namespace Tailwind adds, or one lunar-ui invents that
   isn't in the table, silently falls through to a plain custom property — the
   components still render, but consumers get no utility for it.
-- **JS-coupled class names.** `JS_COUPLED` in `build/extract-classes.js` lists
+- **The CssInJs boundary.** postcss-js emits numeric CSS values as JS numbers
+  (`opacity: 0`), which Tailwind's own `CssInJs` type does not model. The
+  conversion is safe -- Tailwind stringifies them -- and is confined to one cast
+  in `src/index.ts`. TypeScript found this; the JS version shipped it unnoticed.
+- **JS-coupled class names.** `JS_COUPLED` in `build/extract-classes.ts` lists
   classes also written in JavaScript -- currently just `lunar-ripple`, created by
   the ripple action. Prefixing those would leave the action pointing at a class
   that no longer exists, so they ship unrenamed. The list is hand-maintained; a

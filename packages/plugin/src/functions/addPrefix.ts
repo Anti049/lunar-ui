@@ -1,18 +1,20 @@
+import type { Registry, StyleObject } from '../types.js';
+
 /*
 	Prefixes lunar-ui's own class names and custom properties.
 
 	Unlike DaisyUI -- which prefixes every class it encounters and keeps a
 	denylist of exceptions -- this works off an allowlist generated at build time
-	from the component sources (dist/registry.js). A name is renamed only when
-	lunar-ui actually defines it, so Tailwind's theme variables, consumer state
-	hooks like `.disabled`, and third-party classes are left alone by
+	from the component sources (generated/registry.ts). A name is renamed only
+	when lunar-ui actually defines it, so Tailwind's theme variables, consumer
+	state hooks like `.disabled`, and third-party classes are left alone by
 	construction rather than by remembering to exclude them.
 */
 
 const BACKSLASH = '\\';
 
 /** Rewrites `.foo` in a selector, skipping quoted strings and [attr=...] sections. */
-const prefixSelector = (selector, prefix, classes) => {
+const prefixSelector = (selector: string, prefix: string, classes: ReadonlySet<string>): string => {
 	let out = '';
 	let quote = '';
 	let bracketDepth = 0;
@@ -57,12 +59,17 @@ const prefixSelector = (selector, prefix, classes) => {
 
 const VAR_REFERENCE = /--([-\w]+)/g;
 
-const prefixValue = (value, prefix, variables) =>
-	value.replace(VAR_REFERENCE, (match, name) =>
+const prefixValue = (value: string, prefix: string, variables: ReadonlySet<string>): string =>
+	value.replace(VAR_REFERENCE, (match, name: string) =>
 		variables.has(name) ? '--' + prefix + name : match
 	);
 
-const prefixKey = (key, prefix, classes, variables) => {
+const prefixKey = (
+	key: string,
+	prefix: string,
+	classes: ReadonlySet<string>,
+	variables: ReadonlySet<string>
+): string => {
 	if (key.startsWith('--')) {
 		const name = key.slice(2);
 		return variables.has(name) ? '--' + prefix + name : key;
@@ -73,25 +80,26 @@ const prefixKey = (key, prefix, classes, variables) => {
 	return prefixSelector(key, prefix, classes);
 };
 
-const asSet = (value) => (value instanceof Set ? value : new Set(value));
+const asSet = (value: ReadonlySet<string> | readonly string[]): ReadonlySet<string> =>
+	value instanceof Set ? value : new Set(value as readonly string[]);
 
-export const addPrefix = (styles, prefix, registry) => {
+export function addPrefix<T extends StyleObject>(styles: T, prefix: string, registry: Registry): T {
 	if (!prefix) return styles;
 	const classes = asSet(registry.classes);
 	const variables = asSet(registry.variables);
 
-	const walk = (node) => {
+	const walk = (node: unknown): unknown => {
 		if (Array.isArray(node)) return node.map(walk);
 		if (node === null || typeof node !== 'object') {
 			return typeof node === 'string' ? prefixValue(node, prefix, variables) : node;
 		}
 		return Object.fromEntries(
-			Object.entries(node).map(([key, value]) => [
+			Object.entries(node as StyleObject).map(([key, value]) => [
 				prefixKey(key, prefix, classes, variables),
 				walk(value)
 			])
 		);
 	};
 
-	return walk(styles);
-};
+	return walk(styles) as T;
+}

@@ -1,0 +1,16 @@
+/*
+	Compile context.
+
+	Everything a component needs in order to resolve @apply -- theme, tokens,
+	layer order, foundation utilities -- but no component styles. The build
+	compiles this alone to learn what the context owns, then compiles it again
+	with the components appended and keeps the difference.
+
+	Note this is imported normally, not via @reference: @reference suppresses
+	@utility emission entirely, which is exactly what we need to capture.
+*/
+@import 'tailwindcss';
+@import '../../core/src/colors/_index.css';
+@import '../../core/src/core/_index.css';
+@import '../../core/src/foundations/_index.css';
+@import '../../core/src/themes/_index.css';

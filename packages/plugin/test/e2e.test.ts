@@ -511,7 +511,50 @@ const generated = compile(
 );
 const brandRule = /\[data-theme='brand'\]\s*\{([^}]*)\}/.exec(generated)?.[1] ?? '';
 
+/* Status palettes should follow the seed, not sit at fixed hues -- the shipped
+   default and gaziter themes have entirely different status colours. */
+const statusOf = (css: string, palette: string): string | undefined =>
+	new RegExp(`--theme-color-${palette}-40:\\s*(#[0-9a-f]+)`).exec(css)?.[1];
+
+const harmonizedBlue = compile(
+	[
+		"@import 'tailwindcss' source(none);",
+		`@plugin '${themePluginPath}' { name: t; seed: #0956AA; }`
+	].join('\n'),
+	'themes-harmonized-blue'
+);
+const harmonizedGreen = compile(
+	[
+		"@import 'tailwindcss' source(none);",
+		`@plugin '${themePluginPath}' { name: t; seed: #006c4e; }`
+	].join('\n'),
+	'themes-harmonized-green'
+);
+const unharmonized = compile(
+	[
+		"@import 'tailwindcss' source(none);",
+		`@plugin '${themePluginPath}' { name: t; seed: #0956AA; harmonize: false; }`
+	].join('\n'),
+	'themes-unharmonized'
+);
+
 const themeChecks: [string, boolean][] = [
+	[
+		'status palettes harmonize toward the seed',
+		statusOf(harmonizedBlue, 'success') !== statusOf(unharmonized, 'success')
+	],
+	[
+		'harmonized status differs between seeds',
+		statusOf(harmonizedBlue, 'info') !== statusOf(harmonizedGreen, 'info')
+	],
+	[
+		'harmonize: false leaves the status hues exact',
+		statusOf(unharmonized, 'success') === '#006c49'
+	],
+	[
+		'harmonizing keeps success recognisably green',
+		/^#0/.test(statusOf(harmonizedBlue, 'success') ?? '')
+	],
 	['`themes` keeps the requested theme', selectedThemes.has('dracula')],
 	['`themes` drops the rest', !selectedThemes.has('catppuccin-mocha') && !selectedThemes.has('gaziter')],
 	['`default` is always kept, since others inherit from it', selectedThemes.has('default')],

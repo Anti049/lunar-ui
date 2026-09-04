@@ -58,6 +58,10 @@ standalone (@plugin only, no @import of lunar-ui)
   ok   registers non-color namespaces too
 
 themes
+  ok   status palettes harmonize toward the seed
+  ok   harmonized status differs between seeds
+  ok   harmonize: false leaves the status hues exact
+  ok   harmonizing keeps success recognisably green
   ok   `themes` keeps the requested theme
   ok   `themes` drops the rest
   ok   `default` is always kept, since others inherit from it
@@ -166,10 +170,11 @@ and `gaziter` are built:
 @plugin '@anti049/lunar-ui-plugin/theme' {
 	name: brand;
 	seed: #b5179e;
-	variant: vibrant;   /* optional */
-	contrast: 0.3;      /* optional, -1 to 1 */
-	default: true;      /* optional, also apply at :root */
-	success: #2e7d32;   /* optional status-palette seeds */
+	variant: vibrant;    /* optional */
+	contrast: 0.3;       /* optional, -1 to 1 */
+	default: true;       /* optional, also apply at :root */
+	success: #2e7d32;    /* optional status-palette hues */
+	harmonize: false;    /* optional, defaults to true */
 }
 ```
 
@@ -183,10 +188,27 @@ the default theme's `#0956AA` seed it produces `#005db9` against the committed
 generator, so a regenerated theme will not be byte-for-byte equal to the one
 in `packages/core`.
 
+#### Status palettes are harmonized
+
 Material's schemes only cover primary, secondary, tertiary, neutral,
-neutral-variant and error. lunar-ui's four status palettes get their own seeds,
-defaulting to the shipped default theme's own tone-40 values so an unconfigured
-generated theme keeps lunar-ui's status colours.
+neutral-variant and error. lunar-ui's four status palettes start from their own
+hues — the shipped default theme's tone-40 values — and are then **harmonized
+toward the seed** with Material's `Blend.harmonize`, so they read as part of one
+palette rather than four unrelated colours bolted on:
+
+| seed | success | warning | info | alert |
+| --- | --- | --- | --- | --- |
+| `#0956AA` (blue) | `#006b5b` | `#8b4e3a` | `#356383` | `#8938b0` |
+| `#006c4e` (green) | `#006c4b` | `#825520` | `#1f6774` | `#8938b0` |
+| none (`harmonize: false`) | `#006c49` | `#88512c` | `#29657d` | `#993297` |
+
+Harmonize rotates hue by at most 15°, so meaning survives — success stays green,
+it just picks up the theme's temperature. This matches how the shipped themes
+already behave: `default` and `gaziter` have entirely different status colours.
+
+It applies to seeds you supply as well as the defaults, so `success` behaves the
+same however it was chosen. Set `harmonize: false` when you need an exact brand
+colour.
 
 **By hand**, declaring semantic roles the way `catppuccin` and `dracula` are
 authored:

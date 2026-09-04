@@ -1,4 +1,5 @@
 import {
+	Blend,
 	Hct,
 	TonalPalette,
 	argbFromHex,
@@ -52,18 +53,24 @@ export const VARIANT_NAMES = Object.keys(VARIANTS);
 
 /*
 	Material's schemes cover primary/secondary/tertiary/neutral/neutral-variant
-	and error. lunar-ui adds four status palettes on top, so they get their own
-	seeds. These defaults are the shipped default theme's own tone-40 values, so
-	an unconfigured generated theme keeps lunar-ui's status colours.
+	and error. lunar-ui adds four status palettes on top, so they start from their
+	own hues -- the shipped default theme's tone-40 values, so an unconfigured
+	theme keeps lunar-ui's status colours.
+
+	These are starting points, not fixed outputs: by default each is harmonized
+	toward the theme's seed (see `harmonize`), which is what keeps a green
+	success and a blue-seeded theme looking like one palette rather than four
+	unrelated ones. The shipped themes behave this way already -- `default` and
+	`gaziter` have entirely different status colours.
 */
-export const DEFAULT_STATUS_SEEDS = {
+export const STATUS_HUES = {
 	success: '#006c49',
 	warning: '#88512c',
 	info: '#29657d',
 	alert: '#993297'
 } as const;
 
-export type StatusPalette = keyof typeof DEFAULT_STATUS_SEEDS;
+export type StatusPalette = keyof typeof STATUS_HUES;
 
 export interface GenerateThemeOptions {
 	/** Seed colour, any hex Material accepts (`#0956AA`). */
@@ -74,6 +81,13 @@ export interface GenerateThemeOptions {
 	contrast?: number;
 	/** Per-palette seed overrides for the four status roles. */
 	status?: Partial<Record<StatusPalette, string>>;
+	/**
+	 * Rotate the status palettes toward the seed's hue so they read as part of
+	 * the same palette. Material's `Blend.harmonize`, which shifts by at most 15
+	 * degrees and so preserves what each colour means -- success stays green.
+	 * Defaults to true; set false to use the status hues exactly as given.
+	 */
+	harmonize?: boolean;
 }
 
 /** Normalises "Tonal Spot", "tonal-spot" and "tonalspot" to the same key. */
@@ -119,9 +133,24 @@ export function generateThemePalette(options: GenerateThemeOptions): Record<stri
 		...toneSteps(scheme.errorPalette, 'error')
 	};
 
-	for (const [name, fallback] of Object.entries(DEFAULT_STATUS_SEEDS)) {
-		const hex = options.status?.[name as StatusPalette] ?? fallback;
-		Object.assign(declarations, toneSteps(TonalPalette.fromInt(argbFromHex(hex)), name));
+	/*
+		Harmonize applies to supplied seeds as well as the defaults, so `success`
+		behaves the same however it was chosen. A consumer who needs an exact
+		brand colour turns harmonization off.
+	*/
+	const harmonize = options.harmonize ?? true;
+	for (const name of Object.keys(STATUS_HUES) as StatusPalette[]) {
+		const hex = options.status?.[name] ?? STATUS_HUES[name];
+		let argb: number;
+		try {
+			argb = argbFromHex(hex);
+		} catch {
+			throw new Error(
+				`lunar-ui: could not parse the "${name}" colour "${hex}". Expected a hex colour.`
+			);
+		}
+		const resolved = harmonize ? Blend.harmonize(argb, source.toInt()) : argb;
+		Object.assign(declarations, toneSteps(TonalPalette.fromInt(resolved), name));
 	}
 
 	return declarations;

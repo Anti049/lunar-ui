@@ -47,6 +47,11 @@ export interface ThemeOptions {
 	variant?: string;
 	/** Material contrast level, -1 to 1. */
 	contrast?: number;
+	/**
+	 * Rotate the status palettes toward the seed hue so they read as one
+	 * palette. Defaults to true; false uses the status hues exactly.
+	 */
+	harmonize?: boolean;
 	/** Seed overrides for the status palettes. */
 	success?: string;
 	warning?: string;
@@ -82,6 +87,7 @@ const lunarUiTheme: PluginWithOptions<ThemeOptions> = plugin.withOptions(
 					seed: options.seed,
 					variant: options.variant,
 					contrast: typeof options.contrast === 'number' ? options.contrast : undefined,
+					harmonize: typeof options.harmonize === 'boolean' ? options.harmonize : undefined,
 					status
 				})
 			);

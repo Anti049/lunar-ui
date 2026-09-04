@@ -419,18 +419,16 @@ for (const m of standalone.matchAll(/var\(\s*(--[-\w]+)\s*([,)])/g)) {
 // Tailwind's own preflight internals are always referenced with a fallback and
 // never declared; a hard reference to something undefined is a real break.
 /*
-	Two variables are referenced by lunar-ui's own CSS but declared nowhere in
-	it -- pre-existing bugs in packages/core, not artefacts of the port:
+	One variable is referenced by lunar-ui's own CSS but declared nowhere in it
+	-- a pre-existing bug in packages/core, not an artefact of the port:
 
-	  --depth                      checkbox.css:47, inside calc(), so the whole
-	                               box-shadow is invalid and dropped
 	  --color-on-surface-container select.css:48, a fallback naming a token that
 	                               does not exist; the colour silently no-ops
 
-	Pinned so they stay visible without failing the suite, and so a third one
+	Pinned so it stays visible without failing the suite, and so a second one
 	does fail it.
 */
-const KNOWN_DANGLING = new Set(['--depth', '--color-on-surface-container']);
+const KNOWN_DANGLING = new Set(['--color-on-surface-container']);
 
 const allDangling = [...referencedVars]
 	.filter(([name, hasFallback]) => !hasFallback && !declaredVars.has(name))

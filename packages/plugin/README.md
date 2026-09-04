@@ -52,7 +52,7 @@ parity
 
 standalone (@plugin only, no @import of lunar-ui)
   ok   emits the same component rules as the plugin-with-context build
-  ok   no var() reference left dangling (2 known core CSS bugs pinned)
+  ok   no var() reference left dangling (1 known core CSS bug pinned)
   ok   carries the theme token chain
   ok   carries color-scheme for light-dark()
   ok   registers theme colors as utilities
@@ -278,21 +278,24 @@ Theme values are deliberately **not** prefixed. They occupy shared Tailwind
 namespaces, so `--color-primary` stays `--color-primary` whatever `prefix` is
 set to; only lunar-ui's own component classes and locals get renamed.
 
-## Bugs this surfaced in packages/core
+## A bug this surfaced in packages/core
 
 Widening the port from two components to sixteen turned the parity test into a
-linter for the CSS itself. Two references point at variables nothing declares,
-so they fail silently today, in the CSS-first build as much as through the
+linter for the CSS itself. One reference points at a variable nothing declares,
+so it fails silently today, in the CSS-first build as much as through the
 plugin:
 
 | where | reference | effect |
 | --- | --- | --- |
-| `checkbox.css:47` | `calc(var(--depth) * 0.1)` | inside `calc()`, so the whole `box-shadow` is invalid and dropped |
 | `select.css:48` | `var(--select-on-container, var(--color-on-surface-container))` | fallback names a token that does not exist; the colour silently no-ops |
 
-Neither has an obvious intended value, so they are pinned as `KNOWN_DANGLING`
-in the test rather than guessed at — visible, not failing, and a third one will
-fail the suite.
+It has no obvious intended value, so it is pinned as `KNOWN_DANGLING` in the
+test rather than guessed at — visible, not failing, and a second one will fail
+the suite.
+
+A second, `--depth` in `checkbox.css`, has since been removed: it gated an inset
+highlight on the checkmark that never rendered, because the undefined variable
+made the whole `box-shadow` declaration invalid.
 
 ## Three names collide with Tailwind
 

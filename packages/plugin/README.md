@@ -52,7 +52,7 @@ parity
 
 standalone (@plugin only, no @import of lunar-ui)
   ok   emits the same component rules as the plugin-with-context build
-  ok   no var() reference left dangling (1 known core CSS bug pinned)
+  ok   no var() reference left dangling
   ok   carries the theme token chain
   ok   carries color-scheme for light-dark()
   ok   registers theme colors as utilities
@@ -278,24 +278,19 @@ Theme values are deliberately **not** prefixed. They occupy shared Tailwind
 namespaces, so `--color-primary` stays `--color-primary` whatever `prefix` is
 set to; only lunar-ui's own component classes and locals get renamed.
 
-## A bug this surfaced in packages/core
+## Bugs this surfaced in packages/core
 
 Widening the port from two components to sixteen turned the parity test into a
-linter for the CSS itself. One reference points at a variable nothing declares,
-so it fails silently today, in the CSS-first build as much as through the
-plugin:
+linter for the CSS itself. It found two references to variables nothing
+declared -- both silent failures in the CSS-first build as much as through the
+plugin, and both now fixed at source:
 
-| where | reference | effect |
+| where | was | outcome |
 | --- | --- | --- |
-| `select.css:48` | `var(--select-on-container, var(--color-on-surface-container))` | fallback names a token that does not exist; the colour silently no-ops |
+| `checkbox.css` | `calc(var(--depth) * 0.1)` inside a `box-shadow` | an undefined variable in `calc()` invalidates the whole declaration, so the inset highlight never rendered. Removed. |
+| `select.css` | `var(--select-on-container, var(--color-on-surface-container))` | the fallback named a token that does not exist, so the colour no-opped. Corrected to `--color-on-surface`, matching button and badge. |
 
-It has no obvious intended value, so it is pinned as `KNOWN_DANGLING` in the
-test rather than guessed at — visible, not failing, and a second one will fail
-the suite.
-
-A second, `--depth` in `checkbox.css`, has since been removed: it gated an inset
-highlight on the checkmark that never rendered, because the undefined variable
-made the whole `box-shadow` declaration invalid.
+Nothing is exempt now, so any new dangling reference fails the suite.
 
 ## Three names collide with Tailwind
 

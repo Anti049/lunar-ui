@@ -45,7 +45,7 @@
 @utility select-tonal {
 	@layer select.l2 {
 		background-color: var(--select-container, var(--color-surface-container));
-		color: var(--select-on-container, var(--color-on-surface-container));
+		color: var(--select-on-container, var(--color-on-surface));
 	}
 }
 @utility select-elevated {

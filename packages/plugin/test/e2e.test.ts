@@ -419,22 +419,14 @@ for (const m of standalone.matchAll(/var\(\s*(--[-\w]+)\s*([,)])/g)) {
 // Tailwind's own preflight internals are always referenced with a fallback and
 // never declared; a hard reference to something undefined is a real break.
 /*
-	One variable is referenced by lunar-ui's own CSS but declared nowhere in it
-	-- a pre-existing bug in packages/core, not an artefact of the port:
-
-	  --color-on-surface-container select.css:48, a fallback naming a token that
-	                               does not exist; the colour silently no-ops
-
-	Pinned so it stays visible without failing the suite, and so a second one
-	does fail it.
+	Nothing is exempt any more. Both references lunar-ui had to variables it
+	never declared have been fixed at source -- `--depth` removed from
+	checkbox.css, `--color-on-surface-container` corrected in select.css -- so
+	any dangling reference is now a hard failure.
 */
-const KNOWN_DANGLING = new Set(['--color-on-surface-container']);
-
-const allDangling = [...referencedVars]
+const danglingHard = [...referencedVars]
 	.filter(([name, hasFallback]) => !hasFallback && !declaredVars.has(name))
 	.map(([name]) => name);
-const danglingHard = allDangling.filter((name) => !KNOWN_DANGLING.has(name));
-const danglingKnown = allDangling.filter((name) => KNOWN_DANGLING.has(name));
 
 /* Theme switching: every semantic token the components read must resolve under
    each shipped theme -- either the theme sets it directly (catppuccin, dracula)
@@ -492,11 +484,7 @@ const standaloneChecks = [
 		'emits the same component rules as the plugin-with-context build',
 		[...cand.keys()].every((selector) => standaloneRules.has(selector))
 	],
-	[
-		'no var() reference left dangling' +
-			(danglingKnown.length ? ' (' + danglingKnown.length + ' known core CSS bugs pinned)' : ''),
-		danglingHard.length === 0
-	],
+	['no var() reference left dangling', danglingHard.length === 0],
 	['carries the theme token chain', standalone.includes('--theme-color-primary-40:')],
 	['carries color-scheme for light-dark()', standalone.includes('color-scheme')],
 	['registers theme colors as utilities', /\.bg-primary\b|--color-primary\s*:/.test(standalone)],

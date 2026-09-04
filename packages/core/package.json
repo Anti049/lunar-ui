@@ -22,6 +22,11 @@
 	"exports": {
 		".": "./src/index.css",
 		"./index.css": "./src/index.css",
+		"./colors.css": "./src/colors/_index.css",
+		"./core.css": "./src/core/_index.css",
+		"./foundations.css": "./src/foundations/_index.css",
+		"./components.css": "./src/components/_index.css",
+		"./components/*.css": "./src/components/*.css",
 		"./fonts.css": "./src/core/fonts.css",
 		"./themes.css": "./src/themes/_index.css",
 		"./themes/*.css": "./src/themes/*.css",

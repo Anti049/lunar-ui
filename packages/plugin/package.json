@@ -9,6 +9,10 @@
 		"test": "node test/e2e.test.js",
 		"check": "node build/build.js && node test/e2e.test.js"
 	},
+	"files": [
+		"dist",
+		"README.md"
+	],
 	"exports": {
 		".": "./dist/index.js",
 		"./package.json": "./package.json"

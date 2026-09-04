@@ -36,6 +36,17 @@ const prefixSelector = (selector: string, prefix: string, classes: ReadonlySet<s
 			out += ch;
 			continue;
 		}
+		// Skip comments wholesale. Their contents must not drive the state
+		// machine: an apostrophe inside a comment would otherwise open a quote
+		// that never closes, and a stray "[" would leave bracketDepth stuck,
+		// silently skipping every class after it.
+		if (ch === '/' && selector[i + 1] === '*') {
+			const end = selector.indexOf('*/', i + 2);
+			const stop = end === -1 ? selector.length : end + 2;
+			out += selector.slice(i, stop);
+			i = stop - 1;
+			continue;
+		}
 		if (ch === BACKSLASH) {
 			// Escaped character in a selector, e.g. `.w-1\/2`. Copy both through.
 			out += ch + (selector[++i] ?? '');

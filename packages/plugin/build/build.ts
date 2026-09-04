@@ -34,7 +34,16 @@ const generatedDir = path.join(pkgRoot, 'src/generated');
 const distDir = path.join(pkgRoot, 'dist');
 const tmpDir = path.join(pkgRoot, '.tmp');
 
-const COMPONENTS = ['badge', 'button'];
+/*
+	Every component stylesheet that actually defines something. Most of
+	components/ is still empty placeholders for planned components, and an empty
+	bundle is only noise, so files that yield no classes are skipped.
+*/
+const componentsDir = path.join(coreSrc, 'components');
+const componentFiles = fs
+	.readdirSync(componentsDir)
+	.filter((f) => f.endsWith('.css') && f !== '_index.css')
+	.sort();
 
 /* Foundations are part of the library's public surface, not just compile
    context: `surface` applies bg-surface + text-on-surface, `focusable` the
@@ -170,11 +179,20 @@ process.stdout.write('reading theme variables ... ');
 const owned = themeVariables();
 console.log(`${owned.size} owned by Tailwind + lunar-ui @theme`);
 
-const classesByBundle: Record<string, string[]> = Object.fromEntries(
-	COMPONENTS.map((name) => [
-		name,
-		extractClasses(fs.readFileSync(path.join(coreSrc, 'components', `${name}.css`), 'utf8'), name)
-	])
+const classesByBundle: Record<string, string[]> = {};
+const skipped: string[] = [];
+for (const file of componentFiles) {
+	const name = file.replace(/\.css$/, '');
+	const classes = extractClasses(fs.readFileSync(path.join(componentsDir, file), 'utf8'), name);
+	if (classes.length === 0) {
+		skipped.push(name);
+		continue;
+	}
+	classesByBundle[name] = classes;
+}
+const COMPONENTS = Object.keys(classesByBundle);
+console.log(
+	`  ${COMPONENTS.length} components with rules, ${skipped.length} empty placeholders skipped`
 );
 
 // Foundations are not namespaced, so they are read with `namespace: null`.
@@ -190,13 +208,67 @@ const foundationClasses = [
 classesByBundle[FOUNDATIONS] = foundationClasses;
 
 const BUNDLES = [FOUNDATIONS, ...COMPONENTS];
-const classOwners = new Map(foundationClasses.map((c) => [c, FOUNDATIONS]));
+/*
+	Class-name attribution, used when a rule carries no usable @layer marker.
+	Layer names do not always match file names -- collapsible.css emits into
+	`@layer collapse.lN`, navigation.css into `@layer nav-link.lN` -- so without
+	this those rules would be dropped as context. Components are registered
+	before foundations so a component class wins if both claim it; collisions are
+	reported rather than silently resolved.
+*/
+const classOwners = new Map<string, string>();
+const collisions: string[] = [];
+for (const bundle of [...COMPONENTS, FOUNDATIONS]) {
+	for (const cls of classesByBundle[bundle]) {
+		const existing = classOwners.get(cls);
+		if (existing && existing !== bundle) {
+			collisions.push(`${cls} (${existing} vs ${bundle})`);
+			continue;
+		}
+		classOwners.set(cls, bundle);
+	}
+}
+if (collisions.length) {
+	console.log(
+		`  ! ${collisions.length} class name(s) claimed by more than one bundle: ` +
+			collisions.slice(0, 5).join(', ')
+	);
+}
 const allClasses = [...new Set(Object.values(classesByBundle).flat())].sort();
+
+/*
+	Some lunar-ui class names collide with Tailwind built-ins: `collapse`,
+	`table` and `select-text` are all real Tailwind utilities. Compiling the
+	context alone, with lunar-ui's class list safelisted but none of lunar-ui's
+	own stylesheets loaded, says exactly which names Tailwind answers to by
+	itself. Those bare rules are not ours to claim -- attributing them would pull
+	`visibility: collapse` into the collapsible bundle. lunar-ui's own rules for
+	the same names still arrive via their `@layer <name>.lN` wrapper.
+*/
+process.stdout.write('detecting Tailwind built-ins ... ');
+// Bare Tailwind, with none of lunar-ui loaded -- not src/context.css, which
+// pulls in the foundations and would report every one of them as a built-in.
+const builtinCss = runTailwind(
+	["@import 'tailwindcss' source(none);", ...allClasses.map((c) => `@source inline("${c}");`)].join(
+		'\n'
+	),
+	'builtins'
+);
+const builtinClasses = new Set<string>();
+for (const match of builtinCss.matchAll(/^\s*\.([-\w]+)\s*(?:,|\{)/gm)) {
+	if (classOwners.has(match[1])) builtinClasses.add(match[1]);
+}
+for (const name of builtinClasses) classOwners.delete(name);
+console.log(
+	builtinClasses.size
+		? `${builtinClasses.size} collide with Tailwind (${[...builtinClasses].join(', ')})`
+		: 'none'
+);
 
 process.stdout.write(`compiling ${BUNDLES.length} bundles together ... `);
 const input = [
 	`@import '${relFromTmp(path.join(pkgRoot, 'src/context.css'))}';`,
-	...COMPONENTS.map((c) => `@import '${relFromTmp(path.join(coreSrc, 'components', `${c}.css`))}';`),
+	...COMPONENTS.map((c) => `@import '${relFromTmp(path.join(componentsDir, `${c}.css`))}';`),
 	// @utility output is emitted on demand, so safelist every class the
 	// bundles define or the compile comes back empty.
 	...allClasses.map((c) => `@source inline("${c}");`)
@@ -207,11 +279,43 @@ console.log(`${compiled.split('\n').length} lines`);
 
 const { components: buckets, properties, unattributed } = partition(compiled, COMPONENTS, classOwners);
 
+/*
+	A component-local variable is one the component *declares*, not merely one it
+	mentions. Going by references would sweep up typos -- a `var()` naming a
+	token that does not exist anywhere -- and then rename them under a prefix,
+	which quietly breaks the "theme variables are never prefixed" guarantee for
+	anything named `--color-*`.
+*/
+const declaredVariables = (node: unknown, into: Set<string>): Set<string> => {
+	if (Array.isArray(node)) {
+		for (const item of node) declaredVariables(item, into);
+		return into;
+	}
+	if (node === null || typeof node !== 'object') return into;
+	for (const [key, value] of Object.entries(node as Record<string, unknown>)) {
+		if (key.startsWith('--')) into.add(key.slice(2));
+		declaredVariables(value, into);
+	}
+	return into;
+};
+
 const localVariables = new Set<string>();
+const referencedInBundles = new Set<string>();
 for (const name of BUNDLES) {
-	for (const v of referencedVariables(JSON.stringify(buckets[name]))) {
+	for (const v of declaredVariables(buckets[name], new Set())) {
 		if (!owned.has(v) && !v.startsWith('tw-')) localVariables.add(v);
 	}
+	for (const v of referencedVariables(JSON.stringify(buckets[name]))) referencedInBundles.add(v);
+}
+
+/* Referenced by a component, declared by nobody -- a dead var() reference. */
+const undeclared = [...referencedInBundles].filter(
+	(v) => !owned.has(v) && !v.startsWith('tw-') && !localVariables.has(v)
+);
+if (undeclared.length) {
+	console.log(
+		`  ! ${undeclared.length} variable(s) referenced but never declared: ${undeclared.join(', ')}`
+	);
 }
 
 const registry: Registry = {
@@ -336,11 +440,22 @@ writeGenerated('properties.ts', properties satisfies StyleObject, 'StyleObject',
 writeGenerated('theme.ts', themeExtend, 'ThemeExtend', 'ThemeExtend');
 writeGenerated('base.ts', resolvedBaseRules, 'Record<string, Record<string, string>>');
 writeGenerated('themes.ts', resolvedThemeRules, 'ThemeRules', 'ThemeRules');
+/*
+	A keyed record rather than named re-exports: bundle names are file names, and
+	`code-block` is not a valid JS identifier. The keys keep the real names, which
+	is what `include`/`exclude` match against.
+*/
+const identifierFor = (name: string): string =>
+	name.replace(/-([a-z0-9])/g, (_, c: string) => c.toUpperCase());
+
 fs.writeFileSync(
 	path.join(generatedDir, 'imports.ts'),
 	BANNER +
-		BUNDLES.map((c) => `export { default as ${c} } from './components/${c}/index.js';`).join('\n') +
-		'\n'
+		`import type { BundleRegistrar } from '../types.js';\n` +
+		BUNDLES.map((c) => `import ${identifierFor(c)} from './components/${c}/index.js';`).join('\n') +
+		`\n\nconst bundles: Record<string, BundleRegistrar> = {\n` +
+		BUNDLES.map((c) => `\t'${c}': ${identifierFor(c)}`).join(',\n') +
+		`\n};\n\nexport default bundles;\n`
 );
 
 console.log(`\nlocal variables: ${registry.variables.join(', ') || '(none)'}`);

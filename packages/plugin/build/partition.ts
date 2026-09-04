@@ -60,6 +60,27 @@ export function partition(
 				if (owner) return owner;
 			}
 		}
+		/*
+			A layer whose name is not a bundle. Layer names are not always file
+			names -- collapsible.css emits `@layer collapse.lN`, navigation.css
+			emits `@layer nav-link.lN` -- so fall back to the classes inside, or
+			the whole block is dropped as context.
+		*/
+		if (node.type === 'atrule') {
+			let owner: string | null = null;
+			node.walkRules((rule) => {
+				if (owner) return false;
+				for (const match of rule.selector.matchAll(/\.(-?[_a-zA-Z][\w-]*)/g)) {
+					const candidate = classOwners.get(match[1]);
+					if (candidate) {
+						owner = candidate;
+						return false;
+					}
+				}
+				return undefined;
+			});
+			if (owner) return owner;
+		}
 		return null;
 	};
 
@@ -101,15 +122,55 @@ export function partition(
 			Object.entries(buckets).map(([name, b]) => [
 				name,
 				{
-					utilities: objectify(b.utilities) as StyleObject,
-					standalone: objectify(b.standalone) as StyleObject
+					utilities: kebabCaseProperties(objectify(b.utilities)) as StyleObject,
+					standalone: kebabCaseProperties(objectify(b.standalone)) as StyleObject
 				}
 			])
 		),
-		properties: objectify(properties) as StyleObject,
+		properties: kebabCaseProperties(objectify(properties)) as StyleObject,
 		unattributed
 	};
 }
 
 const describe = (node: postcss.ChildNode): string =>
 	node.type === 'atrule' ? `@${node.name} ${node.params}`.trim() : (node as postcss.Rule).selector;
+
+/*
+	postcss-js camelCases declaration properties, and Tailwind converts them back
+	-- except when the value is an array, which is how a repeated declaration is
+	represented (`transition-duration` given twice as a fallback). Those keys
+	reach the output verbatim as `transitionDuration`, which browsers drop.
+
+	Emitting kebab-case throughout sidesteps the conversion entirely. Only
+	declaration keys are rewritten: selectors, at-rules and custom properties are
+	left exactly as they are.
+*/
+const isDeclarationValue = (value: unknown): boolean => {
+	if (Array.isArray(value)) return value.length === 0 || typeof value[0] !== 'object';
+	return typeof value !== 'object' || value === null;
+};
+
+/*
+	postcss-js's own encoding, reversed. Vendor prefixes are the reason this is
+	not a plain camel-to-kebab: `-webkit-user-select` round-trips as
+	`WebkitUserSelect`, so a leading capital has to become a leading dash, and
+	`-ms-` is the odd one out that postcss-js encodes lowercase.
+*/
+const toKebab = (property: string): string =>
+	property
+		.replace(/([A-Z])/g, '-$1')
+		.replace(/^ms-/, '-ms-')
+		.toLowerCase();
+
+export function kebabCaseProperties<T>(node: T): T {
+	if (Array.isArray(node)) return node.map(kebabCaseProperties) as unknown as T;
+	if (node === null || typeof node !== 'object') return node;
+	return Object.fromEntries(
+		Object.entries(node as Record<string, unknown>).map(([key, value]) => {
+			if (key.startsWith('--') || key.startsWith('@') || !isDeclarationValue(value)) {
+				return [key, kebabCaseProperties(value)];
+			}
+			return [toKebab(key), value];
+		})
+	) as T;
+}

@@ -1,7 +1,7 @@
 import plugin from 'tailwindcss/plugin';
 import type { PluginAPI, PluginWithConfig } from 'tailwindcss/plugin';
 
-import * as bundles from './generated/imports.js';
+import bundles from './generated/imports.js';
 import variants from './generated/variants.js';
 import properties from './generated/properties.js';
 import registry from './generated/registry.js';
@@ -96,7 +96,7 @@ const lunarUi: PluginWithOptions<PluginOptions> = plugin.withOptions(
 				api.addUtilities(utilities as unknown as Record<string, CssInJs>);
 			};
 
-			for (const [name, register] of Object.entries(bundles) as [string, BundleRegistrar][]) {
+			for (const [name, register] of Object.entries(bundles)) {
 				if (!included(name)) continue;
 				register({ addUtilities, prefix });
 			}

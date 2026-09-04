@@ -117,10 +117,20 @@ const lunarUiTheme: PluginWithOptions<ThemeOptions> = plugin.withOptions(
 
 		return ({ addBase }: PluginAPI) => {
 			addBase({ [`[data-theme='${name}']`]: declarations });
-			// `:root` outranks the shipped default theme's `:where(:root)`, which
-			// has zero specificity, so this takes over without removing the
-			// fallbacks other themes rely on.
-			if (options.default) addBase({ ':root': declarations });
+			/*
+				`:root:not([data-theme])` rather than plain `:root`.
+
+				`:root` is specificity (0,1,0) -- identical to `[data-theme='x']` --
+				so which one won came down to emission order, and a default theme
+				declared after another theme would beat it and make that theme
+				impossible to apply. Shipped themes hid the problem because the ones
+				with a mode suffix, `[data-theme='dracula'].dark`, are (0,2,0).
+
+				`:not([data-theme])` says what is actually meant: the default applies
+				where no theme has been chosen. It cannot match an element that
+				carries a theme, so it never competes, whatever the order.
+			*/
+			if (options.default) addBase({ ':root:not([data-theme])': declarations });
 		};
 	}
 );

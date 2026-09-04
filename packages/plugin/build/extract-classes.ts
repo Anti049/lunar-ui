@@ -49,6 +49,16 @@ export function extractClasses(css: string, namespace: string | null): string[] 
 		classes.add(name);
 	});
 
+	/*
+		A file's own `@utility` names describe what it owns better than its file
+		name does: collapsible.css declares `collapse`, navigation.css declares
+		`nav-rail` and `nav-link`. Filtering plain selectors by the file name
+		alone would drop those, so the declared utilities widen the namespace.
+	*/
+	const namespaces = namespace === null ? null : [namespace, ...classes];
+	const owned = (name: string): boolean =>
+		namespaces === null || namespaces.some((ns) => name === ns || name.startsWith(`${ns}-`));
+
 	root.walkRules((rule) => {
 		if (rule.parent?.type === 'atrule' && (rule.parent as postcss.AtRule).name === 'utility') {
 			return;
@@ -56,7 +66,7 @@ export function extractClasses(css: string, namespace: string | null): string[] 
 		for (const match of rule.selector.matchAll(CLASS_IN_SELECTOR)) {
 			const name = match[1];
 			if (STATE_HOOKS.has(name)) continue;
-			if (namespace !== null && name !== namespace && !name.startsWith(`${namespace}-`)) continue;
+			if (!owned(name)) continue;
 			classes.add(name);
 		}
 	});

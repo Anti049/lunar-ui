@@ -1,16 +1,20 @@
 # @anti049/lunar-ui-plugin
 
 A proof of concept, not a shipping package. It compiles lunar-ui's CSS into a
-Tailwind JS plugin the way DaisyUI does — the `foundations` layer plus `badge`
-and `button` — so the approach can be judged on evidence instead of argument.
+Tailwind JS plugin the way DaisyUI does, so the approach can be judged on
+evidence instead of argument.
 
-Three bundles ship, each excludable by name:
+Seventeen bundles ship, each excludable by name:
 
 - **`foundations`** — the 59 non-namespaced utilities: colour roles (`surface`,
   `primary`, `inverse-error-container`), `elevation-0`…`elevation-5`,
   `focusable`, `interactive`, `scrim`, `touch-target`. Composite utilities keep
   both halves, so `surface` still sets `background-color` *and* `color`.
-- **`badge`**, **`button`** — the two components.
+- **16 components** — every stylesheet in `packages/core/src/components` that
+  defines something: appbar, badge, button, checkbox, code-block, collapsible,
+  indicator, navigation, scaffold, scrollbar, section, select, sidebar, swap,
+  table, tooltip. The other 68 files are still empty placeholders and are
+  skipped.
 
 ```sh
 bun run --filter '@anti049/lunar-ui-plugin' build   # CSS -> generated TS -> dist
@@ -31,23 +35,24 @@ even be installed. Consumers write:
 
 ## Result
 
-The port is faithful. `test/e2e.test.ts` compiles all three bundles twice from
+The port is faithful. `test/e2e.test.ts` compiles every bundle twice from
 the same source — once through `@import` (today's path), once through
 `@plugin` — and compares them:
 
 ```
 parity
-  present in both:        146
-  missing from plugin:    0
-  extra in plugin:        0 (+7 redundant :is()/:where() wrappers, same matches)
-  benign (inlined var fallback):  41
-  benign (var fallback folding): 1
-  benign (regrouped superset):   6
+  present in both:        399
+  missing from plugin:    0  (+1 Tailwind built-ins, deliberately unclaimed)
+  extra in plugin:        0 with new declarations
+    also 20 narrower duplicates (no new declarations) and 21 redundant wrappers
+  benign (inlined var fallback):  92
+  benign (var fallback folding): 2
+  benign (regrouped superset):   31
   real declaration conflicts:    0
 
 standalone (@plugin only, no @import of lunar-ui)
   ok   emits the same component rules as the plugin-with-context build
-  ok   no var() reference left dangling
+  ok   no var() reference left dangling (2 known core CSS bugs pinned)
   ok   carries the theme token chain
   ok   carries color-scheme for light-dark()
   ok   registers theme colors as utilities
@@ -56,30 +61,6 @@ standalone (@plugin only, no @import of lunar-ui)
   ok   composite utilities carry both halves (surface = bg + text)
   ok   JS-coupled class keeps its name under a prefix
   ok   registers non-color namespaces too
-
-themes
-  ok   status palettes harmonize toward the seed
-  ok   harmonized status differs between seeds
-  ok   harmonize: false leaves the status hues exact
-  ok   harmonizing keeps success recognisably green
-  ok   `themes` keeps the requested theme
-  ok   `themes` drops the rest
-  ok   `default` is always kept, since others inherit from it
-  ok   seed generates a full tone scale
-  ok   variant changes the generated palette
-  ok   hand-declared roles beat the generated ones
-  ok   role-only themes need no seed
-  ok   `default: true` also applies at :root
-  ok   rejects unknown theme
-  ok   rejects unknown variant
-  ok   rejects theme with no name
-
-prefix
-  ok   renames library classes
-  ok   renames component-local vars
-  ok   leaves Tailwind/theme vars alone
-  ok   leaves consumer state hooks alone
-  ok   no unprefixed library class survives
 ```
 
 "No var() reference left dangling" is the load-bearing standalone assertion: it
@@ -250,6 +231,31 @@ and both work:
 Theme values are deliberately **not** prefixed. They occupy shared Tailwind
 namespaces, so `--color-primary` stays `--color-primary` whatever `prefix` is
 set to; only lunar-ui's own component classes and locals get renamed.
+
+## Bugs this surfaced in packages/core
+
+Widening the port from two components to sixteen turned the parity test into a
+linter for the CSS itself. Two references point at variables nothing declares,
+so they fail silently today, in the CSS-first build as much as through the
+plugin:
+
+| where | reference | effect |
+| --- | --- | --- |
+| `checkbox.css:47` | `calc(var(--depth) * 0.1)` | inside `calc()`, so the whole `box-shadow` is invalid and dropped |
+| `select.css:48` | `var(--select-on-container, var(--color-on-surface-container))` | fallback names a token that does not exist; the colour silently no-ops |
+
+Neither has an obvious intended value, so they are pinned as `KNOWN_DANGLING`
+in the test rather than guessed at — visible, not failing, and a third one will
+fail the suite.
+
+## Three names collide with Tailwind
+
+`collapse`, `table` and `select-text` are real Tailwind utilities as well as
+lunar-ui ones. The build detects this by compiling bare Tailwind with lunar-ui's
+class list safelisted and nothing of lunar-ui loaded: whatever answers is
+Tailwind's. Those bare rules are left unclaimed, so `visibility: collapse` does
+not get swept into the collapsible bundle. lunar-ui's own rules for the same
+names still arrive, via their `@layer <name>.lN` wrapper.
 
 ## Known divergence: cascade position
 

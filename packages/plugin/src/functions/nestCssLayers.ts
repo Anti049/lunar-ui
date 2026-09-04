@@ -35,10 +35,24 @@ const moveLayerRules = (styles: StyleObject, layerValue: Nested, atRules: string
 	}
 };
 
+/*
+	At-rules whose children are declarations rather than rules, so there is no
+	selector to hoist out and they must be left exactly as they are.
+*/
+const NON_GROUPING = ['@keyframes', '@property', '@font-face', '@counter-style'];
+
+const isGroupingAtRule = (key: string): boolean =>
+	key.startsWith('@') && !NON_GROUPING.some((name) => key.startsWith(name));
+
 export const nestCssLayers = (styles: StyleObject): Record<string, StyleObject> => {
 	const nested: StyleObject = {};
 	for (const [key, value] of Object.entries(styles)) {
-		if (key.startsWith('@layer ')) {
+		/*
+			Every conditional group at the top level has to be turned inside out,
+			not just `@layer`: addUtilities takes a class selector as its key and
+			rejects `@media (width < 620px)` outright.
+		*/
+		if (isGroupingAtRule(key)) {
 			moveLayerRules(nested, value as Nested, [key]);
 			continue;
 		}

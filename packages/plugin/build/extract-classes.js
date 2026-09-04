@@ -7,14 +7,31 @@ const CLASS_IN_SELECTOR = /\.(-?[_a-zA-Z][\w-]*)/g;
 	component selectors (`.badge.disabled`) yet belong to the consumer's markup,
 	so a prefix must never rename them.
 */
-const STATE_HOOKS = new Set(['disabled', 'selected', 'active', 'checked', 'open', 'collapsed']);
+const STATE_HOOKS = new Set([
+	'disabled',
+	'selected',
+	'active',
+	'checked',
+	'open',
+	'collapsed',
+	'dragged'
+]);
+
+/*
+	Classes whose names are also written in JavaScript -- the ripple action
+	creates elements with `class="lunar-ripple"`. Prefixing the CSS would leave
+	the action pointing at a class that no longer exists, so these ship as-is.
+*/
+export const JS_COUPLED = new Set(['lunar-ripple']);
 
 /**
- * Class names a component stylesheet defines.
+ * Class names a stylesheet defines.
  *
  * `@utility` blocks are authoritative. Plain class selectors are only counted
- * when they sit in the component's own namespace -- otherwise Tailwind builtins
- * the component merely references (`.sr-only`) get claimed as ours and renamed.
+ * when they sit in the given namespace -- otherwise Tailwind builtins the file
+ * merely references (`.sr-only`) get claimed as ours and renamed. Foundations
+ * are not namespaced (`surface`, `focusable`, `elevation-1`), so they pass
+ * `namespace: null`, which accepts any plain class that is not a state hook.
  *
  * Tailwind emits an `@utility` only when something references it, so this list
  * is fed back to the compile as a safelist.
@@ -37,7 +54,7 @@ export function extractClasses(css, namespace) {
 		for (const match of rule.selector.matchAll(CLASS_IN_SELECTOR)) {
 			const name = match[1];
 			if (STATE_HOOKS.has(name)) continue;
-			if (name !== namespace && !name.startsWith(`${namespace}-`)) continue;
+			if (namespace !== null && name !== namespace && !name.startsWith(`${namespace}-`)) continue;
 			classes.add(name);
 		}
 	});

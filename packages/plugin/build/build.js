@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import {
 	extractClasses,
+	JS_COUPLED,
 	extractThemeVariables,
 	extractRootVariables
 } from './extract-classes.js';
@@ -24,6 +25,12 @@ const distDir = path.join(pkgRoot, 'dist');
 const tmpDir = path.join(distDir, '.tmp');
 
 const COMPONENTS = ['badge', 'button'];
+
+/* Foundations are part of the library's public surface, not just compile
+   context: `surface` applies bg-surface + text-on-surface, `focusable` the
+   focus ring, `elevation-3` the shadow. They ship as one bundle because they
+   are not namespaced per component. */
+const FOUNDATIONS = 'foundations';
 
 /* Hand-ported: @custom-variant has no automated CSS -> JS path. */
 const CUSTOM_VARIANTS = { selected: '&:where(.selected)' };
@@ -130,9 +137,24 @@ const classesByComponent = Object.fromEntries(
 		extractClasses(fs.readFileSync(path.join(coreSrc, 'components', `${name}.css`), 'utf8'), name)
 	])
 );
+
+// Foundations are not namespaced, so they are read with `namespace: null`.
+const foundationsDir = path.join(coreSrc, 'foundations');
+const foundationClasses = [
+	...new Set(
+		fs
+			.readdirSync(foundationsDir)
+			.filter((f) => f.endsWith('.css') && f !== '_index.css')
+			.flatMap((f) => extractClasses(fs.readFileSync(path.join(foundationsDir, f), 'utf8'), null))
+	)
+].sort();
+classesByComponent[FOUNDATIONS] = foundationClasses;
+
+const BUNDLES = [FOUNDATIONS, ...COMPONENTS];
+const classOwners = new Map(foundationClasses.map((c) => [c, FOUNDATIONS]));
 const allClasses = [...new Set(Object.values(classesByComponent).flat())].sort();
 
-process.stdout.write(`compiling ${COMPONENTS.length} components together ... `);
+process.stdout.write(`compiling ${BUNDLES.length} bundles together ... `);
 const input = [
 	`@import '${relFromTmp(path.join(pkgRoot, 'src/context.css'))}';`,
 	...COMPONENTS.map((c) => `@import '${relFromTmp(path.join(coreSrc, 'components', `${c}.css`))}';`),
@@ -144,17 +166,21 @@ const compiled = runTailwind(input, 'library');
 if (compiled.includes('@apply')) throw new Error('output still contains @apply');
 console.log(`${compiled.split('\n').length} lines`);
 
-const { components: buckets, properties, unattributed } = partition(compiled, COMPONENTS);
+const { components: buckets, properties, unattributed } = partition(compiled, COMPONENTS, classOwners);
 
 const localVariables = new Set();
-for (const name of COMPONENTS) {
+for (const name of BUNDLES) {
 	const bucketCss = JSON.stringify(buckets[name]);
 	for (const v of referencedVariables(bucketCss)) {
 		if (!owned.has(v) && !v.startsWith('tw-')) localVariables.add(v);
 	}
 }
 
-const registry = { classes: allClasses, variables: [...localVariables].sort() };
+const registry = {
+	// JS-coupled names keep their identity so the ripple action keeps working.
+	classes: allClasses.filter((c) => !JS_COUPLED.has(c)),
+	variables: [...localVariables].sort()
+};
 
 /* ---- Standalone tokens -------------------------------------------------- *
    Carry the design tokens the components depend on, so a consumer needs only
@@ -175,19 +201,19 @@ const { extend: themeExtend, claimed } = buildThemeExtend(declarations);
 const themeValues = new Map(
 	declarations.filter((d) => d.scope === 'theme' && claimed.has(d.prop)).map((d) => [d.prop, d.value])
 );
-for (const name of COMPONENTS) {
+for (const name of BUNDLES) {
 	buckets[name].utilities = inlineThemeFallbacks(buckets[name].utilities, themeValues);
 	buckets[name].standalone = inlineThemeFallbacks(buckets[name].standalone, themeValues);
 }
 
 const componentSeeds = new Set();
-for (const name of COMPONENTS) {
+for (const name of BUNDLES) {
 	for (const v of referencedVariables(JSON.stringify(buckets[name]))) componentSeeds.add('--' + v);
 }
 for (const v of referencedVariables(JSON.stringify(properties))) componentSeeds.add('--' + v);
 const needed = resolveClosure(componentSeeds, declarations);
 
-for (const name of COMPONENTS) {
+for (const name of BUNDLES) {
 	emitComponent(name, buckets[name]);
 	console.log(
 		`  ${name}: ${classesByComponent[name].length} classes, ` +
@@ -246,7 +272,7 @@ write('theme.js', themeExtend);
 write('base.js', resolvedBaseRules);
 fs.writeFileSync(
 	path.join(distDir, 'imports.js'),
-	COMPONENTS.map((c) => `export { default as ${c} } from './components/${c}/index.js';`).join('\n') +
+	BUNDLES.map((c) => `export { default as ${c} } from './components/${c}/index.js';`).join('\n') +
 		'\n'
 );
 fs.copyFileSync(path.join(pkgRoot, 'src/index.js'), path.join(distDir, 'index.js'));
@@ -259,4 +285,4 @@ if (unattributed.length) {
 	if (unattributed.length > 8) console.log(`  ... and ${unattributed.length - 8} more`);
 }
 if (!process.env.KEEP_TMP) fs.rmSync(tmpDir, { recursive: true, force: true });
-console.log(`\nbuilt ${COMPONENTS.length} components -> dist/`);
+console.log(`\nbuilt ${BUNDLES.length} bundles -> dist/`);

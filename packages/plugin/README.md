@@ -1,8 +1,16 @@
 # @anti049/lunar-ui-plugin
 
 A proof of concept, not a shipping package. It compiles lunar-ui's CSS into a
-Tailwind JS plugin the way DaisyUI does, for `badge` and `button` only, so the
-approach can be judged on evidence instead of argument.
+Tailwind JS plugin the way DaisyUI does — the `foundations` layer plus `badge`
+and `button` — so the approach can be judged on evidence instead of argument.
+
+Three bundles ship, each excludable by name:
+
+- **`foundations`** — the 59 non-namespaced utilities: colour roles (`surface`,
+  `primary`, `inverse-error-container`), `elevation-0`…`elevation-5`,
+  `focusable`, `interactive`, `scrim`, `touch-target`. Composite utilities keep
+  both halves, so `surface` still sets `background-color` *and* `color`.
+- **`badge`**, **`button`** — the two components.
 
 ```sh
 bun run --filter '@anti049/lunar-ui-plugin' build   # compile CSS -> JS
@@ -16,22 +24,22 @@ even be installed. Consumers write:
 @import 'tailwindcss';
 @plugin '@anti049/lunar-ui-plugin' {
 	prefix: lunar-;
-	exclude: badge;
+	exclude: badge;   /* or: foundations */
 }
 ```
 
 ## Result
 
-The port is faithful. `test/e2e.test.js` compiles badge and button twice from
+The port is faithful. `test/e2e.test.js` compiles all three bundles twice from
 the same source — once through `@import` (today's path), once through
 `@plugin` — and compares them:
 
 ```
 parity
-  present in both:        85
+  present in both:        146
   missing from plugin:    0
   extra in plugin:        0 (+7 redundant :is()/:where() wrappers, same matches)
-  benign (inlined var fallback):  35
+  benign (inlined var fallback):  41
   benign (var fallback folding): 1
   benign (regrouped superset):   6
   real declaration conflicts:    0
@@ -43,6 +51,9 @@ standalone (@plugin only, no @import of lunar-ui)
   ok   carries color-scheme for light-dark()
   ok   registers theme colors as utilities
   ok   every shipped theme resolves (9 selectors)
+  ok   ships the foundation utilities (59 classes)
+  ok   composite utilities carry both halves (surface = bg + text)
+  ok   JS-coupled class keeps its name under a prefix
   ok   registers non-color namespaces too
 
 prefix
@@ -56,7 +67,7 @@ prefix
 "No var() reference left dangling" is the load-bearing standalone assertion: it
 collects every `var(--x)` used without a fallback and fails if nothing declares
 `--x`. Verified against a real external SvelteKit app too, with the CSS package not
-installed at all — 194 declared, 156 referenced, 0 dangling, and lunar-ui
+installed at all — 203 declared, 0 dangling, and lunar-ui
 utilities (text-display-small, bg-primary) generated from the plugin theme.
 
 The benign buckets are real differences that don't change rendering, and the
@@ -110,7 +121,7 @@ present; the components still render when it is not.
 
 Tokens outside every namespace (`--default-transition-*`, the `--theme-color-*`
 palette) are emitted as plain custom properties via `addBase`, along with
-`color-scheme`, since `light-dark()` is inert without it — 422 declarations
+`color-scheme`, since `light-dark()` is inert without it — 484 declarations
 across 12 selectors.
 
 ### Theme switching
@@ -162,15 +173,18 @@ ordering declaration appears to have no effect on either path.
 
 `build/build.js`:
 
-1. **Enumerate** every class each component defines — `@utility` blocks plus
-   plain selectors in the component's own namespace (`build/extract-classes.js`).
+1. **Enumerate** every class each bundle defines — `@utility` blocks plus plain
+   selectors in the bundle's own namespace. Foundations are not namespaced, so
+   they pass `namespace: null` and accept any non-state-hook class
+   (`build/extract-classes.js`).
 2. **Compile once** with `src/context.css` (theme, tokens, foundations) plus the
    component files, feeding the class list back as `@source inline(…)`.
    `@utility` output is emitted on demand, so without that safelist the compile
    returns nothing.
 3. **Partition** the output by lunar-ui's naming discipline — `@layer <name>.l<n>`
-   and `<name>-*` keyframes attribute to a component; everything else is context
-   and dropped (`build/partition.js`).
+   and `<name>-*` keyframes attribute to a component. Foundations carry no layer
+   marker (`@utility surface` lands as a bare `.surface`), so they are attributed
+   by class name. Everything else is context and dropped (`build/partition.js`).
 4. **Serialize** to JS objects with postcss-js, into two buckets per component:
    `utilities` (from `@utility`) and `standalone` (from plain selectors).
 5. **Emit** `dist/components/<name>/{object,index}.js`, plus a `registry.js` of
@@ -196,7 +210,8 @@ denylist — see `STATE_HOOKS` in `build/extract-classes.js`.
 
 ## What a real port would still need
 
-This POC covers 2 of ~130 components. Beyond scaling that up:
+This POC covers the foundations layer and 2 of ~130 components. Beyond scaling
+that up:
 
 - **`@custom-variant` → `addVariant`.** Hand-ported here; `CUSTOM_VARIANTS` in
   `build/build.js` carries the one `button.css` defines. Automating it means
@@ -205,6 +220,11 @@ This POC covers 2 of ~130 components. Beyond scaling that up:
   is hand-maintained. A namespace Tailwind adds, or one lunar-ui invents that
   isn't in the table, silently falls through to a plain custom property — the
   components still render, but consumers get no utility for it.
+- **JS-coupled class names.** `JS_COUPLED` in `build/extract-classes.js` lists
+  classes also written in JavaScript -- currently just `lunar-ripple`, created by
+  the ripple action. Prefixing those would leave the action pointing at a class
+  that no longer exists, so they ship unrenamed. The list is hand-maintained; a
+  new action that writes a class name needs adding to it.
 - **Functional utilities.** `@utility name-*` can't be safelisted by name and is
   skipped with a warning. Neither badge nor button uses one; other components do.
 - **Usage gating.** Plain-selector rules are unconditional today but become

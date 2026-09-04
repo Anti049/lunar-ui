@@ -14,12 +14,16 @@ const LAYER_OWNER = /^([a-z][\w-]*)\.l\d+$/;
  *   utilities - came from `@utility`, wrapped in `@layer utilities`, usage-gated
  *   standalone - came from plain selectors, emitted at the top level
  */
-export function partition(css, components) {
+export function partition(css, components, classOwners = new Map()) {
 	const root = postcss.parse(css);
 	const owners = new Set(components);
+	const extraBundles = new Set(classOwners.values());
 
 	const buckets = Object.fromEntries(
-		components.map((name) => [name, { utilities: postcss.root(), standalone: postcss.root() }])
+		[...components, ...extraBundles].map((name) => [
+			name,
+			{ utilities: postcss.root(), standalone: postcss.root() }
+		])
 	);
 	const properties = postcss.root();
 	const unattributed = [];
@@ -32,6 +36,15 @@ export function partition(css, components) {
 		if (node.type === 'atrule' && node.name === 'keyframes') {
 			const name = node.params.trim();
 			for (const c of components) if (name === c || name.startsWith(`${c}-`)) return c;
+		}
+		// Foundations carry no @layer marker of their own -- `@utility surface`
+		// lands as a bare `.surface` inside @layer utilities -- so they are
+		// attributed by class name instead.
+		if (node.type === 'rule') {
+			for (const match of node.selector.matchAll(/\.(-?[_a-zA-Z][\w-]*)/g)) {
+				const owner = classOwners.get(match[1]);
+				if (owner) return owner;
+			}
 		}
 		return null;
 	};

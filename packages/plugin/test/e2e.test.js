@@ -114,10 +114,19 @@ function layerPaths(css, keep) {
 	return out;
 }
 
-const classes = COMPONENTS.flatMap((c) =>
+const componentClasses = COMPONENTS.flatMap((c) =>
 	extractClasses(fs.readFileSync(path.join(coreSrc, 'components', c + '.css'), 'utf8'), c)
 );
-const safelist = [...new Set(classes)].sort();
+// Foundations (`surface`, `focusable`, `elevation-3`) are part of the public
+// surface too, and are not namespaced -- hence `namespace: null`.
+const foundationsDir = path.join(coreSrc, 'foundations');
+const foundationClasses = fs
+	.readdirSync(foundationsDir)
+	.filter((f) => f.endsWith('.css') && f !== '_index.css')
+	.flatMap((f) => extractClasses(fs.readFileSync(path.join(foundationsDir, f), 'utf8'), null));
+
+const ownedClasses = new Set([...componentClasses, ...foundationClasses]);
+const safelist = [...ownedClasses].sort();
 const contextImport = "@import '" + rel(path.join(pkgRoot, 'src/context.css')) + "';";
 const pluginPath = rel(path.join(pkgRoot, 'dist/index.js'));
 const sourceLines = safelist.map((c) => '@source inline("' + c + '");');
@@ -157,8 +166,14 @@ const standalone = compile(
 	'standalone'
 );
 
-const owns = (selector) => COMPONENTS.some((c) => selector.includes('.' + c));
-const ownsPrefixed = (selector) => COMPONENTS.some((c) => selector.includes('.lunar-' + c));
+/* Match on whole class tokens, not substrings: foundations own generic names
+   like `.error` and `.surface`, and `.button` must not claim `.button-text`
+   by accident. */
+const classesIn = (selector) =>
+	[...selector.matchAll(/\.(-?[_a-zA-Z][\w-]*)/g)].map((m) => m[1]);
+const owns = (selector) => classesIn(selector).some((c) => ownedClasses.has(c));
+const ownsPrefixed = (selector) =>
+	classesIn(selector).some((c) => c.startsWith('lunar-') && ownedClasses.has(c.slice(6)));
 
 const base = rulesBySelector(baseline, owns);
 const cand = rulesBySelector(candidate, owns);
@@ -403,6 +418,21 @@ const standaloneChecks = [
 	[
 		'every shipped theme resolves (' + themeSelectorCount + ' selectors)',
 		unresolvableThemes.length === 0
+	],
+	[
+		'ships the foundation utilities (' + foundationClasses.length + ' classes)',
+		/\.surface\s*\{/.test(standalone) && /\.elevation-3\s*\{/.test(standalone)
+	],
+	[
+		'composite utilities carry both halves (surface = bg + text)',
+		(() => {
+			const rule = /\.surface\s*\{([^}]*)\}/.exec(standalone)?.[1] ?? '';
+			return /background-color\s*:/.test(rule) && /(^|[^-])color\s*:/.test(rule);
+		})()
+	],
+	[
+		'JS-coupled class keeps its name under a prefix',
+		prefixed.includes('.lunar-ripple') && !prefixed.includes('.lunar-lunar-ripple')
 	],
 	[
 		'registers non-color namespaces too',
